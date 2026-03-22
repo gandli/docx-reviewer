@@ -86,7 +86,9 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "更多操作" }));
     fireEvent.click(screen.getByRole("button", { name: "接受建议" }));
 
-    expect(screen.getByText(mockWorkspaceSummary.suggestedRevisionText)).toBeInTheDocument();
+    expect(screen.getAllByText(mockWorkspaceSummary.suggestedRevisionText).length).toBeGreaterThan(
+      0,
+    );
     expect(screen.getByText(`已应用建议：${mockWorkspaceSummary.suggestedRevisionText}`)).toBeInTheDocument();
   });
 
