@@ -40,6 +40,7 @@
 | 文档解析器 | 把模板、背景资料和待审文档转成统一结构 | `.docx` 读取 + 结构化中间表示 |
 | 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | Transformers.js + Voy + IndexedDB |
 | LLM 运行时 | 本地对话、生成、结构化输出和流式回复 | WebLLM + WebGPU |
+| 模板引擎 | 定义字段、章节、固定句式、条件段落和待确认项 | 模板 schema + 规则装配器 |
 | 任务编排器 | 组织“生成 / 填充 / 审阅 / 修订”任务输入输出 | 明确的任务类型和结构化 schema |
 | 规则引擎 | 识别缺失项、风险项、一致性问题 | 规则 + LLM 混合判定 |
 | 导出器 | 把结构化结果转回可交付的 Word | `docx` 或 `docxtemplater` |
@@ -59,6 +60,7 @@ src/
 │   ├── llm/            # 模型加载、提示、结构化输出
 │   ├── retrieval/      # 切分、嵌入、检索
 │   ├── parsing/        # 导入与解析
+│   ├── generation/     # 模板装配、字段映射、条件段落与待确认项
 │   └── export/         # Word 导出
 ├── workers/            # Web Worker / 推理线程
 ├── persistence/        # IndexedDB 仓储
@@ -103,7 +105,23 @@ const evidence = await retrieval.search(task.query, { sectionId, topK: 8 });
 const result = await llm.runTask({ task, evidence, schema });
 ```
 
-### Pattern 3: Rule + LLM Hybrid Review
+### Pattern 3: Template Engine + LLM Hybrid Generation
+
+**What:** 初稿生成先走模板字段填充、固定句式和条件段落装配，只在需要自然语言补写时再调用模型。  
+**When to use:** 行政文书、合同、制度、函件等固定结构明显的场景。  
+**Trade-offs:** 模板和映射配置成本更高，但结果更稳、更可追溯。
+
+**Example:**
+```typescript
+const filledFields = await mapper.resolve(template.fields, evidence);
+const draft = await generator.compose({
+  template,
+  fields: filledFields,
+  unresolvedPolicy: "mark-as-pending",
+});
+```
+
+### Pattern 4: Rule + LLM Hybrid Review
 
 **What:** 明确规则先查硬错误，再由模型处理语义风险和修订建议。  
 **When to use:** 合同金额、日期、主体名称等必须准确的场景。  
@@ -135,7 +153,7 @@ const result = await llm.runTask({ task, evidence, schema });
 
 1. **导入流:** 用户上传模板或文档后，系统解析结构、切分内容、生成向量并写入本地库。
 2. **预览流:** 原文件进入预览器，保留分页和样式供用户核对，但不直接在预览层上修改。
-3. **生成流:** 用户选择模板和资料后，系统按字段或章节检索背景信息，再调用本地模型生成内容写入结构化编辑稿。
+3. **生成流:** 用户选择模板和资料后，系统先按字段或章节检索背景信息，再执行字段映射、固定句式装配和条件段落填充，仅在需要自然语言补写时调用本地模型，最后把结果写入结构化编辑稿。
 4. **审阅流:** 系统对现有文档提取结构，运行规则检查和语义检查，再生成问题清单与修订建议。
 5. **导出流:** 系统把用户确认后的结构化结果生成 `.docx`，同时写出审阅摘要。
 
@@ -189,6 +207,7 @@ const result = await llm.runTask({ task, evidence, schema });
 | Parsing ↔ Domain | typed models | 不能泄漏底层库结构到业务层 |
 | Retrieval ↔ Review/Generation | task API | 统一检索入口，避免重复实现 |
 | Domain ↔ Export | intermediate representation | 保证导出不直接依赖原始解析结果 |
+| Templates ↔ Generation | typed template schema | 保证“固定结构文书”不是靠 prompt 临时猜出来 |
 
 ## Sources
 

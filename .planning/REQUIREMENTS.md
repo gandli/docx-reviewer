@@ -40,6 +40,10 @@
 ### Generation
 
 - [ ] **GEN-01**: 用户可基于模板和背景资料生成结构化商务文档初稿
+- [ ] **GEN-01A**: 模板可定义字段、章节顺序、固定句式、必填项和条件段落
+- [ ] **GEN-01B**: 系统可从背景资料中提取结构化信息并映射到模板对应字段或章节槽位
+- [ ] **GEN-01C**: 系统生成初稿时应优先执行字段填充和规则装配，只在必要处使用模型补写自然语言
+- [ ] **GEN-01D**: 对于信息缺失、证据不足或无法确定的内容，系统应明确标注待确认项，不得无依据编造
 - [ ] **GEN-02**: 用户可只填充指定字段、章节或表格，而不必重写整份文档
 - [ ] **GEN-03**: 生成结果可保留原模板的章节层级和编号逻辑
 - [ ] **GEN-04**: 系统可输出生成说明或引用依据摘要，帮助用户快速核查
@@ -115,6 +119,10 @@
 | RAG-02 | Phase 3 | Pending |
 | RAG-03 | Phase 3 | Pending |
 | GEN-01 | Phase 4 | Pending |
+| GEN-01A | Phase 3/4 | Pending |
+| GEN-01B | Phase 3/4 | Pending |
+| GEN-01C | Phase 4 | Pending |
+| GEN-01D | Phase 4 | Pending |
 | GEN-02 | Phase 4 | Pending |
 | GEN-03 | Phase 4 | Pending |
 | GEN-04 | Phase 4 | Pending |
@@ -131,8 +139,8 @@
 | OUT-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 34 total
-- Mapped to phases: 34
+- v1 requirements: 38 total
+- Mapped to phases: 38
 - Unmapped: 0 ✓
 
 ---
