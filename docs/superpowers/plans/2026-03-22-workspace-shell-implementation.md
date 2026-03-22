@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 构建企业文档工作台首版主界面，落地左栏资料区、中栏纸张文档区、右栏连续对话区，以及“工作区接续”能力。
+**Goal:** 构建文档工作台首版主界面，落地左栏资料区、中栏纸张文档区、右栏连续对话区，以及“工作区接续”能力。
 
 **Architecture:** 采用固定三栏壳层 `workspace-shell` 承载页面结构，用 `editor-draft` 渲染主文档纸张画布，用 `workspace-context` 保存工作区级连续状态。UI 不直接依赖原聊天线程，而是通过结构化工作摘要恢复当前主文档、当前节点和待处理建议。
 
@@ -22,7 +22,6 @@
 - `src/features/workspace-shell/routes/workspace-page.tsx`：工作区页面入口
 - `src/features/workspace-shell/components/workspace-layout.tsx`：三栏布局容器
 - `src/features/workspace-shell/components/workspace-sidebar.tsx`：左栏资料区
-- `src/features/workspace-shell/components/workspace-resume-card.tsx`：继续上次工作卡片
 - `src/features/workspace-shell/components/workspace-asset-groups.tsx`：主文档 / 模板 / 参考资料 / 表格资料列表
 - `src/features/workspace-shell/components/workspace-evidence-list.tsx`：最近证据列表
 - `src/features/editor-draft/components/document-header.tsx`：中栏标题和状态
@@ -31,7 +30,6 @@
 - `src/features/editor-draft/components/risk-marker.tsx`：风险标记组件
 - `src/features/assistant-panel/components/assistant-panel.tsx`：右栏容器
 - `src/features/assistant-panel/components/assistant-context-header.tsx`：上下文头部
-- `src/features/assistant-panel/components/suggested-actions.tsx`：建议动作胶囊
 - `src/features/assistant-panel/components/assistant-message-list.tsx`：连续对话消息区
 - `src/features/assistant-panel/components/action-panel.tsx`：建议操作区
 - `src/features/workspace-context/store/workspace-context-store.ts`：工作区连续状态 store
@@ -69,7 +67,7 @@ import { App } from "@/app/App";
 
 it("renders workspace route shell", () => {
   render(<App />);
-  expect(screen.getByText("企业文档工作区")).toBeInTheDocument();
+  expect(screen.getByText("文档工作区")).toBeInTheDocument();
 });
 ```
 
@@ -82,7 +80,7 @@ Expected: FAIL，提示 `App` 或路由组件不存在
 
 ```tsx
 export function App() {
-  return <div>企业文档工作区</div>;
+  return <div>文档工作区</div>;
 }
 ```
 
@@ -227,7 +225,7 @@ Expected: FAIL
 export function WorkspaceSidebar() {
   return (
     <aside data-testid="workspace-sidebar">
-      <h2>企业文档工作区</h2>
+      <h2>文档工作台</h2>
       <div>主文档</div>
       <div>模板</div>
       <div>参考资料</div>
@@ -249,6 +247,12 @@ Expected: PASS
 git add src/features/workspace-shell/components src/tests/unit/workspace-layout.test.tsx
 git commit -m "feat: add quiet workspace sidebar"
 ```
+
+补充实现要求：
+
+- 左栏分组支持折叠和展开
+- 默认展开主文档
+- 不再保留单独的“继续上次工作”卡片
 
 ### Task 5: 完成中栏纸张文档区
 
@@ -304,7 +308,6 @@ git commit -m "feat: add document canvas and selection state"
 **Files:**
 - Create: `src/features/assistant-panel/components/assistant-panel.tsx`
 - Create: `src/features/assistant-panel/components/assistant-context-header.tsx`
-- Create: `src/features/assistant-panel/components/suggested-actions.tsx`
 - Create: `src/features/assistant-panel/components/assistant-message-list.tsx`
 - Create: `src/features/assistant-panel/components/action-panel.tsx`
 - Modify: `src/features/workspace-shell/components/workspace-layout.tsx`
@@ -315,7 +318,7 @@ git commit -m "feat: add document canvas and selection state"
 it("renders continuous assistant with suggested actions", () => {
   render(<AssistantPanel />);
   expect(screen.getByText("修订")).toBeInTheDocument();
-  expect(screen.getByText("接受建议")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
 });
 ```
 
