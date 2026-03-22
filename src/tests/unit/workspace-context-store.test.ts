@@ -61,6 +61,22 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.documentBlocks[0]?.text).toBe("付款规范");
     expect(store.getState().summary?.recentEvidenceRefs[0]).toBe("导入文件 · 付款规范.md");
     expect(store.getState().summary?.latestConclusion).toContain("已导入文档");
+    expect(store.getState().summary?.assistantMessages).toHaveLength(1);
+  });
+
+  it("switches the current context to selected text", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    store.getState().selectText({
+      text: "验收通过后方可申请付款。",
+      blockId: "paragraph-2",
+    });
+
+    expect(store.getState().summary?.activeClauseTitle).toBe("已选文本");
+    expect(store.getState().summary?.activeClauseText).toBe("验收通过后方可申请付款。");
+    expect(store.getState().summary?.activeSelectionBlockId).toBe("paragraph-2");
+    expect(store.getState().summary?.latestConclusion).toContain("已切换到你刚刚选中的内容");
   });
 
   it("normalizes restored browser summaries to the current workspace title", async () => {

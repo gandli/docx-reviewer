@@ -26,6 +26,7 @@ export type WorkspaceSummary = {
   activeDocumentId: string;
   activeDocumentTitle: string;
   activeNodeId?: string;
+  activeSelectionBlockId?: string;
   activeClauseTitle: string;
   activeClauseText: string;
   suggestedRevisionText: string;

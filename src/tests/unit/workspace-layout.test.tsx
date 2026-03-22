@@ -14,6 +14,7 @@ describe("workspace shell", () => {
 
   beforeEach(() => {
     window.localStorage.clear();
+    vi.restoreAllMocks();
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -212,6 +213,36 @@ describe("workspace shell", () => {
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
       expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
       expect(screen.getAllByText(/已导入文档《差旅报销制度》/).length).toBeGreaterThan(0);
+    });
+
+    expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();
+  });
+
+  it("updates the assistant context after selecting text in the document", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const paragraphNode = screen.getAllByText("合同签订后一次性支付全部款项。")[0].firstChild;
+    const selectionMock = {
+      toString: () => "合同签订后一次性支付全部款项。",
+      rangeCount: 1,
+      getRangeAt: () =>
+        ({
+          commonAncestorContainer: paragraphNode,
+        }) as Range,
+    };
+
+    vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
+
+    fireEvent.mouseUp(screen.getAllByText("合同签订后一次性支付全部款项。")[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText("已选文本")).toBeInTheDocument();
+      expect(screen.getAllByText("合同签订后一次性支付全部款项。").length).toBeGreaterThan(0);
+      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
     });
   });
 });

@@ -10,6 +10,7 @@ export type WorkspaceContextState = {
   setSummary: (summary: WorkspaceSummary) => void;
   hydrate: (workspaceId: string) => Promise<void>;
   focusSelection: () => void;
+  selectText: (payload: { text: string; blockId?: string }) => void;
   applySuggestion: () => void;
   sendMessage: (message: string) => void;
   importDocument: (document: WorkspaceImportedDocument, fileName: string) => void;
@@ -49,6 +50,28 @@ export function createWorkspaceContextStore(
             ...state.summary,
             isSelectionFocused: true,
             updatedAt: "刚刚",
+          }),
+        };
+      }),
+    selectText: ({ text, blockId }) =>
+      set((state) => {
+        if (!state.summary || !text.trim()) {
+          return state;
+        }
+
+        const selectedText = text.trim();
+
+        return {
+          summary: persist({
+            ...state.summary,
+            activeSelectionBlockId: blockId,
+            activeClauseTitle: "已选文本",
+            activeClauseText: selectedText,
+            latestConclusion: "已切换到你刚刚选中的内容，可以继续围绕这段文字处理。",
+            nextAction: "继续处理选中文本",
+            currentTaskStatus: "in_progress",
+            updatedAt: "刚刚",
+            isSelectionFocused: true,
           }),
         };
       }),
@@ -120,6 +143,7 @@ export function createWorkspaceContextStore(
             ...state.summary,
             activeDocumentId: `imported-${Date.now()}`,
             activeDocumentTitle: document.title,
+            activeSelectionBlockId: document.blocks.find((block) => block.kind === "paragraph")?.id,
             activeClauseTitle: document.activeClauseTitle,
             activeClauseText: document.activeClauseText,
             suggestedRevisionText: "",
@@ -133,9 +157,8 @@ export function createWorkspaceContextStore(
             updatedAt: "刚刚",
             isSelectionFocused: false,
             assistantMessages: [
-              ...state.summary.assistantMessages,
               {
-                id: `assistant-${state.summary.assistantMessages.length + 1}`,
+                id: "assistant-1",
                 role: "assistant",
                 content: importedReply,
               },

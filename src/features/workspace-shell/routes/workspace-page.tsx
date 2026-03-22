@@ -38,6 +38,7 @@ export function WorkspacePage() {
         summary={summary}
         onApplySuggestion={() => store.getState().applySuggestion()}
         onJumpToSelection={() => store.getState().focusSelection()}
+        onSelectText={(payload) => store.getState().selectText(payload)}
         onSendMessage={(message) => store.getState().sendMessage(message)}
         onImportDocument={handleImportDocument}
       />

@@ -8,6 +8,7 @@ type WorkspaceLayoutProps = {
   summary: WorkspaceSummary;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
+  onSelectText: (payload: { text: string; blockId?: string }) => void;
   onSendMessage: (message: string) => void;
   onImportDocument: (file: File) => void | Promise<void>;
 };
@@ -16,6 +17,7 @@ export function WorkspaceLayout({
   summary,
   onApplySuggestion,
   onJumpToSelection,
+  onSelectText,
   onSendMessage,
   onImportDocument,
 }: WorkspaceLayoutProps) {
@@ -24,7 +26,7 @@ export function WorkspaceLayout({
       <WorkspaceSidebar summary={summary} onImportDocument={onImportDocument} />
       <main className="workspace-main">
         <DocumentHeader title={summary.activeDocumentTitle} />
-        <DocumentCanvas summary={summary} />
+        <DocumentCanvas summary={summary} onSelectText={onSelectText} />
       </main>
       <AssistantPanel
         summary={summary}

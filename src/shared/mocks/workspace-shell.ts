@@ -63,6 +63,7 @@ export const mockWorkspaceSummary: WorkspaceSummary = {
   activeDocumentId: "doc-procurement-policy",
   activeDocumentTitle: "采购与付款管理制度",
   activeNodeId: "clause-payment",
+  activeSelectionBlockId: "paragraph-2",
   activeClauseTitle: "付款方式",
   activeClauseText: "合同签订后一次性支付全部款项。",
   suggestedRevisionText: "建议改为分阶段支付，并增加验收节点说明。",
