@@ -241,7 +241,7 @@ textarea {
   background: transparent;
   color: var(--color-text-muted);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   cursor: pointer;
 }
 
@@ -386,26 +386,28 @@ textarea {
 }
 
 .suggested-action {
-  padding: 7px 10px;
+  padding: 6px 10px;
+  border: 1px solid rgba(216, 207, 193, 0.74);
   border-radius: 999px;
-  background: rgba(236, 228, 216, 0.72);
+  background: rgba(255, 251, 244, 0.58);
   color: var(--color-text-secondary);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
 }
 
 .suggested-action.is-active {
-  background: var(--color-ink-strong);
-  color: #fffdf9;
+  border-color: rgba(181, 142, 83, 0.5);
+  background: rgba(250, 243, 229, 0.92);
+  color: #6f5530;
 }
 
 .assistant-card {
   max-width: 92%;
   padding: 12px 14px;
-  border: 1px solid rgba(216, 207, 193, 0.7);
+  border: 1px solid rgba(216, 207, 193, 0.52);
   border-radius: 18px;
-  background: rgba(255, 251, 244, 0.62);
+  background: rgba(255, 251, 244, 0.46);
   line-height: 1.6;
 }
 
@@ -426,8 +428,8 @@ textarea {
 
 .assistant-card--user {
   justify-self: end;
-  background: rgba(236, 228, 216, 0.9);
-  border-color: rgba(210, 194, 171, 0.88);
+  background: rgba(241, 233, 222, 0.78);
+  border-color: rgba(210, 194, 171, 0.7);
 }
 
 .assistant-floating-tools {
@@ -437,13 +439,13 @@ textarea {
 
 .assistant-tools-trigger {
   margin-left: auto;
-  padding: 7px 12px;
+  padding: 6px 11px;
   border: 1px solid rgba(216, 207, 193, 0.88);
   border-radius: 999px;
-  background: rgba(255, 251, 244, 0.82);
+  background: rgba(255, 251, 244, 0.58);
   color: var(--color-text-secondary);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -522,7 +524,7 @@ textarea {
   padding: 12px 12px 12px 14px;
   border: 1px solid rgba(216, 207, 193, 0.88);
   border-radius: 18px;
-  background: rgba(255, 251, 244, 0.82);
+  background: rgba(255, 252, 247, 0.9);
 }
 
 .chat-composer__placeholder {
@@ -534,11 +536,14 @@ textarea {
 }
 
 .chat-composer__send {
-  padding: 10px 14px;
+  padding: 9px 13px;
   border: none;
   border-radius: 999px;
-  background: var(--color-ink-strong);
+  background: rgba(47, 38, 29, 0.92);
   color: #fffdf9;
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .workspace-sidebar,
