@@ -23,6 +23,13 @@ type DocxSelectionPopover = {
   left: number;
 };
 
+const popoverClassName =
+  "fixed z-30 inline-flex -translate-x-1/2 items-center gap-2 rounded-[14px] border border-[rgba(216,207,193,0.92)] bg-[rgba(255,251,244,0.96)] px-[10px] py-2 shadow-[0_18px_36px_rgba(71,53,33,0.14)]";
+const popoverActionClassName =
+  "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] font-semibold text-[var(--color-text-primary)]";
+const popoverDismissClassName =
+  "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] text-[var(--color-text-muted)]";
+
 export function DocxDocumentCanvas({
   summary,
   title,
@@ -115,33 +122,51 @@ export function DocxDocumentCanvas({
 
   if (previewDocument?.mode !== "docx") {
     return (
-      <section className="document-canvas document-canvas--docx" data-testid="document-canvas">
-        <div className="document-canvas__note">Word 预览需要重新导入原文件</div>
-        <div className="pdf-empty-state">当前 Word 原样预览内容不可用，请重新导入《{title}》后继续查看。</div>
+      <section
+        className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(255,255,255,0.95)),var(--color-surface-paper)] px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
+        data-testid="document-canvas"
+      >
+        <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
+          Word 预览需要重新导入原文件
+        </div>
+        <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+          当前 Word 原样预览内容不可用，请重新导入《{title}》后继续查看。
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="document-canvas document-canvas--docx" data-testid="document-canvas">
-      <div className="document-canvas__note">Word 原样预览</div>
+    <section
+      className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(255,255,255,0.95)),var(--color-surface-paper)] px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
+      data-testid="document-canvas"
+    >
+      <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
+        Word 原样预览
+      </div>
       <div
-        className="docx-document-viewer"
+        className="flex min-h-[540px] w-full max-w-full justify-center overflow-x-auto overflow-y-hidden px-5"
         data-testid="docx-document-viewer"
         onMouseUp={handleMouseUp}
       >
         {loadError ? (
-          <div className="pdf-empty-state">{loadError}</div>
+          <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+            {loadError}
+          </div>
         ) : (
-          <div ref={containerRef} className="docx-preview-host" data-testid="docx-preview-host" />
+          <div
+            ref={containerRef}
+            className="docx-preview-host flex w-full max-w-full justify-center overflow-x-auto overflow-y-hidden"
+            data-testid="docx-preview-host"
+          />
         )}
       </div>
-      <div className="docx-document-summary">
+      <div className="mt-[18px] font-sans text-[0.82rem] leading-[1.7] text-[var(--color-text-muted)]">
         已载入《{summary.activeDocumentTitle}》的原样排版预览。后续我们可以继续基于正文结构找问题、直接改写和导出。
       </div>
       {selectionPopover ? (
         <div
-          className="pdf-selection-popover"
+          className={popoverClassName}
           data-testid="docx-selection-popover"
           ref={selectionPopoverRef}
           style={{
@@ -150,7 +175,7 @@ export function DocxDocumentCanvas({
           }}
         >
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -165,7 +190,7 @@ export function DocxDocumentCanvas({
             找问题
           </button>
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -180,7 +205,7 @@ export function DocxDocumentCanvas({
             直接改写
           </button>
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -195,7 +220,7 @@ export function DocxDocumentCanvas({
             润色表达
           </button>
           <button
-            className="pdf-selection-popover__dismiss"
+            className={popoverDismissClassName}
             type="button"
             onClick={() => {
               window.getSelection()?.removeAllRanges();

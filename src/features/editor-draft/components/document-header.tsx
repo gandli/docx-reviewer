@@ -11,33 +11,35 @@ type DocumentHeaderProps = {
 
 export function DocumentHeader({ title, mode, previewLabel }: DocumentHeaderProps) {
   return (
-    <header className="document-header">
+    <header className="mb-[18px] flex items-baseline justify-between gap-4">
       <div>
-        <div className="eyebrow">Document</div>
-        <div className="title-lg" style={{ fontSize: "1.4rem", marginTop: 8 }}>
+        <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
+          Document
+        </div>
+        <div className="mt-2 text-[1.4rem] leading-[1.25] font-bold text-[var(--color-text-primary)]">
           {title}
         </div>
       </div>
-      <div className="document-status-inline">
+      <div className="inline-flex items-center gap-2 font-sans text-[0.8rem] font-semibold text-[var(--color-text-muted)]">
         {mode === "pdf" || mode === "docx" || mode === "plain" ? (
           <>
-            <span className="document-status-inline__item is-active">原样预览</span>
+            <span className="text-[var(--color-text-primary)]">原样预览</span>
             {previewLabel ? (
               <>
-                <span className="document-status-inline__divider" aria-hidden="true">
+                <span className="text-[rgba(109,100,87,0.55)]" aria-hidden="true">
                   ·
                 </span>
-                <span className="document-status-inline__item">{previewLabel}</span>
+                <span>{previewLabel}</span>
               </>
             ) : null}
           </>
         ) : (
           <>
-            <span className="document-status-inline__item">阅读视图</span>
-            <span className="document-status-inline__divider" aria-hidden="true">
+            <span>阅读视图</span>
+            <span className="text-[rgba(109,100,87,0.55)]" aria-hidden="true">
               ·
             </span>
-            <span className="document-status-inline__item is-active">可编辑</span>
+            <span className="text-[var(--color-text-primary)]">可编辑</span>
           </>
         )}
       </div>

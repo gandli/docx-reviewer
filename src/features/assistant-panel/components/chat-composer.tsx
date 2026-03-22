@@ -28,12 +28,12 @@ export function ChatComposer({
   };
 
   return (
-    <form className="chat-composer" onSubmit={handleSubmit}>
-      <div className="chat-composer__status">
+    <form className="grid gap-2" onSubmit={handleSubmit}>
+      <div className="flex items-center justify-between gap-3 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
         <span>{localModelLabel}</span>
         {localModelActionLabel && onLocalModelAction ? (
           <button
-            className="chat-composer__status-action"
+            className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-[var(--color-text-secondary)]"
             type="button"
             onClick={onLocalModelAction}
           >
@@ -41,15 +41,19 @@ export function ChatComposer({
           </button>
         ) : null}
       </div>
-      <div className="chat-composer__input">
+      <div className="flex items-center gap-[10px] rounded-[18px] border border-[rgba(216,207,193,0.88)] bg-[rgba(255,252,247,0.9)] px-3 py-3 pl-[14px]">
         <input
-          className="chat-composer__field"
+          className="flex-1 border-0 bg-transparent p-0 font-sans text-[0.88rem] leading-[1.4] text-[var(--color-text-muted)] outline-none placeholder:text-[var(--color-text-muted)] disabled:cursor-not-allowed disabled:opacity-70"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           disabled={isBusy}
           placeholder="继续输入你的要求，或让助手基于当前条款继续处理"
         />
-        <button className="chat-composer__send" type="submit" disabled={isBusy}>
+        <button
+          className="rounded-full border-0 bg-[rgba(47,38,29,0.92)] px-[13px] py-[9px] font-sans text-[0.8rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-70"
+          type="submit"
+          disabled={isBusy}
+        >
           发送
         </button>
       </div>

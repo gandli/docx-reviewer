@@ -155,7 +155,7 @@ export function WorkspacePage() {
     localModelStatus === "idle" || localModelStatus === "error" ? "启用本地模型" : undefined;
 
   return (
-    <div className="workspace-page">
+    <div className="min-h-screen">
       <WorkspaceLayout
         summary={summary}
         previewDocument={workspaceState.previewDocument}

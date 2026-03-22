@@ -1,8 +1,15 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-serif:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --font-sans: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+}
+
 :root {
   color: var(--color-text-primary);
   background: var(--color-surface-app);
-  font-family:
-    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  font-family: var(--font-serif);
 }
 
 * {
@@ -31,321 +38,36 @@ textarea {
   font: inherit;
 }
 
-.workspace-page {
-  min-height: 100vh;
-  padding: 0;
+::selection {
+  background: rgba(181, 142, 83, 0.2);
 }
 
-.workspace-layout {
-  display: grid;
-  grid-template-columns: 22% 54% 24%;
-  height: 100vh;
-  background: var(--color-surface-app);
-  overflow: hidden;
+[data-scroll-region] {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(61, 53, 44, 0.18) transparent;
 }
 
-.workspace-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-width: 0;
-  height: 100vh;
-  padding: 24px 18px 18px;
-  background: linear-gradient(180deg, rgba(239, 231, 218, 0.82) 0%, rgba(232, 222, 206, 0.58) 100%);
-  border-right: 1px solid var(--color-border-soft);
-  overflow-y: auto;
-  overflow-x: hidden;
+[data-scroll-region]::-webkit-scrollbar {
+  width: 8px;
 }
 
-.workspace-main {
-  min-width: 0;
-  height: 100vh;
-  padding: 22px 24px 26px;
-  background: var(--color-surface-app);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.assistant-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-width: 0;
-  height: 100vh;
-  padding: 24px 18px 18px;
-  background: linear-gradient(180deg, rgba(248, 244, 237, 0.72) 0%, rgba(243, 237, 227, 0.5) 100%);
-  border-left: 1px solid var(--color-border-soft);
-  overflow: hidden;
-}
-
-.eyebrow {
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.title-lg {
-  margin: 8px 0 6px;
-  color: var(--color-text-primary);
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.muted {
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.resume-card,
-.asset-card,
-.evidence-card,
-.assistant-card {
-  border-radius: 14px;
-}
-
-.assistant-card {
-  padding: 0;
-}
-
-.asset-groups,
-.evidence-list,
-.assistant-messages,
-.assistant-actions {
-  display: grid;
-  gap: 10px;
-}
-
-.asset-card,
-.evidence-card {
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(216, 207, 193, 0.72);
-}
-
-.asset-card__trigger {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0;
-  border: none;
+[data-scroll-region]::-webkit-scrollbar-track {
   background: transparent;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
 }
 
-.asset-card__label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.asset-card__count {
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.76rem;
-  font-weight: 600;
-}
-
-.asset-card__chevron {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  transform: rotate(-90deg);
-  transition: transform 180ms ease, color 180ms ease;
-}
-
-.asset-card__chevron.is-expanded {
-  transform: rotate(0deg);
-}
-
-.asset-card__items {
-  display: grid;
-  gap: 8px;
-  margin-top: 10px;
-  padding-left: 2px;
-}
-
-.asset-card__item {
-  padding: 8px 10px;
-  border-radius: 12px;
-  color: var(--color-text-secondary);
-  background: rgba(255, 251, 244, 0.32);
-}
-
-.asset-card__item.is-selected {
-  background: rgba(255, 251, 244, 0.72);
-  box-shadow: inset 0 0 0 1px rgba(216, 207, 193, 0.82);
-}
-
-.asset-card__item-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.asset-card__item-title {
-  color: inherit;
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.84rem;
-  font-weight: 600;
-  line-height: 1.45;
-}
-
-.asset-card__item-kind {
-  flex-shrink: 0;
-  padding: 2px 7px;
+[data-scroll-region]::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
   border-radius: 999px;
-  background: rgba(236, 228, 216, 0.78);
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.asset-card__item-meta {
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.76rem;
-  line-height: 1.4;
-  color: var(--color-text-muted);
-}
-
-.asset-card.is-active {
-  color: var(--color-text-primary);
-  font-weight: 700;
-}
-
-.workspace-actions {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid rgba(216, 207, 193, 0.82);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.workspace-actions__item {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.84rem;
-  cursor: pointer;
-}
-
-.workspace-actions__input {
-  display: none;
-}
-
-.workspace-actions__divider {
-  color: rgba(109, 100, 87, 0.5);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-}
-
-.document-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.document-status-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.document-status-inline__item.is-active {
-  color: var(--color-text-primary);
-}
-
-.document-status-inline__divider {
-  color: rgba(109, 100, 87, 0.55);
-}
-
-.document-canvas {
-  --document-preview-padding: 20px;
-  position: relative;
-  min-width: 0;
-  min-height: 680px;
-  padding: 36px 40px;
-  border: 1px solid #dfd6c8;
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.95)),
-    var(--color-surface-paper);
-  box-shadow: 0 24px 54px rgba(71, 53, 33, 0.1);
-}
-
-.document-canvas__note {
-  margin-bottom: 20px;
-  text-align: right;
-  color: rgba(138, 106, 55, 0.88);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.document-content {
-  display: grid;
-  gap: 14px;
-  margin-bottom: 22px;
-  padding-inline: var(--document-preview-padding);
-}
-
-.pdf-document-viewer {
-  display: flex;
-  justify-content: center;
-  min-height: 540px;
-  padding-inline: var(--document-preview-padding);
-  box-sizing: border-box;
-}
-
-.docx-document-viewer {
-  display: flex;
-  justify-content: center;
-  min-height: 540px;
-  width: 100%;
-  max-width: 100%;
-  padding-inline: var(--document-preview-padding);
-  box-sizing: border-box;
-  overflow-x: auto;
-  overflow-y: hidden;
-}
-
-.docx-preview-host {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-  overflow-x: auto;
-  overflow-y: hidden;
+  background-clip: padding-box;
+  background-color: rgba(61, 53, 44, 0.18);
 }
 
 .docx-preview-host .docx-preview-surface {
   background: transparent;
+}
+
+.docx-preview-host style {
+  display: none !important;
 }
 
 .docx-preview-host .docx-wrapper {
@@ -365,71 +87,26 @@ textarea {
   box-shadow: 0 18px 36px rgba(71, 53, 33, 0.12);
 }
 
-.docx-document-summary {
-  margin-top: 18px;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.82rem;
-  line-height: 1.7;
-}
-
-.pdf-document {
+.react-pdf__Document {
   display: grid;
+  width: 100%;
   justify-items: center;
   gap: 18px;
-  width: 100%;
-  box-sizing: border-box;
 }
 
-.pdf-page-card {
-  width: min(100%, 900px);
-  padding: 0;
-  text-align: left;
-}
-
-.pdf-page-card__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 0 8px;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.pdf-page-card__page-trigger {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.pdf-page-card__status {
-  color: rgba(138, 106, 55, 0.92);
-}
-
-.pdf-page-card__preview {
-  display: block;
-  width: 100%;
-  padding: 0;
-  cursor: text;
-}
-
-.pdf-document .react-pdf__Page {
+.react-pdf__Page {
   overflow: hidden;
   border-radius: 18px;
   box-shadow: 0 18px 36px rgba(71, 53, 33, 0.12);
 }
 
-.pdf-document .react-pdf__Page__canvas {
+.react-pdf__Page__canvas {
+  display: block;
   max-width: 100%;
   height: auto !important;
 }
 
-.pdf-document .react-pdf__Page__textContent {
+.react-pdf__Page__textContent {
   user-select: text;
   cursor: text;
 }
@@ -444,412 +121,4 @@ textarea {
   box-shadow:
     0 18px 36px rgba(71, 53, 33, 0.12),
     0 0 0 4px rgba(181, 142, 83, 0.16);
-}
-
-.pdf-empty-state {
-  width: min(100%, 720px);
-  margin: 0 auto;
-  padding: 72px 28px;
-  border: 1px dashed rgba(181, 142, 83, 0.28);
-  border-radius: 18px;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.92rem;
-  line-height: 1.7;
-  text-align: center;
-}
-
-.pdf-selection-popover {
-  position: fixed;
-  z-index: 30;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid rgba(216, 207, 193, 0.92);
-  border-radius: 14px;
-  background: rgba(255, 251, 244, 0.96);
-  box-shadow: 0 18px 36px rgba(71, 53, 33, 0.14);
-  transform: translate(-50%, 0);
-}
-
-.pdf-selection-popover__action,
-.pdf-selection-popover__dismiss {
-  padding: 0;
-  border: none;
-  background: transparent;
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.pdf-selection-popover__action {
-  color: var(--color-text-primary);
-  font-weight: 600;
-}
-
-.pdf-selection-popover__dismiss {
-  color: var(--color-text-muted);
-}
-
-.document-block {
-  margin: 0;
-  color: var(--color-text-primary);
-}
-
-.document-block--heading {
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.document-block--heading-1 {
-  margin-top: 2px;
-  font-size: 1.5rem;
-}
-
-.document-block--heading-2 {
-  margin-top: 8px;
-  font-size: 1.08rem;
-}
-
-.document-block--heading-3 {
-  margin-top: 6px;
-  font-size: 0.98rem;
-}
-
-.document-block--paragraph {
-  color: var(--color-text-secondary);
-  font-size: 0.98rem;
-  line-height: 1.85;
-  text-align: justify;
-}
-
-.document-block--active {
-  position: relative;
-  margin-left: -12px;
-  margin-right: -12px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(251, 246, 233, 0.9);
-}
-
-.document-block--focused {
-  box-shadow: 0 0 0 3px rgba(181, 142, 83, 0.14);
-}
-
-.document-block__anchor-note {
-  display: inline-block;
-  margin-left: 10px;
-  color: rgba(138, 106, 55, 0.92);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  vertical-align: middle;
-}
-
-.risk-marker {
-  margin-bottom: 18px;
-  padding: 12px 0 12px 14px;
-  border-left: 2px solid rgba(181, 142, 83, 0.52);
-  border-radius: 0;
-  background: transparent;
-}
-
-.risk-marker__label {
-  margin-bottom: 4px;
-  color: rgba(138, 106, 55, 0.92);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.risk-marker__text {
-  color: var(--color-text-secondary);
-  line-height: 1.65;
-}
-
-.assistant-context {
-  margin-bottom: 0;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(216, 207, 193, 0.78);
-}
-
-.assistant-context__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.assistant-context__summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  color: var(--color-text-secondary);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-}
-
-.assistant-context__label {
-  color: var(--color-text-muted);
-}
-
-.assistant-context__value {
-  color: var(--color-text-primary);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.assistant-thread {
-  flex: 1;
-  min-height: 0;
-  padding: 16px 0 12px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.suggested-action {
-  padding: 6px 10px;
-  border: 1px solid rgba(216, 207, 193, 0.74);
-  border-radius: 999px;
-  background: rgba(255, 251, 244, 0.58);
-  color: var(--color-text-secondary);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.76rem;
-  font-weight: 600;
-}
-
-.suggested-action.is-active {
-  border-color: rgba(181, 142, 83, 0.5);
-  background: rgba(250, 243, 229, 0.92);
-  color: #6f5530;
-}
-
-.assistant-card {
-  max-width: 92%;
-  padding: 12px 14px;
-  border: 1px solid rgba(216, 207, 193, 0.52);
-  border-radius: 18px;
-  background: rgba(255, 251, 244, 0.46);
-  line-height: 1.6;
-}
-
-.assistant-card--assistant {
-  justify-self: start;
-}
-
-.assistant-card--summary {
-  justify-self: start;
-  max-width: 88%;
-  padding: 8px 0 10px;
-  border: none;
-  border-bottom: 1px solid rgba(216, 207, 193, 0.6);
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-text-muted);
-}
-
-.assistant-card--user {
-  justify-self: end;
-  background: rgba(241, 233, 222, 0.78);
-  border-color: rgba(210, 194, 171, 0.7);
-}
-
-.assistant-floating-tools {
-  position: relative;
-  min-height: 0;
-}
-
-.assistant-tools-trigger {
-  margin-left: auto;
-  padding: 6px 11px;
-  border: 1px solid rgba(216, 207, 193, 0.88);
-  border-radius: 999px;
-  background: rgba(255, 251, 244, 0.58);
-  color: var(--color-text-secondary);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.76rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.assistant-actions-popover {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 10px);
-  width: min(280px, 100%);
-  padding: 14px;
-  border: 1px solid rgba(216, 207, 193, 0.88);
-  border-radius: 18px;
-  background: rgba(255, 251, 244, 0.96);
-  box-shadow: 0 20px 40px rgba(71, 53, 33, 0.12);
-  backdrop-filter: blur(10px);
-}
-
-.assistant-actions-popover__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.assistant-actions-close {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.assistant-primary-action,
-.assistant-secondary-action {
-  padding: 12px 14px;
-  border: none;
-  border-radius: 14px;
-  text-align: center;
-  cursor: pointer;
-}
-
-.assistant-primary-action {
-  background: var(--color-ink-strong);
-  color: #fffdf9;
-}
-
-.assistant-secondary-action {
-  background: rgba(236, 228, 216, 0.76);
-  color: var(--color-text-secondary);
-}
-
-.assistant-footer {
-  display: grid;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(216, 207, 193, 0.78);
-}
-
-.chat-composer {
-  display: grid;
-  gap: 8px;
-}
-
-.chat-composer__status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.76rem;
-}
-
-.chat-composer__status-action {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.chat-composer__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.chat-composer__input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 12px 12px 14px;
-  border: 1px solid rgba(216, 207, 193, 0.88);
-  border-radius: 18px;
-  background: rgba(255, 252, 247, 0.9);
-}
-
-.chat-composer__field {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  padding: 0;
-  color: var(--color-text-muted);
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.88rem;
-  line-height: 1.4;
-}
-
-.chat-composer__field::placeholder {
-  color: var(--color-text-muted);
-}
-
-.chat-composer__send {
-  padding: 9px 13px;
-  border: none;
-  border-radius: 999px;
-  background: rgba(47, 38, 29, 0.92);
-  color: #fffdf9;
-  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.chat-composer__send:disabled,
-.chat-composer__field:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.workspace-sidebar,
-.workspace-main,
-.assistant-thread {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(61, 53, 44, 0.18) transparent;
-}
-
-.workspace-sidebar::-webkit-scrollbar,
-.workspace-main::-webkit-scrollbar,
-.assistant-thread::-webkit-scrollbar {
-  width: 8px;
-}
-
-.workspace-sidebar::-webkit-scrollbar-track,
-.workspace-main::-webkit-scrollbar-track,
-.assistant-thread::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.workspace-sidebar::-webkit-scrollbar-thumb,
-.workspace-main::-webkit-scrollbar-thumb,
-.assistant-thread::-webkit-scrollbar-thumb {
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background-clip: padding-box;
-  background-color: rgba(61, 53, 44, 0.18);
-}
-
-@media (max-width: 1180px) {
-  .workspace-layout {
-    grid-template-columns: 24% 52% 24%;
-  }
-}
-
-@media (max-width: 980px) {
-  .workspace-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .workspace-sidebar,
-  .assistant-panel {
-    border: none;
-  }
 }

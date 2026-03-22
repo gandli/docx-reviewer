@@ -40,9 +40,12 @@ export function WorkspaceLayout({
   isLocalModelBusy,
 }: WorkspaceLayoutProps) {
   return (
-    <div className="workspace-layout">
+    <div className="grid h-screen overflow-hidden bg-[var(--color-surface-app)] max-[1180px]:grid-cols-[24%_52%_24%] max-[980px]:grid-cols-1 lg:grid-cols-[22%_54%_24%]">
       <WorkspaceSidebar summary={summary} onImportDocument={onImportDocument} />
-      <main className="workspace-main">
+      <main
+        className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-6 pt-5 pb-6 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
+        data-scroll-region="true"
+      >
         <DocumentHeader
           title={summary.activeDocumentTitle}
           mode={summary.activeDocumentMode}

@@ -37,6 +37,13 @@ type PdfSelectionPopover = {
   left: number;
 };
 
+const popoverClassName =
+  "fixed z-30 inline-flex -translate-x-1/2 items-center gap-2 rounded-[14px] border border-[rgba(216,207,193,0.92)] bg-[rgba(255,251,244,0.96)] px-[10px] py-2 shadow-[0_18px_36px_rgba(71,53,33,0.14)]";
+const popoverActionClassName =
+  "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] font-semibold text-[var(--color-text-primary)]";
+const popoverDismissClassName =
+  "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] text-[var(--color-text-muted)]";
+
 function useCanvasWidth() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(720);
@@ -140,24 +147,46 @@ export function PdfDocumentCanvas({
 
   if (!previewDocument) {
     return (
-      <section className="document-canvas document-canvas--pdf" data-testid="document-canvas">
-        <div className="document-canvas__note">PDF 预览需要重新导入原文件</div>
-        <div className="pdf-empty-state">当前 PDF 预览内容不可用，请重新导入后继续查看。</div>
+      <section
+        className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(255,255,255,0.95)),var(--color-surface-paper)] px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
+        data-testid="document-canvas"
+      >
+        <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
+          PDF 预览需要重新导入原文件
+        </div>
+        <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+          当前 PDF 预览内容不可用，请重新导入后继续查看。
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="document-canvas document-canvas--pdf" data-testid="document-canvas">
-      <div className="document-canvas__note">
+    <section
+      className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(255,255,255,0.95)),var(--color-surface-paper)] px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
+      data-testid="document-canvas"
+    >
+      <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
         {pageCount > 0 ? `PDF 原样预览 · 共 ${pageCount} 页` : "正在载入 PDF 预览"}
       </div>
-      <div ref={containerRef} className="pdf-document-viewer" data-testid="pdf-document-viewer">
+      <div
+        ref={containerRef}
+        className="flex min-h-[540px] justify-center px-5"
+        data-testid="pdf-document-viewer"
+      >
         <Document
-          className="pdf-document"
+          className="grid w-full justify-items-center gap-[18px]"
           file={previewDocument.source}
-          loading={<div className="pdf-empty-state">正在打开《{title}》…</div>}
-          error={<div className="pdf-empty-state">{loadError ?? "PDF 打开失败，请重新导入后重试。"}</div>}
+          loading={
+            <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+              正在打开《{title}》…
+            </div>
+          }
+          error={
+            <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+              {loadError ?? "PDF 打开失败，请重新导入后重试。"}
+            </div>
+          }
           onLoadSuccess={({ numPages }) => setPageCount(numPages)}
           onLoadError={(error) => setLoadError(error.message)}
         >
@@ -225,22 +254,24 @@ export function PdfDocumentCanvas({
                 ref={(element) => {
                   pageRefs.current[pageNumber] = element;
                 }}
-                className={`pdf-page-card${isActive ? " pdf-page-card--active" : ""}${focusClassName}`}
+                className={`w-full max-w-[900px] text-left${isActive ? " pdf-page-card--active" : ""}${focusClassName}`}
                 role="group"
               >
-                <div className="pdf-page-card__meta">
+                <div className="mb-2 flex items-center justify-between font-sans text-[0.78rem] font-semibold text-[var(--color-text-muted)]">
                   <button
-                    className="pdf-page-card__page-trigger"
+                    className="cursor-pointer border-0 bg-transparent p-0 text-inherit"
                     data-testid={`pdf-page-trigger-${pageNumber}`}
                     type="button"
                     onClick={handleSelectPage}
                   >
                     第 {pageNumber} 页
                   </button>
-                  {isActive ? <span className="pdf-page-card__status">当前上下文</span> : null}
+                  {isActive ? (
+                    <span className="text-[rgba(138,106,55,0.92)]">当前上下文</span>
+                  ) : null}
                 </div>
                 <div
-                  className="pdf-page-card__preview"
+                  className="block w-full cursor-text"
                   data-testid={`pdf-page-card-${pageNumber}`}
                   onClick={handlePreviewClick}
                   onMouseUp={handlePreviewMouseUp}
@@ -259,7 +290,7 @@ export function PdfDocumentCanvas({
       </div>
       {selectionPopover ? (
         <div
-          className="pdf-selection-popover"
+          className={popoverClassName}
           data-testid="pdf-selection-popover"
           ref={selectionPopoverRef}
           style={{
@@ -268,7 +299,7 @@ export function PdfDocumentCanvas({
           }}
         >
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -284,7 +315,7 @@ export function PdfDocumentCanvas({
             找问题
           </button>
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -300,7 +331,7 @@ export function PdfDocumentCanvas({
             直接改写
           </button>
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -316,7 +347,7 @@ export function PdfDocumentCanvas({
             润色表达
           </button>
           <button
-            className="pdf-selection-popover__dismiss"
+            className={popoverDismissClassName}
             type="button"
             onClick={() => {
               window.getSelection()?.removeAllRanges();

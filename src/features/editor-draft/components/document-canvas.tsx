@@ -25,8 +25,25 @@ type DocumentSelectionPopover = {
 
 function getHeadingClassName(block: WorkspaceDocumentBlock) {
   const level = block.level ?? 2;
-  return `document-block document-block--heading document-block--heading-${level}`;
+  const baseClass = "m-0 text-[var(--color-text-primary)] font-bold leading-[1.35]";
+
+  if (level === 1) {
+    return `${baseClass} mt-[2px] text-[1.5rem]`;
+  }
+
+  if (level === 3) {
+    return `${baseClass} mt-[6px] text-[0.98rem]`;
+  }
+
+  return `${baseClass} mt-2 text-[1.08rem]`;
 }
+
+const popoverClassName =
+  "fixed z-30 inline-flex -translate-x-1/2 items-center gap-2 rounded-[14px] border border-[rgba(216,207,193,0.92)] bg-[rgba(255,251,244,0.96)] px-[10px] py-2 shadow-[0_18px_36px_rgba(71,53,33,0.14)]";
+const popoverActionClassName =
+  "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] font-semibold text-[var(--color-text-primary)]";
+const popoverDismissClassName =
+  "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] text-[var(--color-text-muted)]";
 
 export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
   const suggestionCount = summary.pendingSuggestionIds.length + (summary.suggestedRevisionText ? 1 : 0);
@@ -106,9 +123,18 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
   };
 
   return (
-    <section className="document-canvas" data-testid="document-canvas">
-      <div className="document-canvas__note">{noteText}</div>
-      <div ref={contentRef} className="document-content" onMouseUp={handleMouseUp}>
+    <section
+      className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(255,255,255,0.95)),var(--color-surface-paper)] px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
+      data-testid="document-canvas"
+    >
+      <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
+        {noteText}
+      </div>
+      <div
+        ref={contentRef}
+        className="mb-[22px] grid gap-[14px] px-5"
+        onMouseUp={handleMouseUp}
+      >
         {summary.documentBlocks.map((block) => {
           const isActiveHeading =
             block.kind === "heading" &&
@@ -119,10 +145,12 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
             (block.text.trim() === summary.activeClauseText.trim() ||
               block.id === summary.activeSelectionBlockId);
           const activeClassName =
-            isActiveHeading || isActiveParagraph ? " document-block--active" : "";
+            isActiveHeading || isActiveParagraph
+              ? " -mx-3 rounded-[14px] bg-[rgba(251,246,233,0.9)] px-3 py-[10px]"
+              : "";
           const focusClassName =
             hasFocusedSelection && (isActiveHeading || isActiveParagraph)
-              ? " document-block--focused"
+              ? " shadow-[0_0_0_3px_rgba(181,142,83,0.14)]"
               : "";
 
           if (block.kind === "heading") {
@@ -136,7 +164,9 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
               >
                 {block.text}
                 {hasFocusedSelection && isActiveHeading ? (
-                  <span className="document-block__anchor-note">已定位到当前条款</span>
+                  <span className="ml-[10px] inline-block align-middle font-sans text-[0.72rem] font-semibold text-[rgba(138,106,55,0.92)]">
+                    已定位到当前条款
+                  </span>
                 ) : null}
               </div>
             );
@@ -145,7 +175,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
           return (
             <p
               key={block.id}
-              className={`document-block document-block--paragraph${activeClassName}${focusClassName}`}
+              className={`m-0 text-[0.98rem] leading-[1.85] text-[var(--color-text-secondary)] text-justify${activeClassName}${focusClassName}`}
               data-block-id={block.id}
               data-block-kind="paragraph"
               data-active={isActiveParagraph}
@@ -157,7 +187,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
       </div>
       {selectionPopover ? (
         <div
-          className="pdf-selection-popover"
+          className={popoverClassName}
           data-testid="document-selection-popover"
           ref={selectionPopoverRef}
           style={{
@@ -166,7 +196,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
           }}
         >
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -182,7 +212,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
             找问题
           </button>
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -198,7 +228,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
             直接改写
           </button>
           <button
-            className="pdf-selection-popover__action"
+            className={popoverActionClassName}
             type="button"
             onClick={() => {
               onSelectText({
@@ -214,7 +244,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
             润色表达
           </button>
           <button
-            className="pdf-selection-popover__dismiss"
+            className={popoverDismissClassName}
             type="button"
             onClick={() => {
               window.getSelection()?.removeAllRanges();
