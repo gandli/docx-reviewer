@@ -69,7 +69,10 @@ function collectBlocks(content: string) {
       ];
 }
 
-export function parsePlainTextDocument(fileName: string, content: string): WorkspaceImportedDocument {
+export function parseTextDocumentContent(
+  fileName: string,
+  content: string,
+): WorkspaceImportedDocument {
   const blocks = collectBlocks(content);
   const firstHeading = blocks.find((block) => block.kind === "heading");
   const firstParagraph = blocks.find((block) => block.kind === "paragraph");
@@ -80,4 +83,8 @@ export function parsePlainTextDocument(fileName: string, content: string): Works
     activeClauseTitle: firstHeading?.text ?? getTitleFromFileName(fileName),
     activeClauseText: firstParagraph?.text ?? "暂无正文内容。",
   };
+}
+
+export function parsePlainTextDocument(fileName: string, content: string): WorkspaceImportedDocument {
+  return parseTextDocumentContent(fileName, content);
 }

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { WorkspaceLayout } from "@/features/workspace-shell/components/workspace-layout";
 import { createWorkspaceContextStore } from "@/features/workspace-context/store/workspace-context-store";
 import { createBrowserWorkspaceSummaryRepository } from "@/services/persistence/repositories/workspace-summary-repository";
-import { parsePlainTextDocument } from "@/services/import/plain-text-document";
+import { importDocumentFile } from "@/services/import/import-document";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
 export function WorkspacePage() {
@@ -27,8 +27,7 @@ export function WorkspacePage() {
   );
 
   const handleImportDocument = async (file: File) => {
-    const content = await file.text();
-    const importedDocument = parsePlainTextDocument(file.name, content);
+    const importedDocument = await importDocumentFile(file);
     store.getState().importDocument(importedDocument, file.name);
   };
 
