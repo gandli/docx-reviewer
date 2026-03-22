@@ -319,6 +319,8 @@ textarea {
 }
 
 .docx-document-viewer {
+  display: flex;
+  justify-content: center;
   min-height: 540px;
   width: 100%;
   max-width: 100%;
@@ -327,6 +329,8 @@ textarea {
 }
 
 .docx-preview-host {
+  display: flex;
+  justify-content: center;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
