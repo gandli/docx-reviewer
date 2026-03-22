@@ -20,7 +20,21 @@ export function WorkspaceSidebar({ summary }: WorkspaceSidebarProps) {
       <WorkspaceEvidenceList evidence={summary.recentEvidenceRefs} />
 
       <div className="workspace-actions">
-        <span>导入 · 导出 · 工作区设置</span>
+        <button className="workspace-actions__item" type="button">
+          导入
+        </button>
+        <span className="workspace-actions__divider" aria-hidden="true">
+          ·
+        </span>
+        <button className="workspace-actions__item" type="button">
+          导出
+        </button>
+        <span className="workspace-actions__divider" aria-hidden="true">
+          ·
+        </span>
+        <button className="workspace-actions__item" type="button">
+          工作区设置
+        </button>
       </div>
     </aside>
   );

@@ -229,12 +229,25 @@ textarea {
   margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid rgba(216, 207, 193, 0.82);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.workspace-actions span {
+.workspace-actions__item {
+  padding: 0;
+  border: none;
+  background: transparent;
   color: var(--color-text-muted);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.workspace-actions__divider {
+  color: rgba(109, 100, 87, 0.5);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
 }
 
 .document-header {
@@ -398,6 +411,17 @@ textarea {
 
 .assistant-card--assistant {
   justify-self: start;
+}
+
+.assistant-card--summary {
+  justify-self: start;
+  max-width: 88%;
+  padding: 8px 0 10px;
+  border: none;
+  border-bottom: 1px solid rgba(216, 207, 193, 0.6);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-muted);
 }
 
 .assistant-card--user {

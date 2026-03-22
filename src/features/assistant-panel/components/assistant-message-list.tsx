@@ -12,7 +12,7 @@ type AssistantMessageListProps = {
 export function AssistantMessageList({ messages, latestConclusion }: AssistantMessageListProps) {
   return (
     <div className="assistant-messages">
-      <div className="assistant-card assistant-card--assistant">{latestConclusion}</div>
+      <div className="assistant-card assistant-card--summary">{latestConclusion}</div>
       {messages.map((message) => (
         <div
           key={message.id}
