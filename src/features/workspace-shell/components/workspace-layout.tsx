@@ -9,6 +9,7 @@ type WorkspaceLayoutProps = {
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
   onSendMessage: (message: string) => void;
+  onImportDocument: (file: File) => void | Promise<void>;
 };
 
 export function WorkspaceLayout({
@@ -16,12 +17,13 @@ export function WorkspaceLayout({
   onApplySuggestion,
   onJumpToSelection,
   onSendMessage,
+  onImportDocument,
 }: WorkspaceLayoutProps) {
   return (
     <div className="workspace-layout">
-      <WorkspaceSidebar summary={summary} />
+      <WorkspaceSidebar summary={summary} onImportDocument={onImportDocument} />
       <main className="workspace-main">
-        <DocumentHeader title="采购与付款管理制度" />
+        <DocumentHeader title={summary.activeDocumentTitle} />
         <DocumentCanvas summary={summary} />
       </main>
       <AssistantPanel

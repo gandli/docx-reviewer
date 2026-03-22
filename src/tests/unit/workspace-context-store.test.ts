@@ -3,6 +3,7 @@ import {
   createBrowserWorkspaceSummaryRepository,
   createMemoryWorkspaceSummaryRepository,
 } from "@/services/persistence/repositories/workspace-summary-repository";
+import { parsePlainTextDocument } from "@/services/import/plain-text-document";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
 describe("workspace context store", () => {
@@ -43,6 +44,23 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.assistantMessages.at(-2)?.content).toBe("请改得更正式一些");
     expect(store.getState().summary?.assistantMessages.at(-1)?.role).toBe("assistant");
     expect(store.getState().summary?.latestConclusion).toContain("已记录你的要求");
+  });
+
+  it("imports a plain text document and replaces the document body", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    const importedDocument = parsePlainTextDocument(
+      "付款规范.md",
+      "# 付款规范\n\n第一条 所有付款应以验收通过为前提。\n\n## 付款触发\n\n验收通过且发票齐全后，方可申请付款。",
+    );
+
+    store.getState().importDocument(importedDocument, "付款规范.md");
+
+    expect(store.getState().summary?.activeDocumentTitle).toBe("付款规范");
+    expect(store.getState().summary?.documentBlocks[0]?.text).toBe("付款规范");
+    expect(store.getState().summary?.recentEvidenceRefs[0]).toBe("导入文件 · 付款规范.md");
+    expect(store.getState().summary?.latestConclusion).toContain("已导入文档");
   });
 
   it("normalizes restored browser summaries to the current workspace title", async () => {

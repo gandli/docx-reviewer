@@ -9,6 +9,7 @@ describe("workspace shell", () => {
   const scrollIntoViewMock = vi.fn();
 
   beforeEach(() => {
+    window.localStorage.clear();
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -50,7 +51,7 @@ describe("workspace shell", () => {
     expect(screen.getByText("最近引用")).toBeInTheDocument();
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("文档")).toBeInTheDocument();
-    expect(screen.getByText("刚刚更新")).toBeInTheDocument();
+    expect(screen.getByText("2 分钟前")).toBeInTheDocument();
     expect(screen.getByText("当前上下文")).toBeInTheDocument();
     expect(screen.getAllByText("付款方式").length).toBeGreaterThan(0);
   });
@@ -149,7 +150,9 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"),
+      ).toHaveValue("");
       expect(screen.getByText("请把语气改得更正式")).toBeInTheDocument();
       expect(screen.getAllByText(/已记录你的要求：请把语气改得更正式/)).toHaveLength(2);
     });
@@ -171,6 +174,31 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(scrollIntoViewMock).toHaveBeenCalled();
+    });
+  });
+
+  it("imports a txt or md file and renders the real document content", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const file = new File(
+      ["# 差旅报销制度\n\n所有报销申请应附完整票据。\n\n## 报销时限\n\n出差结束后 10 个工作日内提交。"],
+      "差旅报销制度.md",
+      { type: "text/markdown" },
+    );
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText("差旅报销制度").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
+      expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
+      expect(screen.getAllByText(/已导入文档《差旅报销制度》/).length).toBeGreaterThan(0);
     });
   });
 });

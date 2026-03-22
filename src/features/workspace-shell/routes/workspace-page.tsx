@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { WorkspaceLayout } from "@/features/workspace-shell/components/workspace-layout";
 import { createWorkspaceContextStore } from "@/features/workspace-context/store/workspace-context-store";
 import { createBrowserWorkspaceSummaryRepository } from "@/services/persistence/repositories/workspace-summary-repository";
+import { parsePlainTextDocument } from "@/services/import/plain-text-document";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
 export function WorkspacePage() {
@@ -25,6 +26,12 @@ export function WorkspacePage() {
     () => store.getState().summary ?? mockWorkspaceSummary,
   );
 
+  const handleImportDocument = async (file: File) => {
+    const content = await file.text();
+    const importedDocument = parsePlainTextDocument(file.name, content);
+    store.getState().importDocument(importedDocument, file.name);
+  };
+
   return (
     <div className="workspace-page">
       <WorkspaceLayout
@@ -32,6 +39,7 @@ export function WorkspacePage() {
         onApplySuggestion={() => store.getState().applySuggestion()}
         onJumpToSelection={() => store.getState().focusSelection()}
         onSendMessage={(message) => store.getState().sendMessage(message)}
+        onImportDocument={handleImportDocument}
       />
     </div>
   );

@@ -6,10 +6,25 @@ export type WorkspaceAssistantMessage = {
   content: string;
 };
 
+export type WorkspaceDocumentBlock = {
+  id: string;
+  kind: "heading" | "paragraph";
+  text: string;
+  level?: 1 | 2 | 3;
+};
+
+export type WorkspaceImportedDocument = {
+  title: string;
+  blocks: WorkspaceDocumentBlock[];
+  activeClauseTitle: string;
+  activeClauseText: string;
+};
+
 export type WorkspaceSummary = {
   workspaceId: string;
   workspaceTitle: string;
   activeDocumentId: string;
+  activeDocumentTitle: string;
   activeNodeId?: string;
   activeClauseTitle: string;
   activeClauseText: string;
@@ -24,5 +39,6 @@ export type WorkspaceSummary = {
   pendingSuggestionIds: string[];
   recentEvidenceRefs: string[];
   assistantMessages: WorkspaceAssistantMessage[];
+  documentBlocks: WorkspaceDocumentBlock[];
   updatedAt: string;
 };

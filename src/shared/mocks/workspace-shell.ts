@@ -1,5 +1,6 @@
 import type {
   WorkspaceAssistantMessage,
+  WorkspaceDocumentBlock,
   WorkspaceSummary,
 } from "@/features/workspace-context/types/workspace-summary";
 
@@ -26,10 +27,41 @@ export const mockAssistantMessages: WorkspaceAssistantMessage[] = [
   },
 ];
 
+export const mockDocumentBlocks: WorkspaceDocumentBlock[] = [
+  {
+    id: "heading-1",
+    kind: "heading",
+    level: 1,
+    text: "采购与付款管理制度",
+  },
+  {
+    id: "paragraph-1",
+    kind: "paragraph",
+    text: "为规范采购付款管理流程，保障资金使用合规性，现对付款节点、验收依据和审批要求作如下规定。",
+  },
+  {
+    id: "heading-2",
+    kind: "heading",
+    level: 2,
+    text: "付款方式",
+  },
+  {
+    id: "paragraph-2",
+    kind: "paragraph",
+    text: "合同签订后一次性支付全部款项。",
+  },
+  {
+    id: "paragraph-3",
+    kind: "paragraph",
+    text: "如涉及分阶段交付，应当根据验收节点和发票到齐情况执行付款审批。",
+  },
+];
+
 export const mockWorkspaceSummary: WorkspaceSummary = {
   workspaceId: "ws-enterprise",
   workspaceTitle: "文档工作台",
   activeDocumentId: "doc-procurement-policy",
+  activeDocumentTitle: "采购与付款管理制度",
   activeNodeId: "clause-payment",
   activeClauseTitle: "付款方式",
   activeClauseText: "合同签订后一次性支付全部款项。",
@@ -44,6 +76,7 @@ export const mockWorkspaceSummary: WorkspaceSummary = {
   pendingSuggestionIds: ["suggestion-payment-1", "suggestion-payment-2"],
   recentEvidenceRefs: ["付款节点说明 · 第 4 页", "采购付款计划 · Sheet2"],
   assistantMessages: mockAssistantMessages,
+  documentBlocks: mockDocumentBlocks,
   updatedAt: "2 分钟前",
 };
 

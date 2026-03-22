@@ -1,5 +1,8 @@
 import { createStore } from "zustand/vanilla";
-import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
+import type {
+  WorkspaceImportedDocument,
+  WorkspaceSummary,
+} from "@/features/workspace-context/types/workspace-summary";
 import type { WorkspaceSummaryRepository } from "@/services/persistence/repositories/workspace-summary-repository";
 
 export type WorkspaceContextState = {
@@ -9,6 +12,7 @@ export type WorkspaceContextState = {
   focusSelection: () => void;
   applySuggestion: () => void;
   sendMessage: (message: string) => void;
+  importDocument: (document: WorkspaceImportedDocument, fileName: string) => void;
 };
 
 export function createWorkspaceContextStore(
@@ -98,6 +102,42 @@ export function createWorkspaceContextStore(
                 id: `assistant-${state.summary.assistantMessages.length + 2}`,
                 role: "assistant",
                 content: assistantReply,
+              },
+            ],
+          }),
+        };
+      }),
+    importDocument: (document, fileName) =>
+      set((state) => {
+        if (!state.summary) {
+          return state;
+        }
+
+        const importedReply = `已导入文档《${document.title}》，可以继续生成、审阅或修订。`;
+
+        return {
+          summary: persist({
+            ...state.summary,
+            activeDocumentId: `imported-${Date.now()}`,
+            activeDocumentTitle: document.title,
+            activeClauseTitle: document.activeClauseTitle,
+            activeClauseText: document.activeClauseText,
+            suggestedRevisionText: "",
+            pendingSuggestionIds: [],
+            recentEvidenceRefs: [`导入文件 · ${fileName}`],
+            latestConclusion: importedReply,
+            nextAction: "继续审阅导入内容",
+            currentTaskStatus: "in_progress",
+            lastUserIntent: `导入文档 ${fileName}`,
+            documentBlocks: document.blocks,
+            updatedAt: "刚刚",
+            isSelectionFocused: false,
+            assistantMessages: [
+              ...state.summary.assistantMessages,
+              {
+                id: `assistant-${state.summary.assistantMessages.length + 1}`,
+                role: "assistant",
+                content: importedReply,
               },
             ],
           }),

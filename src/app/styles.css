@@ -245,6 +245,10 @@ textarea {
   cursor: pointer;
 }
 
+.workspace-actions__input {
+  display: none;
+}
+
 .workspace-actions__divider {
   color: rgba(109, 100, 87, 0.5);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
@@ -298,11 +302,42 @@ textarea {
   letter-spacing: 0.02em;
 }
 
-.line {
-  height: 9px;
-  margin-bottom: 13px;
-  border-radius: 999px;
-  background: #f1ebe2;
+.document-content {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.document-block {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.document-block--heading {
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.document-block--heading-1 {
+  margin-top: 2px;
+  font-size: 1.5rem;
+}
+
+.document-block--heading-2 {
+  margin-top: 8px;
+  font-size: 1.08rem;
+}
+
+.document-block--heading-3 {
+  margin-top: 6px;
+  font-size: 0.98rem;
+}
+
+.document-block--paragraph {
+  color: var(--color-text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.85;
+  text-align: justify;
 }
 
 .selection-block {
