@@ -13,11 +13,13 @@ html,
 body,
 #root {
   margin: 0;
+  height: 100%;
   min-height: 100%;
 }
 
 body {
   min-height: 100vh;
+  overflow: hidden;
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.75), transparent 30%),
     linear-gradient(180deg, #f4eee5 0%, var(--color-surface-app) 100%);
@@ -37,31 +39,40 @@ textarea {
 .workspace-layout {
   display: grid;
   grid-template-columns: 22% 54% 24%;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--color-surface-app);
+  overflow: hidden;
 }
 
 .workspace-sidebar {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  height: 100vh;
   padding: 24px 18px 18px;
   background: linear-gradient(180deg, rgba(239, 231, 218, 0.82) 0%, rgba(232, 222, 206, 0.58) 100%);
   border-right: 1px solid var(--color-border-soft);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .workspace-main {
+  height: 100vh;
   padding: 22px 24px 26px;
   background: var(--color-surface-app);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .assistant-panel {
   display: flex;
   flex-direction: column;
   gap: 0;
+  height: 100vh;
   padding: 24px 18px 18px;
   background: linear-gradient(180deg, rgba(248, 244, 237, 0.72) 0%, rgba(243, 237, 227, 0.5) 100%);
   border-left: 1px solid var(--color-border-soft);
+  overflow: hidden;
 }
 
 .eyebrow {
@@ -229,7 +240,8 @@ textarea {
   flex: 1;
   min-height: 0;
   padding: 16px 0 12px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .suggested-action {
@@ -341,6 +353,34 @@ textarea {
   border-radius: 999px;
   background: var(--color-ink-strong);
   color: #fffdf9;
+}
+
+.workspace-sidebar,
+.workspace-main,
+.assistant-thread {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(61, 53, 44, 0.18) transparent;
+}
+
+.workspace-sidebar::-webkit-scrollbar,
+.workspace-main::-webkit-scrollbar,
+.assistant-thread::-webkit-scrollbar {
+  width: 8px;
+}
+
+.workspace-sidebar::-webkit-scrollbar-track,
+.workspace-main::-webkit-scrollbar-track,
+.assistant-thread::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workspace-sidebar::-webkit-scrollbar-thumb,
+.workspace-main::-webkit-scrollbar-thumb,
+.assistant-thread::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background-color: rgba(61, 53, 44, 0.18);
 }
 
 @media (max-width: 1180px) {
