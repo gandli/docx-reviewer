@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type {
   WorkspaceDocumentBlock,
   WorkspaceSummary,
@@ -7,7 +7,20 @@ import { RiskMarker } from "@/features/editor-draft/components/risk-marker";
 
 type DocumentCanvasProps = {
   summary: WorkspaceSummary;
-  onSelectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
+  onSelectText: (payload: {
+    text: string;
+    blockId?: string;
+    contextLabel?: string;
+    intent?: "review" | "revise" | "polish";
+  }) => void;
+};
+
+type DocumentSelectionPopover = {
+  text: string;
+  blockId?: string;
+  contextLabel: string;
+  top: number;
+  left: number;
 };
 
 function getHeadingClassName(block: WorkspaceDocumentBlock) {
@@ -19,12 +32,33 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
   const suggestionCount = summary.pendingSuggestionIds.length + (summary.suggestedRevisionText ? 1 : 0);
   const hasFocusedSelection = summary.isSelectionFocused;
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const selectionPopoverRef = useRef<HTMLDivElement | null>(null);
+  const [selectionPopover, setSelectionPopover] = useState<DocumentSelectionPopover | undefined>();
 
-  const handleMouseUp = () => {
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        selectionPopoverRef.current &&
+        event.target instanceof Node &&
+        selectionPopoverRef.current.contains(event.target)
+      ) {
+        return;
+      }
+
+      setSelectionPopover(undefined);
+    };
+
+    window.addEventListener("pointerdown", handlePointerDown);
+
+    return () => window.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
+
+  const handleMouseUp = (event: MouseEvent<HTMLDivElement>) => {
     const selection = window.getSelection();
     const text = selection?.toString().trim();
 
     if (!selection || !text) {
+      setSelectionPopover(undefined);
       return;
     }
 
@@ -40,7 +74,29 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
     }
 
     const blockId = anchorElement.closest("[data-block-id]")?.getAttribute("data-block-id") ?? undefined;
-    onSelectText({ text, blockId });
+    const blockElement = anchorElement.closest("[data-block-id]");
+    const contextLabel =
+      blockElement?.getAttribute("data-block-kind") === "heading"
+        ? blockElement.textContent?.trim() || "已选文本"
+        : summary.activeClauseTitle;
+    const rect = range?.getBoundingClientRect();
+
+    if (!rect) {
+      onSelectText({ text, blockId, contextLabel });
+      return;
+    }
+
+    if (!event.currentTarget.contains(anchorElement)) {
+      return;
+    }
+
+    setSelectionPopover({
+      text,
+      blockId,
+      contextLabel: contextLabel?.trim() || "已选文本",
+      top: rect.top + window.scrollY - 52,
+      left: rect.left + window.scrollX + rect.width / 2,
+    });
   };
 
   return (
@@ -71,6 +127,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
                 key={block.id}
                 className={`${getHeadingClassName(block)}${activeClassName}${focusClassName}`}
                 data-block-id={block.id}
+                data-block-kind="heading"
                 data-active={isActiveHeading}
               >
                 {block.text}
@@ -86,6 +143,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
               key={block.id}
               className={`document-block document-block--paragraph${activeClassName}${focusClassName}`}
               data-block-id={block.id}
+              data-block-kind="paragraph"
               data-active={isActiveParagraph}
             >
               {block.text}
@@ -93,6 +151,76 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
           );
         })}
       </div>
+      {selectionPopover ? (
+        <div
+          className="pdf-selection-popover"
+          data-testid="document-selection-popover"
+          ref={selectionPopoverRef}
+          style={{
+            top: selectionPopover.top,
+            left: selectionPopover.left,
+          }}
+        >
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                blockId: selectionPopover.blockId,
+                contextLabel: selectionPopover.contextLabel,
+                intent: "review",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            找问题
+          </button>
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                blockId: selectionPopover.blockId,
+                contextLabel: selectionPopover.contextLabel,
+                intent: "revise",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            直接改写
+          </button>
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                blockId: selectionPopover.blockId,
+                contextLabel: selectionPopover.contextLabel,
+                intent: "polish",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            润色表达
+          </button>
+          <button
+            className="pdf-selection-popover__dismiss"
+            type="button"
+            onClick={() => {
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            关闭
+          </button>
+        </div>
+      ) : null}
       {summary.suggestedRevisionText ? <RiskMarker text={summary.suggestedRevisionText} /> : null}
     </section>
   );

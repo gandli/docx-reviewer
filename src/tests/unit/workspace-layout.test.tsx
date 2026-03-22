@@ -620,7 +620,7 @@ describe("workspace shell", () => {
     });
   });
 
-  it("updates the assistant context after selecting text in the document", async () => {
+  it("shows an action popover after selecting text in the markdown or text document", async () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -628,13 +628,26 @@ describe("workspace shell", () => {
     );
 
     const paragraphNode = screen.getAllByText("合同签订后一次性支付全部款项。")[0].firstChild;
+    const removeAllRangesMock = vi.fn();
     const selectionMock = {
       toString: () => "合同签订后一次性支付全部款项。",
       rangeCount: 1,
       getRangeAt: () =>
         ({
           commonAncestorContainer: paragraphNode,
+          getBoundingClientRect: () => ({
+            top: 180,
+            left: 360,
+            width: 120,
+            height: 20,
+            right: 480,
+            bottom: 200,
+            x: 360,
+            y: 180,
+            toJSON: () => ({}),
+          }),
         }) as Range,
+      removeAllRanges: removeAllRangesMock,
     };
 
     vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
@@ -642,9 +655,26 @@ describe("workspace shell", () => {
     fireEvent.mouseUp(screen.getAllByText("合同签订后一次性支付全部款项。")[0]);
 
     await waitFor(() => {
-      expect(screen.getByText("已选文本")).toBeInTheDocument();
-      expect(screen.getAllByText("合同签订后一次性支付全部款项。").length).toBeGreaterThan(0);
-      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+      expect(screen.getByTestId("document-selection-popover")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "找问题" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "直接改写" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "润色表达" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "润色表达" }));
+
+    await waitFor(() => {
+      expect(within(screen.getByTestId("assistant-panel")).getByText("付款方式")).toBeInTheDocument();
+      expect(screen.getAllByText("建议在验收通过并完成票据核验后，按约定节点安排付款。").length).toBeGreaterThan(0);
+      expect(screen.queryByTestId("document-selection-popover")).not.toBeInTheDocument();
+      expect(removeAllRangesMock).toHaveBeenCalled();
+      expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "polish",
+          clauseTitle: "付款方式",
+          clauseText: "合同签订后一次性支付全部款项。",
+        }),
+      );
     });
   });
 });
