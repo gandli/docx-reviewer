@@ -152,10 +152,19 @@ textarea {
 }
 
 .asset-card__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--color-text-muted);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  transform: rotate(-90deg);
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.asset-card__chevron.is-expanded {
+  transform: rotate(0deg);
 }
 
 .asset-card__items {

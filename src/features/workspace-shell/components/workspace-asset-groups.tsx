@@ -50,8 +50,11 @@ export function WorkspaceAssetGroups({ groups }: WorkspaceAssetGroupsProps) {
                 {group.label}
                 <span className="asset-card__count">{group.items?.length ?? 0}</span>
               </span>
-              <span className="asset-card__chevron" aria-hidden="true">
-                {isExpanded ? "−" : "+"}
+              <span
+                className={`asset-card__chevron${isExpanded ? " is-expanded" : ""}`}
+                aria-hidden="true"
+              >
+                ▾
               </span>
             </button>
             {isExpanded ? (
