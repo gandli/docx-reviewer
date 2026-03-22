@@ -19,15 +19,16 @@
 
 - 浏览器本地优先，核心能力运行在前端。
 - 文档内容、索引和生成结果默认只保存在本机。
-- v1 固定以 Qwen2.5-1.5B 量级模型为生成核心。
+- v1 生成链路优先采用 WebLLM + WebGPU，并加载 Qwen 系列本地模型。
 - 首发聚焦支持 WebGPU 的现代桌面浏览器。
 - 输出必须是可直接交付的 `.docx` 文件。
 - v1 优先支持结构化商务文档，不做扫描件和复杂版式恢复。
 
 ## 当前推荐技术路线
 
-- 本地生成模型：Qwen2.5-1.5B-Instruct
-- 浏览器推理与嵌入：`@huggingface/transformers`
+- 浏览器生成引擎：`@mlc-ai/web-llm`
+- 本地生成模型：优先选择 WebLLM 可用的 Qwen 系列模型
+- 浏览器嵌入：`@huggingface/transformers`
 - 向量检索：`voy-search`
 - 离线存储：IndexedDB
 - 文档读取：`mammoth`

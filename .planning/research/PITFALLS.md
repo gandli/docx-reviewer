@@ -111,7 +111,7 @@ Phase 1
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Transformers.js + WebGPU | 不做能力检测，直接加载模型 | 先探测浏览器能力，再分支提示或阻断 |
+| WebLLM + WebGPU | 不做能力检测，直接加载模型 | 先探测浏览器能力，再分支提示或阻断 |
 | Voy + IndexedDB | 只存向量索引，不存索引版本和来源映射 | 连同 schema 版本、文档 ID、片段来源一起保存 |
 | Mammoth + Word 导出 | 把 Mammoth 的 HTML 当最终导出结构 | Mammoth 只负责读取，导出走独立结构层 |
 

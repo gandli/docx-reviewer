@@ -10,8 +10,9 @@
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Qwen/Qwen2.5-1.5B-Instruct | model card current on 2026-03-22 | 本地生成、改写、审阅说明输出 | 中文能力强，能处理结构化文本和较长上下文，1.5B 量级更适合浏览器端部署 |
-| `@huggingface/transformers` | 3.8.1 | 浏览器内加载模型、嵌入和 WebGPU 推理 | 官方已提供 WebGPU 用法，生态成熟，前端集成成本低 |
+| `@mlc-ai/web-llm` | 0.2.82 | 浏览器内本地对话、生成、流式输出和 JSON 结构化输出 | 官方明确定位为高性能浏览器内 LLM 推理引擎，直接基于 WebGPU，适合对话与文档生成主链路 |
+| Qwen 系列 WebLLM 可用模型 | current supported models on 2026-03-22 | 本地生成、改写、审阅说明输出 | WebLLM 官方列出支持 Qwen 家族，适合作为中文文档任务的生成模型来源 |
+| `@huggingface/transformers` | 3.8.1 | 浏览器内嵌入模型与特征提取 | 更适合承担嵌入与检索增强，不必和生成引擎绑在一起 |
 | WebGPU | 浏览器标准 | 本地 GPU 加速推理 | 是浏览器端获得可用响应速度的关键能力 |
 | IndexedDB | 浏览器标准 | 离线持久化模型缓存、文档片段、索引元数据 | 浏览器原生、可离线、容量和事务能力足够 |
 
@@ -38,7 +39,7 @@
 
 ```bash
 # Core
-bun add @huggingface/transformers voy-search
+bun add @mlc-ai/web-llm @huggingface/transformers voy-search
 
 # Supporting
 bun add docx mammoth docxtemplater zod
@@ -51,7 +52,7 @@ bun add -d vite vitest playwright typescript
 
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
-| Transformers.js | WebLLM | 如果后续更看重浏览器端生成模型生态而不是统一的嵌入/模型调用接口，可以评估 |
+| WebLLM | Transformers.js 直接做生成 | 只有当某个特定任务必须依赖 Transformers.js 独占模型时才考虑 |
 | Voy | 内存 brute-force / 自建索引 | 文档规模非常小，且要规避 Voy 仍未稳定的 API 时 |
 | `docx` + `docxtemplater` | 纯 HTML 转 Word | 仅当输出对 Word 结构要求很低时才考虑，当前场景不建议 |
 | IndexedDB | OPFS | 如果后续大文件缓存或模型分块管理成为瓶颈，可进一步评估 OPFS |
@@ -60,6 +61,7 @@ bun add -d vite vitest playwright typescript
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
+| 用纯 WASM 推理承担主生成链路 | 在文档对话和长文本生成场景下性能通常不如 WebGPU 路线 | 优先使用 WebLLM + WebGPU |
 | 直接把所有文档内容拼进单次提示词 | 容易超出上下文、结果不稳定，也无法追溯来源 | 先切分、建索引，再按章节检索增强 |
 | 只用 Mammoth 做“导入 + 导出”双向闭环 | Mammoth 强项是读取语义，不是高保真回写 Word | 读取用 Mammoth，输出用 `docx` 或 `docxtemplater` |
 | 业务逻辑直接耦合 Voy 序列化格式 | Voy 官方仓库明确表示 1.0 前 API 仍可能变化 | 增加向量仓储适配层，隔离底层索引实现 |
@@ -79,17 +81,19 @@ bun add -d vite vitest playwright typescript
 
 | Package A | Compatible With | Notes |
 |-----------|-----------------|-------|
-| `@huggingface/transformers@3.8.1` | WebGPU-capable Chromium-class browsers | 官方文档展示了 `device: "webgpu"` 的标准用法 |
+| `@mlc-ai/web-llm@0.2.82` | WebGPU-capable browsers | 官方仓库明确说明其以 WebGPU 为浏览器内高性能推理基础 |
+| `@huggingface/transformers@3.8.1` | WebGPU-capable Chromium-class browsers | 在本项目中更适合承担嵌入与特征提取 |
 | `voy-search@0.6.3` | Transformers.js 生成的嵌入向量 | 仓库说明其可与 Transformers.js 等库配合，但 API 仍未稳定 |
 | `docx@9.6.1` | 结构化中间表示 | 适合在应用内按章节、表格、条款重建 Word 内容 |
 
 ## Sources
 
+- [mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — 验证了其浏览器内高性能推理、OpenAI 风格接口、Worker/Service Worker 支持和 Qwen 家族支持
 - [Transformers.js WebGPU guide](https://huggingface.co/docs/transformers.js/guides/webgpu) — 验证了浏览器端 `device: "webgpu"` 的官方用法
 - [Qwen/Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) — 验证了模型规模、结构化文本能力和上下文说明
 - [tantaraio/voy](https://github.com/tantaraio/voy) — 验证了 Voy 的用途，以及 1.0 前 API 不稳定的事实
 - [Mammoth.js](https://github.com/mwilliamson/mammoth.js) — 验证了其定位是 `.docx` 到 HTML 的语义读取
-- `npm view @huggingface/transformers version` / `voy-search version` / `docx version` / `mammoth version` / `docxtemplater version` — 2026-03-22 校验当前包版本
+- `npm view @mlc-ai/web-llm version` / `@huggingface/transformers version` / `voy-search version` / `docx version` / `mammoth version` / `docxtemplater version` — 2026-03-22 校验当前包版本
 
 ---
 *Stack research for: 浏览器本地离线商务文档智能处理系统*

@@ -116,7 +116,7 @@ Word 导出 ──requires──> 结构化中间表示
 
 ## Sources
 
-- 官方模型与框架文档（Qwen、Transformers.js、Mammoth、Voy）
+- 官方模型与框架文档（WebLLM、Qwen、Transformers.js、Mammoth、Voy）
 - 当前 npm 包版本查询结果
 - 对结构化商务文档工作流的产品模式归纳
 

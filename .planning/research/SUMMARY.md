@@ -9,17 +9,18 @@
 
 这是一个典型的“本地 AI 文档工作台”项目，核心不是做通用聊天，而是把结构化文档处理拆成可验证的几个环节：导入与解析、本地知识索引、按章节生成、审阅风险、修订建议和 Word 导出。研究结果表明，这类产品最关键的不是模型本身，而是结构化中间表示、统一检索底座和稳定的导出链路。
 
-推荐路线是坚持浏览器本地优先：用 Qwen2.5-1.5B 做生成与解释，用 Transformers.js 负责浏览器内嵌入和 WebGPU 推理，用 Voy + IndexedDB 形成离线知识底座，再用 `docx` / `docxtemplater` 完成最终 `.docx` 交付。最大的风险不在“能不能跑模型”，而在“文档结构是否被正确保留”和“审阅结果是否可追溯、可落回 Word”。
+推荐路线是坚持浏览器本地优先：用 WebLLM 作为本地对话与生成引擎，用 Transformers.js 负责嵌入，用 Voy + IndexedDB 形成离线知识底座，再用 `docx` / `docxtemplater` 完成最终 `.docx` 交付。最大的风险不在“能不能跑模型”，而在“文档结构是否被正确保留”和“审阅结果是否可追溯、可落回 Word”。
 
 ## Key Findings
 
 ### Recommended Stack
 
-浏览器端组合是可行的，但要明确边界。Transformers.js 官方已经给出 WebGPU 用法，Qwen2.5-1.5B 在结构化文本和中文场景上比较合适；Voy 适合本地中小规模检索，但因 1.0 前 API 仍不稳定，必须通过适配层隔离；Mammoth 适合读取旧文档，最终导出仍应由专门的 Word 生成层负责。
+浏览器端组合是可行的，但要明确分工。WebLLM 官方明确把自己定位成高性能浏览器内 LLM 引擎，适合承担对话、长文本生成和结构化输出；Transformers.js 继续承担嵌入与特征提取更顺；Voy 适合本地中小规模检索，但因 1.0 前 API 仍不稳定，必须通过适配层隔离；Mammoth 适合读取旧文档，最终导出仍应由专门的 Word 生成层负责。
 
 **Core technologies:**
-- Qwen2.5-1.5B-Instruct: 本地生成与改写核心 — 中文和结构化文本能力更均衡
-- Transformers.js: 浏览器模型与嵌入运行时 — 官方支持 WebGPU
+- WebLLM: 浏览器生成运行时 — 更适合对话、流式输出和结构化结果
+- Qwen 系列 WebLLM 模型: 本地生成与改写核心 — 中文和结构化文本能力更均衡
+- Transformers.js: 浏览器嵌入运行时 — 适合检索增强
 - Voy + IndexedDB: 本地向量检索与持久化 — 适合离线证据链
 - `docx` / `docxtemplater`: Word 导出与模板保真 — 保证最终交付物可用
 
@@ -79,7 +80,7 @@ Based on research, suggested phase structure:
 ### Phase 3: Grounded Knowledge Layer
 **Rationale:** 先统一知识底座，后面生成和审阅才会前后一致。  
 **Delivers:** 片段检索、来源追溯、文档类型模板配置。  
-**Uses:** Transformers.js、Voy、IndexedDB。  
+**Uses:** WebLLM、Transformers.js、Voy、IndexedDB。  
 **Implements:** 检索编排器。
 
 ### Phase 4: Draft Generation
@@ -137,7 +138,8 @@ Phases with standard patterns (skip research-phase):
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Transformers.js WebGPU guide](https://huggingface.co/docs/transformers.js/guides/webgpu) — 浏览器端 WebGPU 推理方式
+- [mlc-ai/web-llm](https://github.com/mlc-ai/web-llm) — 浏览器端高性能生成引擎、Worker 和 Service Worker 用法
+- [Transformers.js WebGPU guide](https://huggingface.co/docs/transformers.js/guides/webgpu) — 浏览器端嵌入与 WebGPU 推理方式
 - [Qwen/Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) — 模型能力与规模说明
 - [tantaraio/voy](https://github.com/tantaraio/voy) — 向量检索能力与稳定性提示
 - [mwilliamson/mammoth.js](https://github.com/mwilliamson/mammoth.js) — `.docx` 读取定位说明

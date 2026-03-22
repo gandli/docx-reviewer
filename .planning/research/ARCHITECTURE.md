@@ -38,6 +38,7 @@
 |-----------|----------------|------------------------|
 | 文档解析器 | 把模板、背景资料和待审文档转成统一结构 | `.docx` 读取 + 结构化中间表示 |
 | 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | Transformers.js + Voy + IndexedDB |
+| LLM 运行时 | 本地对话、生成、结构化输出和流式回复 | WebLLM + WebGPU |
 | 任务编排器 | 组织“生成 / 填充 / 审阅 / 修订”任务输入输出 | 明确的任务类型和结构化 schema |
 | 规则引擎 | 识别缺失项、风险项、一致性问题 | 规则 + LLM 混合判定 |
 | 导出器 | 把结构化结果转回可交付的 Word | `docx` 或 `docxtemplater` |
@@ -183,6 +184,7 @@ const result = await llm.runTask({ task, evidence, schema });
 
 ## Sources
 
+- WebLLM 官方文档
 - Transformers.js 官方文档
 - Qwen2.5 官方模型页
 - Voy 官方仓库说明
