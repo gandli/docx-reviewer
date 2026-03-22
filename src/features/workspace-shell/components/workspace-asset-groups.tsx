@@ -1,11 +1,18 @@
 import { useState } from "react";
 
+type AssetItem = {
+  id: string;
+  label: string;
+  updatedAt: string;
+  selected?: boolean;
+};
+
 type AssetGroup = {
   id: string;
   label: string;
   active?: boolean;
   defaultExpanded?: boolean;
-  items?: readonly string[];
+  items?: readonly AssetItem[];
 };
 
 type WorkspaceAssetGroupsProps = {
@@ -38,7 +45,10 @@ export function WorkspaceAssetGroups({ groups }: WorkspaceAssetGroupsProps) {
                 }))
               }
             >
-              <span>{group.label}</span>
+              <span className="asset-card__label">
+                {group.label}
+                <span className="asset-card__count">{group.items?.length ?? 0}</span>
+              </span>
               <span className="asset-card__chevron" aria-hidden="true">
                 {isExpanded ? "−" : "+"}
               </span>
@@ -46,8 +56,12 @@ export function WorkspaceAssetGroups({ groups }: WorkspaceAssetGroupsProps) {
             {isExpanded ? (
               <div className="asset-card__items">
                 {group.items?.map((item) => (
-                  <div key={item} className="asset-card__item">
-                    {item}
+                  <div
+                    key={item.id}
+                    className={`asset-card__item${item.selected ? " is-selected" : ""}`}
+                  >
+                    <div className="asset-card__item-title">{item.label}</div>
+                    <div className="asset-card__item-meta">{item.updatedAt}</div>
                   </div>
                 ))}
               </div>

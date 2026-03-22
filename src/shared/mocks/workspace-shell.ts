@@ -26,25 +26,41 @@ export const mockAssetGroups = [
     label: "主文档",
     active: true,
     defaultExpanded: true,
-    items: ["采购与付款管理制度"],
+    items: [
+      {
+        id: "doc-procurement-policy",
+        label: "采购与付款管理制度",
+        updatedAt: "刚刚更新",
+        selected: true,
+      },
+    ],
   },
   {
     id: "template",
     label: "模板",
     defaultExpanded: false,
-    items: ["制度模板 v3", "合同条款模板"],
+    items: [
+      { id: "tpl-policy-v3", label: "制度模板 v3", updatedAt: "今天 14:20" },
+      { id: "tpl-contract-clauses", label: "合同条款模板", updatedAt: "昨天 18:40" },
+    ],
   },
   {
     id: "references",
     label: "参考资料",
     defaultExpanded: false,
-    items: ["付款节点说明", "采购管理办法"],
+    items: [
+      { id: "ref-payment", label: "付款节点说明", updatedAt: "今天 09:15" },
+      { id: "ref-procurement", label: "采购管理办法", updatedAt: "昨天 11:30" },
+    ],
   },
   {
     id: "sheets",
     label: "表格资料",
     defaultExpanded: false,
-    items: ["采购付款计划", "供应商信息表"],
+    items: [
+      { id: "sheet-plan", label: "采购付款计划", updatedAt: "今天 10:05" },
+      { id: "sheet-vendors", label: "供应商信息表", updatedAt: "昨天 16:12" },
+    ],
   },
 ] as const;
 

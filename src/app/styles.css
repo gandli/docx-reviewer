@@ -138,6 +138,19 @@ textarea {
   text-align: left;
 }
 
+.asset-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.asset-card__count {
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
 .asset-card__chevron {
   color: var(--color-text-muted);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
@@ -153,10 +166,30 @@ textarea {
 }
 
 .asset-card__item {
-  color: var(--color-text-muted);
+  padding: 8px 10px;
+  border-radius: 12px;
+  color: var(--color-text-secondary);
+  background: rgba(255, 251, 244, 0.32);
+}
+
+.asset-card__item.is-selected {
+  background: rgba(255, 251, 244, 0.72);
+  box-shadow: inset 0 0 0 1px rgba(216, 207, 193, 0.82);
+}
+
+.asset-card__item-title {
+  color: inherit;
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   font-size: 0.84rem;
+  font-weight: 600;
   line-height: 1.45;
+}
+
+.asset-card__item-meta {
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--color-text-muted);
 }
 
 .asset-card.is-active {

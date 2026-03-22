@@ -39,6 +39,7 @@ describe("workspace shell", () => {
     expect(screen.getByText("参考资料")).toBeInTheDocument();
     expect(screen.getByText("最近引用")).toBeInTheDocument();
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
+    expect(screen.getByText("刚刚更新")).toBeInTheDocument();
     expect(screen.getByText(/已继承当前工作区摘要/)).toBeInTheDocument();
   });
 
@@ -51,10 +52,11 @@ describe("workspace shell", () => {
 
     expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "参考资料" }));
+    fireEvent.click(screen.getByRole("button", { name: /参考资料/ }));
     expect(screen.getByText("付款节点说明")).toBeInTheDocument();
+    expect(screen.getByText("今天 09:15")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "参考资料" }));
+    fireEvent.click(screen.getByRole("button", { name: /参考资料/ }));
     expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
   });
 
