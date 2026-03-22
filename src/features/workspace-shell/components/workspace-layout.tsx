@@ -1,7 +1,6 @@
 import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
 import { useState } from "react";
 import { WorkspaceSidebar } from "@/features/workspace-shell/components/workspace-sidebar";
-import { DocumentHeader } from "@/features/editor-draft/components/document-header";
 import { DocumentCanvas } from "@/features/editor-draft/components/document-canvas";
 import { PdfDocumentCanvas } from "@/features/editor-draft/components/pdf-document-canvas";
 import { DocxDocumentCanvas } from "@/features/editor-draft/components/docx-document-canvas";
@@ -65,12 +64,9 @@ export function WorkspaceLayout({
         onToggleCollapse={() => setIsLeftCollapsed((current) => !current)}
       />
       <main
-        className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-0 pt-4 pb-0 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
+        className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-0 pt-0 pb-0 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
         data-scroll-region="true"
       >
-        <DocumentHeader
-          title={summary.activeDocumentTitle}
-        />
         {summary.activeDocumentMode === "pdf" ? (
           <PdfDocumentCanvas
             summary={summary}
