@@ -1,123 +1,55 @@
 import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
 import type { WorkspaceAssistantMessage } from "@/features/workspace-context/types/workspace-summary";
+import { normalizeAssistantMarkdown } from "@/shared/utils/assistant-message-format";
 
 type AssistantMessageListProps = {
   messages: readonly WorkspaceAssistantMessage[];
   latestConclusion: string;
 };
 
-type ReviewIssue = {
-  originalText: string;
-  problemType: string;
-  category: string;
-  explanation: string;
-  suggestion: string;
-};
+function MarkdownContent({ content }: { content: string }) {
+  const normalized = normalizeAssistantMarkdown(content);
 
-const REVIEW_FIELDS = [
-  { key: "originalText", label: "原文" },
-  { key: "problemType", label: "问题类型" },
-  { key: "category", label: "问题归类" },
-  { key: "explanation", label: "问题说明" },
-  { key: "suggestion", label: "修改建议" },
-] as const;
-
-function extractReviewField(
-  block: string,
-  label: (typeof REVIEW_FIELDS)[number]["label"],
-  nextLabels: readonly string[],
-) {
-  const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const nextPattern = nextLabels.map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
-  const matcher = new RegExp(
-    `${escapedLabel}[：:]\\s*([\\s\\S]*?)(?=(?:${nextPattern})[：:]|$)`,
-    "m",
+  return (
+    <div className="assistant-markdown text-[0.9rem] leading-[1.8] text-[var(--color-text-primary)]">
+      <ReactMarkdown
+        components={{
+          h1: ({ children }) => (
+            <h3 className="mt-0 mb-3 text-[0.95rem] font-semibold text-[var(--color-text-primary)]">{children}</h3>
+          ),
+          h2: ({ children }) => (
+            <h3 className="mt-0 mb-3 text-[0.95rem] font-semibold text-[var(--color-text-primary)]">{children}</h3>
+          ),
+          h3: ({ children }) => (
+            <h4 className="mt-0 mb-3 text-[0.9rem] font-semibold text-[var(--color-text-primary)]">{children}</h4>
+          ),
+          p: ({ children }) => <p className="m-0 mb-3 last:mb-0">{children}</p>,
+          ul: ({ children }) => <ul className="m-0 grid gap-2 pl-5">{children}</ul>,
+          ol: ({ children }) => <ol className="m-0 grid gap-2 pl-5">{children}</ol>,
+          li: ({ children }) => <li className="pl-1">{children}</li>,
+          strong: ({ children }) => <strong className="font-semibold text-[var(--color-text-primary)]">{children}</strong>,
+          code: ({ children }) => (
+            <code className="rounded bg-[rgba(71,53,33,0.06)] px-1.5 py-0.5 text-[0.84em]">{children}</code>
+          ),
+        }}
+      >
+        {normalized}
+      </ReactMarkdown>
+    </div>
   );
-  return block.match(matcher)?.[1]?.trim() ?? "";
-}
-
-function parseReviewIssues(content: string) {
-  const normalized = content.replace(/\r/g, "").trim();
-
-  if (!normalized.includes("原文：") && !normalized.includes("原文:")) {
-    return [];
-  }
-
-  return normalized
-    .split(/(?=原文[：:])/)
-    .map((block) => block.trim())
-    .filter(Boolean)
-    .map<ReviewIssue>((block) => {
-      const labels = REVIEW_FIELDS.map((field) => field.label);
-
-      return {
-        originalText: extractReviewField(block, "原文", labels.filter((item) => item !== "原文")),
-        problemType: extractReviewField(
-          block,
-          "问题类型",
-          labels.filter((item) => item !== "问题类型"),
-        ),
-        category: extractReviewField(
-          block,
-          "问题归类",
-          labels.filter((item) => item !== "问题归类"),
-        ),
-        explanation: extractReviewField(
-          block,
-          "问题说明",
-          labels.filter((item) => item !== "问题说明"),
-        ),
-        suggestion: extractReviewField(
-          block,
-          "修改建议",
-          labels.filter((item) => item !== "修改建议"),
-        ),
-      };
-    })
-    .filter((issue) => issue.originalText || issue.problemType || issue.category || issue.explanation || issue.suggestion);
 }
 
 function ReviewResultCard({ content }: { content: string }) {
-  const issues = parseReviewIssues(content);
-
-  if (!issues.length) {
-    return (
-      <div className="max-w-[92%] justify-self-start rounded-[18px] border border-[rgba(216,207,193,0.52)] bg-[rgba(255,251,244,0.46)] px-[14px] py-3 leading-[1.7]">
-        {content}
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-[92%] justify-self-start rounded-[20px] border border-[rgba(196,165,116,0.42)] bg-[rgba(255,250,242,0.9)] px-4 py-4 shadow-[0_12px_28px_rgba(110,84,47,0.08)]">
       <div className="mb-3 flex items-center justify-between gap-3 border-b border-[rgba(216,207,193,0.6)] pb-3">
         <div>
           <div className="text-[0.92rem] font-semibold text-[var(--color-text-primary)]">校阅发现</div>
-          <div className="mt-1 text-[0.76rem] text-[var(--color-text-muted)]">按问题逐项标注，便于直接核对和修改</div>
-        </div>
-        <div className="rounded-full bg-[rgba(199,171,125,0.18)] px-[10px] py-[4px] text-[0.72rem] font-semibold text-[var(--color-text-secondary)]">
-          {issues.length} 项
+          <div className="mt-1 text-[0.76rem] text-[var(--color-text-muted)]">按问题逐项展开，便于核对和修改</div>
         </div>
       </div>
-      <div className="grid gap-3">
-        {issues.map((issue, index) => (
-          <div
-            key={`${issue.originalText}-${index}`}
-            className="rounded-[16px] border border-[rgba(216,207,193,0.78)] bg-[rgba(255,255,255,0.86)] px-3 py-3"
-          >
-            <div className="mb-3 text-[0.74rem] font-semibold tracking-[0.06em] text-[var(--color-text-muted)] uppercase">
-              问题 {index + 1}
-            </div>
-            <div className="grid gap-2 text-[0.86rem] leading-[1.7] text-[var(--color-text-secondary)]">
-              <ResultField label="原文" value={issue.originalText} />
-              <ResultField label="问题类型" value={issue.problemType} />
-              <ResultField label="问题归类" value={issue.category} />
-              <ResultField label="问题说明" value={issue.explanation} />
-              <ResultField label="修改建议" value={issue.suggestion} />
-            </div>
-          </div>
-        ))}
-      </div>
+      <MarkdownContent content={content} />
     </div>
   );
 }
@@ -134,9 +66,7 @@ function RewriteResultCard({ content }: { content: string }) {
           可直接采用
         </div>
       </div>
-      <div className="rounded-[16px] border border-[rgba(216,207,193,0.72)] bg-white px-4 py-4 text-[0.9rem] leading-[1.8] text-[var(--color-text-primary)]">
-        {content}
-      </div>
+      <MarkdownContent content={content} />
     </div>
   );
 }
@@ -153,22 +83,7 @@ function PolishResultCard({ content }: { content: string }) {
           保留原意
         </div>
       </div>
-      <div className="rounded-[16px] border border-[rgba(216,207,193,0.72)] bg-white px-4 py-4 text-[0.9rem] leading-[1.8] text-[var(--color-text-primary)]">
-        {content}
-      </div>
-    </div>
-  );
-}
-
-function ResultField({ label, value }: { label: string; value: string }) {
-  if (!value) {
-    return null;
-  }
-
-  return (
-    <div className="grid gap-1">
-      <div className="text-[0.74rem] font-semibold text-[var(--color-text-muted)]">{label}</div>
-      <div className="text-[0.88rem] text-[var(--color-text-secondary)]">{value}</div>
+      <MarkdownContent content={content} />
     </div>
   );
 }
@@ -196,7 +111,7 @@ function AssistantMessageCard({ message }: { message: WorkspaceAssistantMessage 
           : "justify-self-start border-[rgba(216,207,193,0.52)] bg-[rgba(255,251,244,0.46)]"
       }`}
     >
-      {message.content}
+      {message.role === "assistant" ? <MarkdownContent content={message.content} /> : message.content}
     </div>
   );
 }
@@ -214,7 +129,7 @@ export function AssistantMessageList({ messages, latestConclusion }: AssistantMe
   return (
     <div className="grid gap-[10px]">
       <div className="max-w-[88%] justify-self-start border-b border-[rgba(216,207,193,0.6)] bg-transparent px-0 pt-2 pb-[10px] text-[var(--color-text-muted)]">
-        {latestConclusion}
+        <MarkdownContent content={latestConclusion} />
       </div>
       {messages.map((message) => (
         <div key={message.id} ref={message === messages.at(-1) ? latestMessageRef : null}>

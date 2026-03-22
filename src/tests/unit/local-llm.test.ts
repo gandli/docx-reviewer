@@ -46,8 +46,10 @@ describe("local llm", () => {
     expect(messages[0]?.content).toContain("笔误类");
     expect(messages[0]?.content).toContain("语法类");
     expect(messages[0]?.content).toContain("条款风险类");
-    expect(messages[0]?.content).toContain("原文：");
-    expect(messages[0]?.content).toContain("修改建议：");
+    expect(messages[0]?.content).toContain("Markdown");
+    expect(messages[0]?.content).toContain("### 问题 1");
+    expect(messages[0]?.content).toContain("- 原文：");
+    expect(messages[0]?.content).toContain("- 修改建议：");
     expect(messages[1]?.content).toContain("请审阅下面这段");
   });
 
@@ -64,6 +66,7 @@ describe("local llm", () => {
     expect(messages[0]?.content).toContain("补齐逻辑不清、事实不完整");
     expect(messages[0]?.content).toContain("消除明显的条款风险");
     expect(messages[0]?.content).toContain("只输出改写后的正文");
+    expect(messages[0]?.content).toContain("Markdown");
     expect(messages[1]?.content).toContain("请直接改写下面这段");
   });
 
@@ -80,6 +83,7 @@ describe("local llm", () => {
     expect(messages[0]?.content).toContain("不能新增事实");
     expect(messages[0]?.content).toContain("不能改变责任边界");
     expect(messages[0]?.content).toContain("只优化措辞、标点、语气、节奏和书面感");
+    expect(messages[0]?.content).toContain("Markdown");
     expect(messages[1]?.content).toContain("请润色下面这段");
   });
 });

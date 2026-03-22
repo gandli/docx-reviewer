@@ -857,9 +857,15 @@ describe("workspace shell", () => {
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
       expect(screen.getByText("校阅发现")).toBeInTheDocument();
-      expect(screen.getByText("问题归类")).toBeInTheDocument();
-      expect(screen.getByText("条款风险类")).toBeInTheDocument();
-      expect(screen.getByText("修改建议")).toBeInTheDocument();
+      expect(
+        screen.getAllByText((_, element) => element?.textContent?.includes("问题归类") ?? false).length,
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText((_, element) => element?.textContent?.includes("条款风险类") ?? false).length,
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getAllByText((_, element) => element?.textContent?.includes("修改建议") ?? false).length,
+      ).toBeGreaterThan(0);
       expect(screen.queryByTestId("pdf-selection-popover")).not.toBeInTheDocument();
       expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
         expect.objectContaining({
