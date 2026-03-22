@@ -7,6 +7,10 @@ import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
 describe("workspace shell", () => {
   const scrollIntoViewMock = vi.fn();
+  const getActiveClauseHeading = () =>
+    screen
+      .getAllByText("付款方式")
+      .find((element) => element.getAttribute("data-active") === "true");
 
   beforeEach(() => {
     window.localStorage.clear();
@@ -74,17 +78,17 @@ describe("workspace shell", () => {
     expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
   });
 
-  it("renders document header, selected clause block, and assistant actions", () => {
+  it("renders document header, highlighted active clause, and assistant actions", () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
       </MemoryRouter>,
     );
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
-    expect(screen.getByText("当前选中条款")).toBeInTheDocument();
     expect(screen.getByText("阅读视图")).toBeInTheDocument();
     expect(screen.getByText("可编辑")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
+    expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
 
   it("applies the suggestion and updates the clause text", () => {
@@ -108,6 +112,14 @@ describe("workspace shell", () => {
       ...mockWorkspaceSummary,
       activeClauseText: "付款分三期执行，验收通过后支付尾款。",
       latestConclusion: "已从本地恢复付款条款修订结果。",
+      documentBlocks: mockWorkspaceSummary.documentBlocks.map((block) =>
+        block.text === mockWorkspaceSummary.activeClauseText
+          ? {
+              ...block,
+              text: "付款分三期执行，验收通过后支付尾款。",
+            }
+          : block,
+      ),
     };
     window.localStorage.setItem(
       `workspace-summary:${mockWorkspaceSummary.workspaceId}`,
@@ -135,6 +147,7 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "跳到原文位置" }));
 
     expect(screen.getByText("已定位到当前条款")).toBeInTheDocument();
+    expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
 
   it("sends a chat message and appends it to the assistant thread", async () => {
