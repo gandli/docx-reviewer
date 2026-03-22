@@ -18,5 +18,4 @@ export type WorkspaceSummary = {
   pendingSuggestionIds: string[];
   recentEvidenceRefs: string[];
   updatedAt: string;
-  lastAgent: string;
 };

@@ -12,7 +12,7 @@ export function WorkspaceResumeCard({ summary }: WorkspaceResumeCardProps) {
         {summary.nextAction}
       </div>
       <div className="muted">
-        上次停在“{summary.activeClauseTitle}”修订。可由当前 agent 或其他 agent 接续。
+        上次停在“{summary.activeClauseTitle}”修订，可直接继续处理。
       </div>
     </section>
   );

@@ -39,7 +39,7 @@ describe("workspace shell", () => {
     expect(screen.getByText("参考资料")).toBeInTheDocument();
     expect(screen.getByText("最近引用")).toBeInTheDocument();
     expect(screen.getByText("继续上次工作")).toBeInTheDocument();
-    expect(screen.getByText(/已继承工作区摘要/)).toBeInTheDocument();
+    expect(screen.getByText(/已继承当前工作区摘要/)).toBeInTheDocument();
   });
 
   it("renders document header, selected clause block, and assistant actions", () => {
@@ -71,7 +71,6 @@ describe("workspace shell", () => {
     const restoredSummary = {
       ...mockWorkspaceSummary,
       activeClauseText: "付款分三期执行，验收通过后支付尾款。",
-      lastAgent: "Codex",
       latestConclusion: "已从本地恢复付款条款修订结果。",
     };
     window.localStorage.setItem(
@@ -86,7 +85,7 @@ describe("workspace shell", () => {
     );
 
     expect(await screen.findByText("付款分三期执行，验收通过后支付尾款。")).toBeInTheDocument();
-    expect(await screen.findByText(/最近接续自 Codex/)).toBeInTheDocument();
+    expect(await screen.findByText(/已从本地恢复付款条款修订结果/)).toBeInTheDocument();
   });
 
   it("jumps back to the current clause when asked", () => {

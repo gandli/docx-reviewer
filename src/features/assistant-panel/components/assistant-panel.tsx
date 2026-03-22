@@ -29,9 +29,9 @@ export function AssistantPanel({
         onJumpToSelection={onJumpToSelection}
       />
       <div className="context-card">
-        <div className="eyebrow">跨 Agent 接续</div>
+        <div className="eyebrow">工作区摘要</div>
         <div className="muted">
-          恢复时读取工作区摘要、当前节点、待处理建议和最近证据，不依赖原聊天线程。
+          当前视图基于工作区摘要、当前节点、待处理建议和最近证据恢复。
         </div>
       </div>
     </section>

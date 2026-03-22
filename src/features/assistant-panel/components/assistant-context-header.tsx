@@ -11,7 +11,7 @@ export function AssistantContextHeader({ summary }: AssistantContextHeaderProps)
       <div className="title-lg" style={{ fontSize: "1.05rem", marginTop: 10 }}>
         当前上下文：{summary.activeClauseTitle}
       </div>
-      <div className="muted">已继承工作区摘要，最近接续自 {summary.lastAgent}</div>
+      <div className="muted">已继承当前工作区摘要和最近处理状态</div>
     </div>
   );
 }

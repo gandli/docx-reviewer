@@ -18,7 +18,6 @@ export const mockWorkspaceSummary: WorkspaceSummary = {
   pendingSuggestionIds: ["suggestion-payment-1", "suggestion-payment-2"],
   recentEvidenceRefs: ["付款节点说明 · 第 4 页", "采购付款计划 · Sheet2"],
   updatedAt: "2 分钟前",
-  lastAgent: "Claude Code",
 };
 
 export const mockAssetGroups = [
