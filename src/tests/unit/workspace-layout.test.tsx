@@ -233,6 +233,9 @@ describe("workspace shell", () => {
       </MemoryRouter>,
     );
 
+    expect(screen.getByRole("button", { name: "收起左栏" })).toHaveTextContent("");
+    expect(screen.getByRole("button", { name: "收起右栏" })).toHaveTextContent("");
+
     fireEvent.click(screen.getByRole("button", { name: "收起左栏" }));
     expect(screen.queryByText("Workspace")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "展开左栏" })).toBeInTheDocument();
