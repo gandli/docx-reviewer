@@ -38,15 +38,18 @@ export function AssistantPanel({
               onClose={() => setIsActionPanelOpen(false)}
             />
           ) : null}
-          <button
-            className="assistant-tools-trigger"
-            type="button"
-            onClick={() => setIsActionPanelOpen((current) => !current)}
-          >
-            更多操作
-          </button>
         </div>
-        <ChatComposer />
+        <ChatComposer
+          trailingAction={
+            <button
+              className="assistant-tools-trigger"
+              type="button"
+              onClick={() => setIsActionPanelOpen((current) => !current)}
+            >
+              更多操作
+            </button>
+          }
+        />
       </div>
     </section>
   );

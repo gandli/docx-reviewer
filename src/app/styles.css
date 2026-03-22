@@ -277,16 +277,19 @@ textarea {
 
 .assistant-floating-tools {
   position: relative;
-  display: flex;
-  justify-content: flex-end;
+  min-height: 0;
 }
 
 .assistant-tools-trigger {
-  padding: 8px 12px;
+  margin-left: auto;
+  padding: 7px 12px;
   border: 1px solid rgba(216, 207, 193, 0.88);
   border-radius: 999px;
   background: rgba(255, 251, 244, 0.82);
   color: var(--color-text-secondary);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -340,20 +343,21 @@ textarea {
 
 .assistant-footer {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   padding-top: 14px;
   border-top: 1px solid rgba(216, 207, 193, 0.78);
 }
 
 .chat-composer {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
-.chat-composer__suggestions {
+.chat-composer__toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
 }
 
 .chat-composer__input {
