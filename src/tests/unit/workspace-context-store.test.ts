@@ -25,6 +25,19 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.workspaceTitle).toBe("文档工作台");
   });
 
+  it("hydrates preview documents from repository", async () => {
+    const repository = createMemoryWorkspaceSummaryRepository(mockWorkspaceSummary, {
+      mode: "docx",
+      source: new ArrayBuffer(8),
+    });
+    const store = createWorkspaceContextStore(repository);
+
+    await store.getState().hydrate("ws-enterprise");
+
+    expect(store.getState().previewDocument?.mode).toBe("docx");
+    expect(store.getState().previewDocument?.source.byteLength).toBe(8);
+  });
+
   it("applies suggestion and focuses current selection", () => {
     const store = createWorkspaceContextStore();
     store.getState().setSummary(mockWorkspaceSummary);
@@ -159,5 +172,51 @@ describe("workspace context store", () => {
     await store.getState().hydrate(mockWorkspaceSummary.workspaceId);
 
     expect(store.getState().summary?.workspaceTitle).toBe("文档工作台");
+  });
+
+  it("restores persisted pdf preview sources from browser storage", async () => {
+    window.localStorage.setItem(
+      `workspace-state:${mockWorkspaceSummary.workspaceId}`,
+      JSON.stringify({
+        summary: mockWorkspaceSummary,
+        previewDocument: {
+          mode: "pdf",
+          source: "data:application/pdf;base64,ZmFrZQ==",
+        },
+      }),
+    );
+
+    const repository = createBrowserWorkspaceSummaryRepository(mockWorkspaceSummary);
+    const store = createWorkspaceContextStore(repository);
+
+    await store.getState().hydrate(mockWorkspaceSummary.workspaceId);
+
+    expect(store.getState().previewDocument).toEqual({
+      mode: "pdf",
+      source: "data:application/pdf;base64,ZmFrZQ==",
+    });
+  });
+
+  it("restores persisted docx preview sources from browser storage", async () => {
+    window.localStorage.setItem(
+      `workspace-state:${mockWorkspaceSummary.workspaceId}`,
+      JSON.stringify({
+        summary: mockWorkspaceSummary,
+        previewDocument: {
+          mode: "docx",
+          source: "AQIDBA==",
+        },
+      }),
+    );
+
+    const repository = createBrowserWorkspaceSummaryRepository(mockWorkspaceSummary);
+    const store = createWorkspaceContextStore(repository);
+
+    await store.getState().hydrate(mockWorkspaceSummary.workspaceId);
+
+    expect(store.getState().previewDocument?.mode).toBe("docx");
+    expect(Array.from(new Uint8Array(store.getState().previewDocument?.source ?? new ArrayBuffer(0)))).toEqual([
+      1, 2, 3, 4,
+    ]);
   });
 });

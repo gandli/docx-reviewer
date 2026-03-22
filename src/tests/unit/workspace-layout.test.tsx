@@ -463,6 +463,41 @@ describe("workspace shell", () => {
     });
   });
 
+  it("restores the docx original preview after a page refresh", async () => {
+    const restoredBuffer = new Uint8Array([1, 2, 3, 4]).buffer;
+    window.localStorage.setItem(
+      `workspace-state:${mockWorkspaceSummary.workspaceId}`,
+      JSON.stringify({
+        summary: {
+          ...mockWorkspaceSummary,
+          activeDocumentMode: "docx",
+          activeDocumentTitle: "制度范本",
+        },
+        previewDocument: {
+          mode: "docx",
+          source: "AQIDBA==",
+        },
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("docx-document-viewer")).toBeInTheDocument();
+      expect(screen.queryByText("Word 预览需要重新导入原文件")).not.toBeInTheDocument();
+      expect(renderDocxPreviewMock).toHaveBeenCalledWith(
+        restoredBuffer,
+        expect.any(HTMLElement),
+        undefined,
+        expect.any(Object),
+      );
+    });
+  });
+
   it("shows an action popover after selecting text inside the docx preview", async () => {
     render(
       <MemoryRouter>
@@ -585,6 +620,35 @@ describe("workspace shell", () => {
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();
+  });
+
+  it("restores the pdf original preview after a page refresh", async () => {
+    window.localStorage.setItem(
+      `workspace-state:${mockWorkspaceSummary.workspaceId}`,
+      JSON.stringify({
+        summary: {
+          ...mockWorkspaceSummary,
+          activeDocumentMode: "pdf",
+          activeDocumentTitle: "制度附件",
+        },
+        previewDocument: {
+          mode: "pdf",
+          source: "data:application/pdf;base64,ZmFrZQ==",
+        },
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("PDF 原样预览 · 共 2 页")).toBeInTheDocument();
+      expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
+      expect(screen.queryByText("PDF 预览需要重新导入原文件")).not.toBeInTheDocument();
+    });
   });
 
   it("switches the assistant context after selecting a pdf page", async () => {

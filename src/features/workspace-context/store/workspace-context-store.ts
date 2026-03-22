@@ -36,21 +36,28 @@ export function createWorkspaceContextStore(
   const buildAssistantReply = (summary: WorkspaceSummary, message: string) =>
     `已记录你的要求：${message}。我会继续围绕“${summary.activeClauseTitle}”处理，并保持当前文档上下文。`;
 
-  const persist = (summary: WorkspaceSummary) => {
-    void repository?.save(summary);
-    return summary;
+  const persist = (
+    summary: WorkspaceSummary,
+    previewDocument?: WorkspacePreviewDocument,
+  ) => {
+    void repository?.save(summary, previewDocument);
+    return { summary, previewDocument };
   };
 
   return createStore<WorkspaceContextState>((set) => ({
     summary: initialSummary,
     previewDocument: undefined,
     setSummary: (summary) => {
-      set({ summary: persist(summary) });
+      const persisted = persist(summary);
+      set({ summary: persisted.summary, previewDocument: persisted.previewDocument });
     },
     hydrate: async (workspaceId) => {
-      const summary = await repository?.load(workspaceId);
-      if (summary) {
-        set({ summary });
+      const state = await repository?.load(workspaceId);
+      if (state?.summary) {
+        set({
+          summary: state.summary,
+          previewDocument: state.previewDocument,
+        });
       }
     },
     focusSelection: () =>
@@ -59,13 +66,16 @@ export function createWorkspaceContextStore(
           return state;
         }
 
-        return {
-          summary: persist({
+        const persisted = persist(
+          {
             ...state.summary,
             isSelectionFocused: true,
             updatedAt: "刚刚",
-          }),
-        };
+          },
+          state.previewDocument,
+        );
+
+        return persisted;
       }),
     selectText: ({ text, blockId, contextLabel, intent }) =>
       set((state) => {
@@ -99,8 +109,8 @@ export function createWorkspaceContextStore(
                     nextAction: "继续处理选中文本",
                   };
 
-        return {
-          summary: persist({
+        return persist(
+          {
             ...state.summary,
             activeSelectionBlockId: blockId,
             activeClauseTitle: contextLabel?.trim() || "已选文本",
@@ -111,8 +121,9 @@ export function createWorkspaceContextStore(
             currentTaskStatus: "in_progress",
             updatedAt: "刚刚",
             isSelectionFocused: true,
-          }),
-        };
+          },
+          state.previewDocument,
+        );
       }),
     applySuggestion: () =>
       set((state) => {
@@ -123,8 +134,8 @@ export function createWorkspaceContextStore(
         const [acceptedSuggestionId, ...restSuggestionIds] = state.summary.pendingSuggestionIds;
         const acceptedText = state.summary.suggestedRevisionText;
 
-        return {
-          summary: persist({
+        return persist(
+          {
             ...state.summary,
             activeClauseText: acceptedText,
             latestConclusion: `已应用建议：${acceptedText}`,
@@ -133,8 +144,9 @@ export function createWorkspaceContextStore(
             currentTaskStatus: "in_progress",
             updatedAt: "刚刚",
             isSelectionFocused: true,
-          }),
-        };
+          },
+          state.previewDocument,
+        );
       }),
     sendMessage: (message) =>
       set((state) => {
@@ -145,8 +157,8 @@ export function createWorkspaceContextStore(
         const trimmedMessage = message.trim();
         const assistantReply = buildAssistantReply(state.summary, trimmedMessage);
 
-        return {
-          summary: persist({
+        return persist(
+          {
             ...state.summary,
             lastUserIntent: trimmedMessage,
             latestConclusion: assistantReply,
@@ -166,8 +178,9 @@ export function createWorkspaceContextStore(
                 content: assistantReply,
               },
             ],
-          }),
-        };
+          },
+          state.previewDocument,
+        );
       }),
     completeAssistantTurn: ({ assistantReply, userMessage, task, nextAction }) =>
       set((state) => {
@@ -191,8 +204,8 @@ export function createWorkspaceContextStore(
           content: assistantReply.trim(),
         });
 
-        return {
-          summary: persist({
+        return persist(
+          {
             ...state.summary,
             assistantMessages: messages,
             latestConclusion: assistantReply.trim(),
@@ -200,8 +213,9 @@ export function createWorkspaceContextStore(
             nextAction: nextAction ?? "继续处理当前内容",
             currentTaskStatus: "in_progress",
             updatedAt: "刚刚",
-          }),
-        };
+          },
+          state.previewDocument,
+        );
       }),
     importDocument: (document, fileName) =>
       set((state) => {
@@ -214,20 +228,21 @@ export function createWorkspaceContextStore(
         const defaultActiveBlockId =
           document.blocks.find((block) => block.kind === "paragraph")?.id ?? document.blocks[0]?.id;
 
-        return {
-          previewDocument:
-            isPdfDocument && document.pdfSource
+        const previewDocument =
+          isPdfDocument && document.pdfSource
+            ? {
+                mode: "pdf" as const,
+                source: document.pdfSource,
+              }
+            : document.mode === "docx" && document.docxSource
               ? {
-                  mode: "pdf",
-                  source: document.pdfSource,
+                  mode: "docx" as const,
+                  source: document.docxSource,
                 }
-              : document.mode === "docx" && document.docxSource
-                ? {
-                    mode: "docx",
-                    source: document.docxSource,
-                  }
-                : undefined,
-          summary: persist({
+              : undefined;
+
+        return persist(
+          {
             ...state.summary,
             activeDocumentId: `imported-${Date.now()}`,
             activeDocumentTitle: document.title,
@@ -247,8 +262,9 @@ export function createWorkspaceContextStore(
             updatedAt: "刚刚",
             isSelectionFocused: false,
             assistantMessages: [],
-          }),
-        };
+          },
+          previewDocument,
+        );
       }),
   }));
 }
