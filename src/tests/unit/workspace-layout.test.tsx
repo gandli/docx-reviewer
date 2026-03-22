@@ -15,7 +15,7 @@ describe("workspace shell", () => {
   it("renders workspace route shell from app", () => {
     window.history.pushState({}, "", "/workspace/ws-enterprise");
     render(<App />);
-    expect(screen.getAllByText("企业文档工作区").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("文档工作台").length).toBeGreaterThan(0);
   });
 
   it("renders sidebar, document area, and assistant panel", () => {

@@ -18,7 +18,7 @@ describe("workspace context store", () => {
     await store.getState().hydrate("ws-enterprise");
 
     expect(store.getState().summary?.currentTask).toBe("revise");
-    expect(store.getState().summary?.workspaceTitle).toBe("企业文档工作区");
+    expect(store.getState().summary?.workspaceTitle).toBe("文档工作台");
   });
 
   it("applies suggestion and focuses current selection", () => {

@@ -2,7 +2,7 @@ import type { WorkspaceSummary } from "@/features/workspace-context/types/worksp
 
 export const mockWorkspaceSummary: WorkspaceSummary = {
   workspaceId: "ws-enterprise",
-  workspaceTitle: "企业文档工作区",
+  workspaceTitle: "文档工作台",
   activeDocumentId: "doc-procurement-policy",
   activeNodeId: "clause-payment",
   activeClauseTitle: "付款方式",
