@@ -48,6 +48,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
   height: 100vh;
   padding: 24px 18px 18px;
   background: linear-gradient(180deg, rgba(239, 231, 218, 0.82) 0%, rgba(232, 222, 206, 0.58) 100%);
@@ -57,6 +58,7 @@ textarea {
 }
 
 .workspace-main {
+  min-width: 0;
   height: 100vh;
   padding: 22px 24px 26px;
   background: var(--color-surface-app);
@@ -68,6 +70,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 0;
+  min-width: 0;
   height: 100vh;
   padding: 24px 18px 18px;
   background: linear-gradient(180deg, rgba(248, 244, 237, 0.72) 0%, rgba(243, 237, 227, 0.5) 100%);
@@ -282,6 +285,7 @@ textarea {
 
 .document-canvas {
   position: relative;
+  min-width: 0;
   min-height: 680px;
   padding: 36px 40px;
   border: 1px solid #dfd6c8;
@@ -316,10 +320,17 @@ textarea {
 
 .docx-document-viewer {
   min-height: 540px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .docx-preview-host {
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .docx-preview-host .docx-preview-surface {
@@ -331,12 +342,15 @@ textarea {
   flex-direction: column;
   align-items: center;
   gap: 18px;
+  width: max-content;
+  min-width: 100%;
   padding: 0 !important;
   background: transparent !important;
 }
 
 .docx-preview-host .docx {
   margin: 0 !important;
+  max-width: 100%;
   box-shadow: 0 18px 36px rgba(71, 53, 33, 0.12);
 }
 
