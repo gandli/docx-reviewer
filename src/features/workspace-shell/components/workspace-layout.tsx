@@ -11,7 +11,7 @@ type WorkspaceLayoutProps = {
   previewDocument?: WorkspacePreviewDocument;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
-  onSelectText: (payload: { text: string; blockId?: string }) => void;
+  onSelectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
   onSendMessage: (message: string) => void;
   onImportDocument: (file: File) => void | Promise<void>;
 };
@@ -31,7 +31,12 @@ export function WorkspaceLayout({
       <main className="workspace-main">
         <DocumentHeader title={summary.activeDocumentTitle} mode={summary.activeDocumentMode} />
         {summary.activeDocumentMode === "pdf" ? (
-          <PdfDocumentCanvas title={summary.activeDocumentTitle} previewDocument={previewDocument} />
+          <PdfDocumentCanvas
+            summary={summary}
+            title={summary.activeDocumentTitle}
+            previewDocument={previewDocument}
+            onSelectText={onSelectText}
+          />
         ) : (
           <DocumentCanvas summary={summary} onSelectText={onSelectText} />
         )}

@@ -1,9 +1,17 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { App } from "@/app/App";
 import { WorkspacePage } from "@/features/workspace-shell/routes/workspace-page";
 import { themeTokens } from "@/shared/constants/theme";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
+
+const { parsePdfDocumentMock } = vi.hoisted(() => ({
+  parsePdfDocumentMock: vi.fn(),
+}));
+
+vi.mock("@/services/import/pdf-document", () => ({
+  parsePdfDocument: parsePdfDocumentMock,
+}));
 
 vi.mock("react-pdf", async () => {
   const React = await import("react");
@@ -51,6 +59,7 @@ describe("workspace shell", () => {
   beforeEach(() => {
     window.localStorage.clear();
     vi.restoreAllMocks();
+    parsePdfDocumentMock.mockReset();
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -269,6 +278,30 @@ describe("workspace shell", () => {
       </MemoryRouter>,
     );
 
+    parsePdfDocumentMock.mockResolvedValue({
+      mode: "pdf",
+      title: "制度附件",
+      blocks: [
+        { id: "pdf-heading-1", kind: "heading", level: 2, pageNumber: 1, text: "第 1 页" },
+        {
+          id: "pdf-paragraph-1",
+          kind: "paragraph",
+          pageNumber: 1,
+          text: "付款安排应以验收和发票齐备为支付前提。",
+        },
+        { id: "pdf-heading-2", kind: "heading", level: 2, pageNumber: 2, text: "第 2 页" },
+        {
+          id: "pdf-paragraph-2",
+          kind: "paragraph",
+          pageNumber: 2,
+          text: "违约责任应与付款节点保持一致。",
+        },
+      ],
+      activeClauseTitle: "第 1 页",
+      activeClauseText: "付款安排应以验收和发票齐备为支付前提。",
+      pdfSource: "data:application/pdf;base64,ZmFrZQ==",
+    });
+
     const file = new File(["%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF"], "制度附件.pdf", {
       type: "application/pdf",
     });
@@ -282,10 +315,50 @@ describe("workspace shell", () => {
       expect(screen.getByText("原样预览")).toBeInTheDocument();
       expect(screen.getByText("PDF 原样预览 · 共 2 页")).toBeInTheDocument();
       expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
+      expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
+      expect(screen.getByText("付款安排应以验收和发票齐备为支付前提。")).toBeInTheDocument();
       expect(screen.getByText("导入文件 · 制度附件.pdf")).toBeInTheDocument();
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();
+  });
+
+  it("switches the assistant context after selecting a pdf page", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    parsePdfDocumentMock.mockResolvedValue({
+      mode: "pdf",
+      title: "制度附件",
+      blocks: [
+        { id: "pdf-heading-1", kind: "heading", level: 2, pageNumber: 1, text: "第 1 页" },
+        { id: "pdf-paragraph-1", kind: "paragraph", pageNumber: 1, text: "第一页正文。" },
+        { id: "pdf-heading-2", kind: "heading", level: 2, pageNumber: 2, text: "第 2 页" },
+        { id: "pdf-paragraph-2", kind: "paragraph", pageNumber: 2, text: "第二页正文。" },
+      ],
+      activeClauseTitle: "第 1 页",
+      activeClauseText: "第一页正文。",
+      pdfSource: "data:application/pdf;base64,ZmFrZQ==",
+    });
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: { files: [new File(["fake"], "制度附件.pdf", { type: "application/pdf" })] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-page-card-2")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId("pdf-page-card-2"));
+
+    await waitFor(() => {
+      expect(within(screen.getByTestId("assistant-panel")).getByText("第 2 页")).toBeInTheDocument();
+      expect(screen.getByText("第二页正文。")).toBeInTheDocument();
+      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+    });
   });
 
   it("updates the assistant context after selecting text in the document", async () => {

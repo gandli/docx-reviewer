@@ -7,7 +7,7 @@ import { RiskMarker } from "@/features/editor-draft/components/risk-marker";
 
 type DocumentCanvasProps = {
   summary: WorkspaceSummary;
-  onSelectText: (payload: { text: string; blockId?: string }) => void;
+  onSelectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
 };
 
 function getHeadingClassName(block: WorkspaceDocumentBlock) {

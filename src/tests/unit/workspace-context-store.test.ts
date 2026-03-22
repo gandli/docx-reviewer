@@ -72,9 +72,12 @@ describe("workspace context store", () => {
       {
         mode: "pdf",
         title: "付款附件",
-        blocks: [],
-        activeClauseTitle: "PDF 预览",
-        activeClauseText: "当前文档已按原样预览打开，可继续围绕整份文档发起审阅或修订。",
+        blocks: [
+          { id: "pdf-heading-1", kind: "heading", level: 2, pageNumber: 1, text: "第 1 页" },
+          { id: "pdf-paragraph-1", kind: "paragraph", pageNumber: 1, text: "付款安排正文。" },
+        ],
+        activeClauseTitle: "第 1 页",
+        activeClauseText: "付款安排正文。",
         pdfSource: "data:application/pdf;base64,ZmFrZQ==",
       },
       "付款附件.pdf",
@@ -82,6 +85,7 @@ describe("workspace context store", () => {
 
     expect(store.getState().summary?.activeDocumentMode).toBe("pdf");
     expect(store.getState().summary?.activeDocumentTitle).toBe("付款附件");
+    expect(store.getState().summary?.activeSelectionBlockId).toBe("pdf-paragraph-1");
     expect(store.getState().summary?.assistantMessages).toHaveLength(1);
     expect(store.getState().previewDocument?.mode).toBe("pdf");
   });

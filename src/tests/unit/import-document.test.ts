@@ -4,14 +4,22 @@ import { importDocumentFile } from "@/services/import/import-document";
 const { parseDocxDocumentMock } = vi.hoisted(() => ({
   parseDocxDocumentMock: vi.fn(),
 }));
+const { parsePdfDocumentMock } = vi.hoisted(() => ({
+  parsePdfDocumentMock: vi.fn(),
+}));
 
 vi.mock("@/services/import/docx-document", () => ({
   parseDocxDocument: parseDocxDocumentMock,
 }));
 
+vi.mock("@/services/import/pdf-document", () => ({
+  parsePdfDocument: parsePdfDocumentMock,
+}));
+
 describe("import document", () => {
   beforeEach(() => {
     parseDocxDocumentMock.mockReset();
+    parsePdfDocumentMock.mockReset();
   });
 
   it("routes docx files to the docx parser", async () => {
@@ -36,8 +44,21 @@ describe("import document", () => {
   it("routes pdf files to the pdf parser", async () => {
     const file = new File(["fake"], "附件.pdf", { type: "application/pdf" });
 
+    parsePdfDocumentMock.mockResolvedValue({
+      mode: "pdf",
+      title: "附件",
+      blocks: [
+        { id: "pdf-heading-1", kind: "heading", level: 2, pageNumber: 1, text: "第 1 页" },
+        { id: "pdf-paragraph-1", kind: "paragraph", pageNumber: 1, text: "付款方式..." },
+      ],
+      activeClauseTitle: "第 1 页",
+      activeClauseText: "付款方式...",
+      pdfSource: "data:application/pdf;base64,ZmFrZQ==",
+    });
+
     const result = await importDocumentFile(file);
 
+    expect(parsePdfDocumentMock).toHaveBeenCalledWith(file);
     expect(result.mode).toBe("pdf");
     expect(result.title).toBe("附件");
     expect(result.pdfSource).toContain("data:application/pdf");

@@ -12,7 +12,7 @@ export type WorkspaceContextState = {
   setSummary: (summary: WorkspaceSummary) => void;
   hydrate: (workspaceId: string) => Promise<void>;
   focusSelection: () => void;
-  selectText: (payload: { text: string; blockId?: string }) => void;
+  selectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
   applySuggestion: () => void;
   sendMessage: (message: string) => void;
   importDocument: (document: WorkspaceImportedDocument, fileName: string) => void;
@@ -56,7 +56,7 @@ export function createWorkspaceContextStore(
           }),
         };
       }),
-    selectText: ({ text, blockId }) =>
+    selectText: ({ text, blockId, contextLabel }) =>
       set((state) => {
         if (!state.summary || !text.trim()) {
           return state;
@@ -68,7 +68,7 @@ export function createWorkspaceContextStore(
           summary: persist({
             ...state.summary,
             activeSelectionBlockId: blockId,
-            activeClauseTitle: "已选文本",
+            activeClauseTitle: contextLabel?.trim() || "已选文本",
             activeClauseText: selectedText,
             latestConclusion: "已切换到你刚刚选中的内容，可以继续围绕这段文字处理。",
             nextAction: "继续处理选中文本",
@@ -141,6 +141,8 @@ export function createWorkspaceContextStore(
 
         const importedReply = `已导入文档《${document.title}》，可以继续生成、审阅或修订。`;
         const isPdfDocument = document.mode === "pdf";
+        const defaultActiveBlockId =
+          document.blocks.find((block) => block.kind === "paragraph")?.id ?? document.blocks[0]?.id;
 
         return {
           previewDocument:
@@ -155,9 +157,7 @@ export function createWorkspaceContextStore(
             activeDocumentId: `imported-${Date.now()}`,
             activeDocumentTitle: document.title,
             activeDocumentMode: document.mode,
-            activeSelectionBlockId: isPdfDocument
-              ? undefined
-              : document.blocks.find((block) => block.kind === "paragraph")?.id,
+            activeSelectionBlockId: defaultActiveBlockId,
             activeClauseTitle: document.activeClauseTitle,
             activeClauseText: document.activeClauseText,
             suggestedRevisionText: "",
@@ -169,7 +169,7 @@ export function createWorkspaceContextStore(
             lastUserIntent: `导入文档 ${fileName}`,
             documentBlocks: document.blocks,
             updatedAt: "刚刚",
-            isSelectionFocused: isPdfDocument,
+            isSelectionFocused: false,
             assistantMessages: [
               {
                 id: "assistant-1",

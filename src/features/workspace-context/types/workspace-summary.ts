@@ -11,6 +11,7 @@ export type WorkspaceDocumentBlock = {
   kind: "heading" | "paragraph";
   text: string;
   level?: 1 | 2 | 3;
+  pageNumber?: number;
 };
 
 export type WorkspaceDocumentMode = "structured" | "pdf";
