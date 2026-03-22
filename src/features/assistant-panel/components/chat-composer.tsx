@@ -33,11 +33,25 @@ export function ChatComposer({
         <span>{localModelLabel}</span>
         {localModelActionLabel && onLocalModelAction ? (
           <button
-            className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-[var(--color-text-secondary)]"
+            aria-label={localModelActionLabel}
+            className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.78)] text-[var(--color-text-secondary)] transition hover:border-[rgba(181,142,83,0.42)] hover:bg-[rgba(255,251,244,0.96)]"
             type="button"
             onClick={onLocalModelAction}
           >
-            {localModelActionLabel}
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 3.25a1.2 1.2 0 0 1 1.18.97l.15.77a5.2 5.2 0 0 1 1.08.45l.66-.43a1.2 1.2 0 0 1 1.51.14l.28.28a1.2 1.2 0 0 1 .14 1.5l-.43.67c.2.35.35.72.46 1.1l.76.14A1.2 1.2 0 0 1 17 10a1.2 1.2 0 0 1-.97 1.18l-.77.15a5.2 5.2 0 0 1-.45 1.08l.43.66a1.2 1.2 0 0 1-.14 1.51l-.28.28a1.2 1.2 0 0 1-1.5.14l-.67-.43c-.35.2-.72.35-1.1.46l-.14.76A1.2 1.2 0 0 1 10 17a1.2 1.2 0 0 1-1.18-.97l-.15-.77a5.2 5.2 0 0 1-1.08-.45l-.66.43a1.2 1.2 0 0 1-1.51-.14l-.28-.28a1.2 1.2 0 0 1-.14-1.5l.43-.67a5.2 5.2 0 0 1-.46-1.1l-.76-.14A1.2 1.2 0 0 1 3 10c0-.58.42-1.08.97-1.18l.77-.15c.1-.37.25-.73.45-1.08l-.43-.66a1.2 1.2 0 0 1 .14-1.51l.28-.28a1.2 1.2 0 0 1 1.5-.14l.67.43c.35-.2.72-.35 1.1-.46l.14-.76A1.2 1.2 0 0 1 10 3.25Z"
+                stroke="currentColor"
+                strokeWidth="1.2"
+              />
+              <circle cx="10" cy="10" r="2.4" stroke="currentColor" strokeWidth="1.2" />
+            </svg>
           </button>
         ) : null}
       </div>
