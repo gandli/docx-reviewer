@@ -21,6 +21,8 @@ type WorkspaceLayoutProps = {
   }) => void;
   onSendMessage: (message: string) => void;
   onImportDocument: (file: File) => void | Promise<void>;
+  onExport: () => void;
+  onOpenSettings: () => void;
   localModelLabel: string;
   localModelActionLabel?: string;
   onLocalModelAction?: () => void;
@@ -35,6 +37,8 @@ export function WorkspaceLayout({
   onSelectText,
   onSendMessage,
   onImportDocument,
+  onExport,
+  onOpenSettings,
   localModelLabel,
   localModelActionLabel,
   onLocalModelAction,
@@ -55,6 +59,8 @@ export function WorkspaceLayout({
       <WorkspaceSidebar
         summary={summary}
         onImportDocument={onImportDocument}
+        onExport={onExport}
+        onOpenSettings={onOpenSettings}
         isCollapsed={isLeftCollapsed}
         onToggleCollapse={() => setIsLeftCollapsed((current) => !current)}
       />

@@ -10,6 +10,10 @@ export type WorkspaceContextState = {
   summary?: WorkspaceSummary;
   previewDocument?: WorkspacePreviewDocument;
   setSummary: (summary: WorkspaceSummary) => void;
+  replaceWorkspace: (
+    summary: WorkspaceSummary,
+    previewDocument?: WorkspacePreviewDocument,
+  ) => void;
   hydrate: (workspaceId: string) => Promise<void>;
   focusSelection: () => void;
   selectText: (payload: {
@@ -50,6 +54,10 @@ export function createWorkspaceContextStore(
     setSummary: (summary) => {
       const persisted = persist(summary);
       set({ summary: persisted.summary, previewDocument: persisted.previewDocument });
+    },
+    replaceWorkspace: (summary, previewDocument) => {
+      const persisted = persist(summary, previewDocument);
+      set(persisted);
     },
     hydrate: async (workspaceId) => {
       const state = await repository?.load(workspaceId);

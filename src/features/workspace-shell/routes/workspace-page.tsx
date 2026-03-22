@@ -4,6 +4,7 @@ import { WorkspaceLayout } from "@/features/workspace-shell/components/workspace
 import { createWorkspaceContextStore } from "@/features/workspace-context/store/workspace-context-store";
 import { createBrowserWorkspaceSummaryRepository } from "@/services/persistence/repositories/workspace-summary-repository";
 import { importDocumentFile } from "@/services/import/import-document";
+import { downloadWorkspaceExport, type WorkspaceExportFormat } from "@/services/export/workspace-export";
 import {
   ensureLocalLLM,
   getAvailableLocalLLMModels,
@@ -17,6 +18,8 @@ import {
 } from "@/services/ai/local-llm";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 import { LocalModelSettingsModal } from "@/features/assistant-panel/components/local-model-settings-modal";
+import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/workspace-settings-modal";
+import { WorkspaceExportModal } from "@/features/workspace-shell/components/workspace-export-modal";
 
 type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "responding" | "error";
 
@@ -40,6 +43,8 @@ export function WorkspacePage() {
   const modelOptions = useMemo(() => getAvailableLocalLLMModels(), []);
   const [selectedModelId, setSelectedModelId] = useState(() => loadSelectedLocalLLMModelId());
   const [isModelSettingsOpen, setIsModelSettingsOpen] = useState(false);
+  const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const selectedModel = useMemo(
     () =>
       modelOptions.find((model) => model.id === selectedModelId) ??
@@ -203,6 +208,33 @@ export function WorkspacePage() {
     await ensureModelReady(modelId);
   };
 
+  const handleSaveWorkspaceSettings = (workspaceTitle: string) => {
+    const nextTitle = workspaceTitle.trim() || mockWorkspaceSummary.workspaceTitle;
+    store.getState().replaceWorkspace(
+      {
+        ...summary,
+        workspaceTitle: nextTitle,
+        updatedAt: "刚刚",
+      },
+      workspaceState.previewDocument,
+    );
+    setIsWorkspaceSettingsOpen(false);
+  };
+
+  const handleClearWorkspaceRecords = async () => {
+    await repository.clear(workspaceId);
+    store.setState({
+      summary: mockWorkspaceSummary,
+      previewDocument: undefined,
+    });
+    setIsWorkspaceSettingsOpen(false);
+  };
+
+  const handleExportWorkspace = (format: WorkspaceExportFormat) => {
+    downloadWorkspaceExport(summary, format);
+    setIsExportModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen">
       <WorkspaceLayout
@@ -217,12 +249,29 @@ export function WorkspacePage() {
           void handleSendMessage(message);
         }}
         onImportDocument={handleImportDocument}
+        onExport={() => setIsExportModalOpen(true)}
+        onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
         localModelLabel={localModelDetail}
         localModelActionLabel="模型设置"
         onLocalModelAction={() => {
           setIsModelSettingsOpen(true);
         }}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
+      />
+      <WorkspaceSettingsModal
+        isOpen={isWorkspaceSettingsOpen}
+        workspaceTitle={summary.workspaceTitle}
+        onClose={() => setIsWorkspaceSettingsOpen(false)}
+        onSave={handleSaveWorkspaceSettings}
+        onClear={() => {
+          void handleClearWorkspaceRecords();
+        }}
+      />
+      <WorkspaceExportModal
+        isOpen={isExportModalOpen}
+        documentTitle={summary.activeDocumentTitle}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExportWorkspace}
       />
       <LocalModelSettingsModal
         isOpen={isModelSettingsOpen}

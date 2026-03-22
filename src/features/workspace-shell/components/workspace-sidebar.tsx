@@ -7,6 +7,8 @@ import { WorkspaceEvidenceList } from "@/features/workspace-shell/components/wor
 type WorkspaceSidebarProps = {
   summary: WorkspaceSummary;
   onImportDocument: (file: File) => void | Promise<void>;
+  onExport: () => void;
+  onOpenSettings: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 };
@@ -14,6 +16,8 @@ type WorkspaceSidebarProps = {
 export function WorkspaceSidebar({
   summary,
   onImportDocument,
+  onExport,
+  onOpenSettings,
   isCollapsed = false,
   onToggleCollapse,
 }: WorkspaceSidebarProps) {
@@ -109,14 +113,22 @@ export function WorkspaceSidebar({
             <span className="font-sans text-[var(--color-text-muted)]/50" aria-hidden="true">
               ·
             </span>
-            <button className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]" type="button">
+            <button
+              className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]"
+              type="button"
+              onClick={onExport}
+            >
               导出
             </button>
             <span className="font-sans text-[var(--color-text-muted)]/50" aria-hidden="true">
               ·
             </span>
-            <button className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]" type="button">
-              工作区设置
+            <button
+              className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]"
+              type="button"
+              onClick={onOpenSettings}
+            >
+              设置
             </button>
           </div>
         </>

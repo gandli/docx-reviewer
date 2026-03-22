@@ -9,6 +9,7 @@ export interface WorkspaceSummaryRepository {
     previewDocument?: WorkspacePreviewDocument;
   }>;
   save(summary: WorkspaceSummary, previewDocument?: WorkspacePreviewDocument): Promise<void>;
+  clear(workspaceId: string): Promise<void>;
 }
 
 type PersistedWorkspaceState = {
@@ -126,6 +127,12 @@ export function createMemoryWorkspaceSummaryRepository(
       current = summary;
       currentPreviewDocument = previewDocument;
     },
+    async clear(workspaceId) {
+      if (current?.workspaceId === workspaceId) {
+        current = undefined;
+        currentPreviewDocument = undefined;
+      }
+    },
   };
 }
 
@@ -188,6 +195,12 @@ export function createBrowserWorkspaceSummaryRepository(
       );
       storage?.setItem(`workspace-summary:${summary.workspaceId}`, JSON.stringify(summary));
       await memory.save(summary, previewDocument);
+    },
+    async clear(workspaceId) {
+      const storage = getStorage();
+      storage?.removeItem(`workspace-state:${workspaceId}`);
+      storage?.removeItem(`workspace-summary:${workspaceId}`);
+      await memory.clear(workspaceId);
     },
   };
 }

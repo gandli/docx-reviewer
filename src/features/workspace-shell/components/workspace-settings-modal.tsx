@@ -1,0 +1,105 @@
+import { useEffect, useState } from "react";
+
+type WorkspaceSettingsModalProps = {
+  isOpen: boolean;
+  workspaceTitle: string;
+  onClose: () => void;
+  onSave: (workspaceTitle: string) => void;
+  onClear: () => void;
+};
+
+export function WorkspaceSettingsModal({
+  isOpen,
+  workspaceTitle,
+  onClose,
+  onSave,
+  onClear,
+}: WorkspaceSettingsModalProps) {
+  const [draftTitle, setDraftTitle] = useState(workspaceTitle);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    setDraftTitle(workspaceTitle);
+  }, [isOpen, workspaceTitle]);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(17,14,10,0.45)] px-6 py-10 backdrop-blur-sm">
+      <section className="flex w-full max-w-2xl flex-col overflow-hidden rounded-[28px] border border-[rgba(216,207,193,0.9)] bg-[rgba(251,248,242,0.98)] shadow-[0_28px_80px_rgba(41,31,21,0.22)]">
+        <header className="flex items-start justify-between gap-4 border-b border-[rgba(216,207,193,0.72)] px-6 py-5">
+          <div>
+            <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
+              Workspace
+            </div>
+            <h2 className="mt-2 text-[1.35rem] font-bold text-[var(--color-text-primary)]">
+              工作区设置
+            </h2>
+            <p className="mt-1 font-sans text-[0.9rem] leading-[1.6] text-[var(--color-text-muted)]">
+              这里可以调整当前工作区名称，或清空这一个工作区在本机浏览器里的保存记录。
+            </p>
+          </div>
+          <button
+            className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-3 py-2 font-sans text-[0.82rem] text-[var(--color-text-secondary)]"
+            type="button"
+            onClick={onClose}
+          >
+            关闭
+          </button>
+        </header>
+
+        <div className="grid gap-5 px-6 py-5">
+          <label className="grid gap-2">
+            <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
+              工作区名称
+            </span>
+            <input
+              aria-label="工作区名称"
+              className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.95rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+              value={draftTitle}
+              onChange={(event) => setDraftTitle(event.target.value)}
+            />
+          </label>
+
+          <div className="rounded-2xl border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.9)] px-4 py-4">
+            <div className="text-[0.96rem] font-semibold text-[var(--color-text-primary)]">
+              清空当前工作区记录
+            </div>
+            <div className="mt-1 font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
+              只会删除这个工作区保存在本机浏览器里的内容，不影响你的模型设置。
+            </div>
+            <button
+              className="mt-4 cursor-pointer rounded-full border border-[rgba(191,132,104,0.32)] bg-[rgba(255,245,240,0.92)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[rgba(143,83,52,0.96)]"
+              type="button"
+              onClick={onClear}
+            >
+              清空当前工作区记录
+            </button>
+          </div>
+        </div>
+
+        <footer className="flex items-center justify-end gap-3 border-t border-[rgba(216,207,193,0.72)] px-6 py-4">
+          <button
+            className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
+            type="button"
+            onClick={onClose}
+          >
+            取消
+          </button>
+          <button
+            className="cursor-pointer rounded-full border-0 bg-[rgba(47,38,29,0.94)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[#fffdf9]"
+            type="button"
+            onClick={() => onSave(draftTitle)}
+          >
+            保存设置
+          </button>
+        </footer>
+      </section>
+    </div>
+  );
+}

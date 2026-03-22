@@ -129,6 +129,9 @@ vi.mock("react-pdf", async () => {
 
 describe("workspace shell", () => {
   const scrollIntoViewMock = vi.fn();
+  const createObjectURLMock = vi.fn(() => "blob:workspace-export");
+  const revokeObjectURLMock = vi.fn();
+  const anchorClickMock = vi.fn();
   const getActiveClauseHeading = () =>
     screen
       .getAllByText("付款方式")
@@ -166,6 +169,21 @@ describe("workspace shell", () => {
         observe() {}
         disconnect() {}
       },
+    });
+    Object.defineProperty(globalThis.URL, "createObjectURL", {
+      configurable: true,
+      writable: true,
+      value: createObjectURLMock,
+    });
+    Object.defineProperty(globalThis.URL, "revokeObjectURL", {
+      configurable: true,
+      writable: true,
+      value: revokeObjectURLMock,
+    });
+    Object.defineProperty(HTMLAnchorElement.prototype, "click", {
+      configurable: true,
+      writable: true,
+      value: anchorClickMock,
     });
   });
 
@@ -321,6 +339,79 @@ describe("workspace shell", () => {
 
     expect(await screen.findByText("付款分三期执行，验收通过后支付尾款。")).toBeInTheDocument();
     expect(await screen.findByText(/已从本地恢复付款条款修订结果/)).toBeInTheDocument();
+  });
+
+  it("opens settings, updates the workspace title, and persists it", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    expect(screen.getByText("工作区设置")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("工作区名称"), {
+      target: { value: "法务文档台" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText("法务文档台").length).toBeGreaterThan(0);
+      expect(
+        JSON.parse(window.localStorage.getItem("workspace-state:ws-enterprise") ?? "{}").summary
+          .workspaceTitle,
+      ).toBe("法务文档台");
+    });
+  });
+
+  it("clears persisted workspace records from settings", async () => {
+    window.localStorage.setItem(
+      "workspace-state:ws-enterprise",
+      JSON.stringify({
+        summary: {
+          ...mockWorkspaceSummary,
+          workspaceTitle: "法务文档台",
+          activeDocumentTitle: "已恢复文档",
+        },
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByRole("button", { name: "清空当前工作区记录" }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText("文档工作台").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
+      expect(window.localStorage.getItem("workspace-state:ws-enterprise")).toBeNull();
+      expect(window.localStorage.getItem("workspace-summary:ws-enterprise")).toBeNull();
+    });
+  });
+
+  it("exports the current workspace as markdown", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "导出" }));
+    expect(screen.getByText("导出当前文档")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Markdown (.md)"));
+    fireEvent.click(screen.getByRole("button", { name: "开始导出" }));
+
+    await waitFor(() => {
+      expect(createObjectURLMock).toHaveBeenCalled();
+      expect(anchorClickMock).toHaveBeenCalled();
+      expect(revokeObjectURLMock).toHaveBeenCalledWith("blob:workspace-export");
+    });
   });
 
   it("sends a chat message and appends it to the assistant thread", async () => {
