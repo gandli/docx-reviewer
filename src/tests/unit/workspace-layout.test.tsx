@@ -226,6 +226,28 @@ describe("workspace shell", () => {
     expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
   });
 
+  it("collapses and expands both side panels", () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "收起左栏" }));
+    expect(screen.queryByText("Workspace")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "展开左栏" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "收起右栏" }));
+    expect(screen.queryByText("Assistant")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "展开右栏" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "展开左栏" }));
+    fireEvent.click(screen.getByRole("button", { name: "展开右栏" }));
+
+    expect(screen.getByText("Workspace")).toBeInTheDocument();
+    expect(screen.getByText("Assistant")).toBeInTheDocument();
+  });
+
   it("renders document header, highlighted active clause, and local model controls", () => {
     render(
       <MemoryRouter>
@@ -371,6 +393,7 @@ describe("workspace shell", () => {
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
       expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
       expect(screen.getByText("可以直接选中内容开始处理，或在右侧输入你的要求。")).toBeInTheDocument();
+      expect(screen.getByTestId("document-canvas")).toHaveClass("bg-white");
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();

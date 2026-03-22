@@ -124,7 +124,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
 
   return (
     <section
-      className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(255,255,255,0.95)),var(--color-surface-paper)] px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
+      className="relative min-w-0 rounded-[22px] border border-[#dfd6c8] bg-white px-10 py-9 shadow-[0_24px_54px_rgba(71,53,33,0.1)]"
       data-testid="document-canvas"
     >
       <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">

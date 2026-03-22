@@ -12,6 +12,8 @@ type AssistantPanelProps = {
   localModelActionLabel?: string;
   onLocalModelAction?: () => void;
   isLocalModelBusy?: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
 export function AssistantPanel({
@@ -23,31 +25,47 @@ export function AssistantPanel({
   localModelActionLabel,
   onLocalModelAction,
   isLocalModelBusy = false,
+  isCollapsed = false,
+  onToggleCollapse,
 }: AssistantPanelProps) {
   return (
     <section
-      className="flex h-screen min-w-0 flex-col overflow-hidden border-l border-[var(--color-border-soft)] bg-[linear-gradient(180deg,rgba(248,244,237,0.72)_0%,rgba(243,237,227,0.5)_100%)] px-[18px] pt-6 pb-[18px] max-[980px]:h-auto max-[980px]:border-l-0 max-[980px]:border-t"
+      className={`flex h-screen min-w-0 flex-col overflow-hidden border-l border-[var(--color-border-soft)] bg-[linear-gradient(180deg,rgba(248,244,237,0.72)_0%,rgba(243,237,227,0.5)_100%)] pt-6 pb-[18px] max-[980px]:h-auto max-[980px]:border-l-0 max-[980px]:border-t ${
+        isCollapsed ? "items-center px-3" : "px-[18px]"
+      }`}
       data-testid="assistant-panel"
     >
-      <AssistantContextHeader summary={summary} />
-      <div
-        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pt-4 pb-3"
-        data-scroll-region="true"
+      <button
+        aria-label={isCollapsed ? "展开右栏" : "收起右栏"}
+        className="mb-3 cursor-pointer rounded-full border border-[rgba(216,207,193,0.9)] bg-[rgba(255,251,244,0.82)] px-3 py-2 font-sans text-[0.8rem] font-semibold text-[var(--color-text-secondary)]"
+        type="button"
+        onClick={onToggleCollapse}
       >
-        <AssistantMessageList
-          messages={summary.assistantMessages}
-          latestConclusion={summary.latestConclusion}
-        />
-      </div>
-      <div className="grid gap-[10px] border-t border-[rgba(216,207,193,0.78)] pt-[14px]">
-        <ChatComposer
-          onSendMessage={onSendMessage}
-          localModelLabel={localModelLabel}
-          localModelActionLabel={localModelActionLabel}
-          onLocalModelAction={onLocalModelAction}
-          isBusy={isLocalModelBusy}
-        />
-      </div>
+        {isCollapsed ? "展开" : "收起"}
+      </button>
+      {!isCollapsed ? (
+        <>
+          <AssistantContextHeader summary={summary} />
+          <div
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pt-4 pb-3"
+            data-scroll-region="true"
+          >
+            <AssistantMessageList
+              messages={summary.assistantMessages}
+              latestConclusion={summary.latestConclusion}
+            />
+          </div>
+          <div className="grid gap-[10px] border-t border-[rgba(216,207,193,0.78)] pt-[14px]">
+            <ChatComposer
+              onSendMessage={onSendMessage}
+              localModelLabel={localModelLabel}
+              localModelActionLabel={localModelActionLabel}
+              onLocalModelAction={onLocalModelAction}
+              isBusy={isLocalModelBusy}
+            />
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }

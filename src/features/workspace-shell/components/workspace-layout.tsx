@@ -1,4 +1,5 @@
 import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
+import { useState } from "react";
 import { WorkspaceSidebar } from "@/features/workspace-shell/components/workspace-sidebar";
 import { DocumentHeader } from "@/features/editor-draft/components/document-header";
 import { DocumentCanvas } from "@/features/editor-draft/components/document-canvas";
@@ -39,9 +40,24 @@ export function WorkspaceLayout({
   onLocalModelAction,
   isLocalModelBusy,
 }: WorkspaceLayoutProps) {
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
+  const desktopGridColumns = isLeftCollapsed
+    ? isRightCollapsed
+      ? "lg:grid-cols-[72px_minmax(0,1fr)_72px]"
+      : "lg:grid-cols-[72px_minmax(0,1fr)_24%]"
+    : isRightCollapsed
+      ? "lg:grid-cols-[22%_minmax(0,1fr)_72px]"
+      : "lg:grid-cols-[22%_54%_24%]";
+
   return (
-    <div className="grid h-screen overflow-hidden bg-[var(--color-surface-app)] max-[1180px]:grid-cols-[24%_52%_24%] max-[980px]:grid-cols-1 lg:grid-cols-[22%_54%_24%]">
-      <WorkspaceSidebar summary={summary} onImportDocument={onImportDocument} />
+    <div className={`grid h-screen overflow-hidden bg-[var(--color-surface-app)] max-[1180px]:grid-cols-[24%_52%_24%] max-[980px]:grid-cols-1 ${desktopGridColumns}`}>
+      <WorkspaceSidebar
+        summary={summary}
+        onImportDocument={onImportDocument}
+        isCollapsed={isLeftCollapsed}
+        onToggleCollapse={() => setIsLeftCollapsed((current) => !current)}
+      />
       <main
         className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-6 pt-5 pb-6 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
         data-scroll-region="true"
@@ -78,6 +94,8 @@ export function WorkspaceLayout({
         localModelActionLabel={localModelActionLabel}
         onLocalModelAction={onLocalModelAction}
         isLocalModelBusy={isLocalModelBusy}
+        isCollapsed={isRightCollapsed}
+        onToggleCollapse={() => setIsRightCollapsed((current) => !current)}
       />
     </div>
   );

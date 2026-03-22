@@ -7,9 +7,16 @@ import { WorkspaceEvidenceList } from "@/features/workspace-shell/components/wor
 type WorkspaceSidebarProps = {
   summary: WorkspaceSummary;
   onImportDocument: (file: File) => void | Promise<void>;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 };
 
-export function WorkspaceSidebar({ summary, onImportDocument }: WorkspaceSidebarProps) {
+export function WorkspaceSidebar({
+  summary,
+  onImportDocument,
+  isCollapsed = false,
+  onToggleCollapse,
+}: WorkspaceSidebarProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const groups = [
     {
@@ -29,26 +36,77 @@ export function WorkspaceSidebar({ summary, onImportDocument }: WorkspaceSidebar
 
   return (
     <aside
-      className="flex h-screen min-w-0 flex-col gap-5 overflow-x-hidden overflow-y-auto border-r border-[var(--color-border-soft)] bg-[linear-gradient(180deg,rgba(239,231,218,0.82)_0%,rgba(232,222,206,0.58)_100%)] px-[18px] pt-6 pb-[18px] max-[980px]:h-auto max-[980px]:border-r-0 max-[980px]:border-b"
+      className={`flex h-screen min-w-0 flex-col overflow-x-hidden overflow-y-auto border-r border-[var(--color-border-soft)] bg-[linear-gradient(180deg,rgba(239,231,218,0.82)_0%,rgba(232,222,206,0.58)_100%)] pt-6 pb-[18px] max-[980px]:h-auto max-[980px]:border-r-0 max-[980px]:border-b ${
+        isCollapsed ? "items-center px-3" : "gap-5 px-[18px]"
+      }`}
       data-testid="workspace-sidebar"
       data-scroll-region="true"
     >
-      <div>
-        <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
-          Workspace
-        </div>
-        <div className="mt-2 mb-1 text-[1.15rem] leading-[1.25] font-bold text-[var(--color-text-primary)]">
-          {summary.workspaceTitle}
-        </div>
-        <div className="font-sans text-[0.85rem] leading-[1.5] text-[var(--color-text-muted)]">
-          最近更新：{summary.updatedAt}
-        </div>
-      </div>
+      <button
+        aria-label={isCollapsed ? "展开左栏" : "收起左栏"}
+        className="mb-3 cursor-pointer rounded-full border border-[rgba(216,207,193,0.9)] bg-[rgba(255,251,244,0.82)] px-3 py-2 font-sans text-[0.8rem] font-semibold text-[var(--color-text-secondary)]"
+        type="button"
+        onClick={onToggleCollapse}
+      >
+        {isCollapsed ? "展开" : "收起"}
+      </button>
 
-      <WorkspaceAssetGroups groups={groups} />
-      <WorkspaceEvidenceList evidence={summary.recentEvidenceRefs} />
+      {!isCollapsed ? (
+        <>
+          <div>
+            <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
+              Workspace
+            </div>
+            <div className="mt-2 mb-1 text-[1.15rem] leading-[1.25] font-bold text-[var(--color-text-primary)]">
+              {summary.workspaceTitle}
+            </div>
+            <div className="font-sans text-[0.85rem] leading-[1.5] text-[var(--color-text-muted)]">
+              最近更新：{summary.updatedAt}
+            </div>
+          </div>
 
-      <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-[rgba(216,207,193,0.82)] pt-4">
+          <WorkspaceAssetGroups groups={groups} />
+          <WorkspaceEvidenceList evidence={summary.recentEvidenceRefs} />
+
+          <div className="mt-auto flex flex-wrap items-center gap-2 border-t border-[rgba(216,207,193,0.82)] pt-4">
+            <input
+              ref={fileInputRef}
+              className="hidden"
+              data-testid="workspace-import-input"
+              type="file"
+              accept=".txt,.md,.docx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={(event) => {
+                const [file] = Array.from(event.target.files ?? []);
+                if (!file) {
+                  return;
+                }
+
+                void onImportDocument(file);
+                event.currentTarget.value = "";
+              }}
+            />
+            <button
+              className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              导入
+            </button>
+            <span className="font-sans text-[var(--color-text-muted)]/50" aria-hidden="true">
+              ·
+            </span>
+            <button className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]" type="button">
+              导出
+            </button>
+            <span className="font-sans text-[var(--color-text-muted)]/50" aria-hidden="true">
+              ·
+            </span>
+            <button className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]" type="button">
+              工作区设置
+            </button>
+          </div>
+        </>
+      ) : (
         <input
           ref={fileInputRef}
           className="hidden"
@@ -65,26 +123,7 @@ export function WorkspaceSidebar({ summary, onImportDocument }: WorkspaceSidebar
             event.currentTarget.value = "";
           }}
         />
-        <button
-          className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]"
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          导入
-        </button>
-        <span className="font-sans text-[var(--color-text-muted)]/50" aria-hidden="true">
-          ·
-        </span>
-        <button className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]" type="button">
-          导出
-        </button>
-        <span className="font-sans text-[var(--color-text-muted)]/50" aria-hidden="true">
-          ·
-        </span>
-        <button className="cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.84rem] text-[var(--color-text-muted)]" type="button">
-          工作区设置
-        </button>
-      </div>
+      )}
     </aside>
   );
 }
