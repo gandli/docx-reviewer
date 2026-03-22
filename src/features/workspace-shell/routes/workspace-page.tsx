@@ -6,11 +6,17 @@ import { createBrowserWorkspaceSummaryRepository } from "@/services/persistence/
 import { importDocumentFile } from "@/services/import/import-document";
 import {
   ensureLocalLLM,
+  getAvailableLocalLLMModels,
   getLocalLLMModelId,
+  getLoadedLocalLLMModelId,
+  getDefaultLocalLLMModelId,
   isLocalLLMSupported,
+  loadSelectedLocalLLMModelId,
   runLocalLLMTask,
+  saveSelectedLocalLLMModelId,
 } from "@/services/ai/local-llm";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
+import { LocalModelSettingsModal } from "@/features/assistant-panel/components/local-model-settings-modal";
 
 type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "responding" | "error";
 
@@ -31,12 +37,21 @@ export function WorkspacePage() {
 
   const workspaceState = useSyncExternalStore(store.subscribe, () => store.getState());
   const summary = workspaceState.summary ?? mockWorkspaceSummary;
+  const modelOptions = useMemo(() => getAvailableLocalLLMModels(), []);
+  const [selectedModelId, setSelectedModelId] = useState(() => loadSelectedLocalLLMModelId());
+  const [isModelSettingsOpen, setIsModelSettingsOpen] = useState(false);
+  const selectedModel = useMemo(
+    () =>
+      modelOptions.find((model) => model.id === selectedModelId) ??
+      modelOptions.find((model) => model.id === getDefaultLocalLLMModelId()),
+    [modelOptions, selectedModelId],
+  );
   const [localModelStatus, setLocalModelStatus] = useState<LocalModelStatus>(() =>
     isLocalLLMSupported() ? "idle" : "unsupported",
   );
   const [localModelDetail, setLocalModelDetail] = useState(() =>
     isLocalLLMSupported()
-      ? "本地模型未加载。需要时会自动启动。"
+      ? `当前模型：${getLocalLLMModelId(selectedModelId)}，尚未加载。需要时会自动启动。`
       : "当前浏览器不支持 WebGPU，本地模型无法运行。",
   );
 
@@ -45,7 +60,35 @@ export function WorkspacePage() {
     setLocalModelDetail(`本地模型加载中 ${Math.round(progress.progress * 100)}% · ${progress.text}`);
   };
 
-  const ensureModelReady = async () => {
+  useEffect(() => {
+    if (!selectedModel) {
+      return;
+    }
+
+    const activeModelId = getLoadedLocalLLMModelId();
+
+    if (!isLocalLLMSupported()) {
+      setLocalModelDetail("当前浏览器不支持 WebGPU，本地模型无法运行。");
+      return;
+    }
+
+    if (localModelStatus === "ready" && activeModelId === selectedModel.id) {
+      setLocalModelDetail(`本地模型已就绪 · ${selectedModel.label}`);
+      return;
+    }
+
+    if (localModelStatus === "loading" || localModelStatus === "responding") {
+      return;
+    }
+
+    setLocalModelDetail(`当前模型：${selectedModel.label}，尚未加载。需要时会自动启动。`);
+  }, [localModelStatus, selectedModel]);
+
+  const ensureModelReady = async (modelId = selectedModelId) => {
+    const model =
+      modelOptions.find((candidate) => candidate.id === modelId) ??
+      modelOptions.find((candidate) => candidate.id === getDefaultLocalLLMModelId());
+
     if (!isLocalLLMSupported()) {
       setLocalModelStatus("unsupported");
       setLocalModelDetail("当前浏览器不支持 WebGPU，本地模型无法运行。");
@@ -54,10 +97,10 @@ export function WorkspacePage() {
 
     try {
       setLocalModelStatus((current) => (current === "ready" ? current : "loading"));
-      setLocalModelDetail(`正在启动本地模型 ${getLocalLLMModelId()}…`);
-      await ensureLocalLLM(updateProgress);
+      setLocalModelDetail(`正在启动本地模型 ${model?.label ?? getLocalLLMModelId(modelId)}…`);
+      await ensureLocalLLM(modelId, updateProgress);
       setLocalModelStatus("ready");
-      setLocalModelDetail(`本地模型已就绪 · ${getLocalLLMModelId()}`);
+      setLocalModelDetail(`本地模型已就绪 · ${model?.label ?? getLocalLLMModelId(modelId)}`);
       return true;
     } catch (error) {
       setLocalModelStatus("error");
@@ -88,13 +131,14 @@ export function WorkspacePage() {
         clauseTitle: currentSummary.activeClauseTitle,
         clauseText: currentSummary.activeClauseText,
         userMessage: message,
+        modelId: selectedModelId,
       });
       store.getState().completeAssistantTurn({
         userMessage: message,
         assistantReply: reply,
       });
       setLocalModelStatus("ready");
-      setLocalModelDetail(`本地模型已就绪 · ${getLocalLLMModelId()}`);
+      setLocalModelDetail(`本地模型已就绪 · ${selectedModel?.label ?? getLocalLLMModelId(selectedModelId)}`);
     } catch (error) {
       setLocalModelStatus("error");
       setLocalModelDetail(error instanceof Error ? error.message : "本地模型回复失败。");
@@ -137,6 +181,7 @@ export function WorkspacePage() {
         action: payload.intent,
         clauseTitle: payload.contextLabel ?? "已选文本",
         clauseText: payload.text,
+        modelId: selectedModelId,
       });
       store.getState().completeAssistantTurn({
         userMessage: labelMap[payload.intent],
@@ -144,15 +189,19 @@ export function WorkspacePage() {
         task: taskMap[payload.intent],
       });
       setLocalModelStatus("ready");
-      setLocalModelDetail(`本地模型已就绪 · ${getLocalLLMModelId()}`);
+      setLocalModelDetail(`本地模型已就绪 · ${selectedModel?.label ?? getLocalLLMModelId(selectedModelId)}`);
     } catch (error) {
       setLocalModelStatus("error");
       setLocalModelDetail(error instanceof Error ? error.message : "本地模型处理失败。");
     }
   };
 
-  const localModelActionLabel =
-    localModelStatus === "idle" || localModelStatus === "error" ? "启用本地模型" : undefined;
+  const handleConfirmModel = async (modelId: string) => {
+    saveSelectedLocalLLMModelId(modelId);
+    setSelectedModelId(modelId);
+    setIsModelSettingsOpen(false);
+    await ensureModelReady(modelId);
+  };
 
   return (
     <div className="min-h-screen">
@@ -169,11 +218,23 @@ export function WorkspacePage() {
         }}
         onImportDocument={handleImportDocument}
         localModelLabel={localModelDetail}
-        localModelActionLabel={localModelActionLabel}
+        localModelActionLabel="模型设置"
         onLocalModelAction={() => {
-          void ensureModelReady();
+          setIsModelSettingsOpen(true);
         }}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
+      />
+      <LocalModelSettingsModal
+        isOpen={isModelSettingsOpen}
+        selectedModelId={selectedModelId}
+        activeModelId={getLoadedLocalLLMModelId()}
+        modelOptions={modelOptions}
+        isBusy={localModelStatus === "loading" || localModelStatus === "responding"}
+        isSupported={isLocalLLMSupported()}
+        onClose={() => setIsModelSettingsOpen(false)}
+        onConfirm={(modelId) => {
+          void handleConfirmModel(modelId);
+        }}
       />
     </div>
   );

@@ -21,6 +21,11 @@ const {
   runLocalLLMTaskMock,
   isLocalLLMSupportedMock,
   getLocalLLMModelIdMock,
+  getLoadedLocalLLMModelIdMock,
+  getDefaultLocalLLMModelIdMock,
+  getAvailableLocalLLMModelsMock,
+  loadSelectedLocalLLMModelIdMock,
+  saveSelectedLocalLLMModelIdMock,
 } = vi.hoisted(() => ({
   ensureLocalLLMMock: vi.fn(() => Promise.resolve()),
   runLocalLLMTaskMock: vi.fn(async ({ action }: { action: string }) => {
@@ -40,6 +45,24 @@ const {
   }),
   isLocalLLMSupportedMock: vi.fn(() => true),
   getLocalLLMModelIdMock: vi.fn(() => "Qwen3-0.6B-q4f16_1-MLC"),
+  getLoadedLocalLLMModelIdMock: vi.fn(() => undefined),
+  getDefaultLocalLLMModelIdMock: vi.fn(() => "Qwen2.5-1.5B-Instruct-q4f16_1-MLC"),
+  getAvailableLocalLLMModelsMock: vi.fn(() => [
+    {
+      id: "Qwen3-0.6B-q4f16_1-MLC",
+      label: "Qwen3 0.6B",
+      summary: "更轻，启动更快",
+      tags: ["中文", "轻量"],
+    },
+    {
+      id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+      label: "Qwen2.5 1.5B",
+      summary: "中文审阅更稳",
+      tags: ["中文", "审阅"],
+    },
+  ]),
+  loadSelectedLocalLLMModelIdMock: vi.fn(() => "Qwen3-0.6B-q4f16_1-MLC"),
+  saveSelectedLocalLLMModelIdMock: vi.fn(),
 }));
 
 vi.mock("@/services/import/pdf-document", () => ({
@@ -59,6 +82,11 @@ vi.mock("@/services/ai/local-llm", () => ({
   runLocalLLMTask: runLocalLLMTaskMock,
   isLocalLLMSupported: isLocalLLMSupportedMock,
   getLocalLLMModelId: getLocalLLMModelIdMock,
+  getLoadedLocalLLMModelId: getLoadedLocalLLMModelIdMock,
+  getDefaultLocalLLMModelId: getDefaultLocalLLMModelIdMock,
+  getAvailableLocalLLMModels: getAvailableLocalLLMModelsMock,
+  loadSelectedLocalLLMModelId: loadSelectedLocalLLMModelIdMock,
+  saveSelectedLocalLLMModelId: saveSelectedLocalLLMModelIdMock,
 }));
 
 vi.mock("react-pdf", async () => {
@@ -118,6 +146,14 @@ describe("workspace shell", () => {
     isLocalLLMSupportedMock.mockReturnValue(true);
     getLocalLLMModelIdMock.mockClear();
     getLocalLLMModelIdMock.mockReturnValue("Qwen3-0.6B-q4f16_1-MLC");
+    getLoadedLocalLLMModelIdMock.mockClear();
+    getLoadedLocalLLMModelIdMock.mockReturnValue(undefined);
+    getDefaultLocalLLMModelIdMock.mockClear();
+    getDefaultLocalLLMModelIdMock.mockReturnValue("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
+    getAvailableLocalLLMModelsMock.mockClear();
+    loadSelectedLocalLLMModelIdMock.mockClear();
+    loadSelectedLocalLLMModelIdMock.mockReturnValue("Qwen3-0.6B-q4f16_1-MLC");
+    saveSelectedLocalLLMModelIdMock.mockClear();
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -199,9 +235,38 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("阅读视图")).toBeInTheDocument();
     expect(screen.getByText("可编辑")).toBeInTheDocument();
-    expect(screen.getByText(/本地模型未加载/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "启用本地模型" })).toBeInTheDocument();
+    expect(screen.getByText(/尚未加载/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "模型设置" })).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
+  });
+
+  it("opens model settings, filters models, and persists selected model", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "模型设置" }));
+
+    expect(screen.getByText("本地模型设置")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("搜索模型"), {
+      target: { value: "1.5B" },
+    });
+
+    expect(screen.queryByText("Qwen3 0.6B")).not.toBeInTheDocument();
+    expect(screen.getByText("Qwen2.5 1.5B")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByLabelText("Qwen2.5 1.5B"));
+    fireEvent.click(screen.getByRole("button", { name: "保存并启用" }));
+
+    await waitFor(() => {
+      expect(saveSelectedLocalLLMModelIdMock).toHaveBeenCalledWith(
+        "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+      );
+      expect(ensureLocalLLMMock).toHaveBeenCalled();
+    });
   });
 
   it("restores a saved workspace summary from local storage", async () => {
