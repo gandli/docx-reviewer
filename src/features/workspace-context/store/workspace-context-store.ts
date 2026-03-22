@@ -20,6 +20,12 @@ export type WorkspaceContextState = {
   }) => void;
   applySuggestion: () => void;
   sendMessage: (message: string) => void;
+  completeAssistantTurn: (payload: {
+    assistantReply: string;
+    userMessage?: string;
+    task?: WorkspaceSummary["currentTask"];
+    nextAction?: string;
+  }) => void;
   importDocument: (document: WorkspaceImportedDocument, fileName: string) => void;
 };
 
@@ -160,6 +166,40 @@ export function createWorkspaceContextStore(
                 content: assistantReply,
               },
             ],
+          }),
+        };
+      }),
+    completeAssistantTurn: ({ assistantReply, userMessage, task, nextAction }) =>
+      set((state) => {
+        if (!state.summary || !assistantReply.trim()) {
+          return state;
+        }
+
+        const messages = [...state.summary.assistantMessages];
+
+        if (userMessage?.trim()) {
+          messages.push({
+            id: `user-${messages.length + 1}`,
+            role: "user",
+            content: userMessage.trim(),
+          });
+        }
+
+        messages.push({
+          id: `assistant-${messages.length + 1}`,
+          role: "assistant",
+          content: assistantReply.trim(),
+        });
+
+        return {
+          summary: persist({
+            ...state.summary,
+            assistantMessages: messages,
+            latestConclusion: assistantReply.trim(),
+            currentTask: task ?? state.summary.currentTask,
+            nextAction: nextAction ?? "继续处理当前内容",
+            currentTaskStatus: "in_progress",
+            updatedAt: "刚刚",
           }),
         };
       }),

@@ -10,6 +10,10 @@ type AssistantPanelProps = {
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
   onSendMessage: (message: string) => void;
+  localModelLabel: string;
+  localModelActionLabel?: string;
+  onLocalModelAction?: () => void;
+  isLocalModelBusy?: boolean;
 };
 
 export function AssistantPanel({
@@ -17,6 +21,10 @@ export function AssistantPanel({
   onApplySuggestion,
   onJumpToSelection,
   onSendMessage,
+  localModelLabel,
+  localModelActionLabel,
+  onLocalModelAction,
+  isLocalModelBusy = false,
 }: AssistantPanelProps) {
   const [isActionPanelOpen, setIsActionPanelOpen] = useState(false);
 
@@ -44,6 +52,10 @@ export function AssistantPanel({
         </div>
         <ChatComposer
           onSendMessage={onSendMessage}
+          localModelLabel={localModelLabel}
+          localModelActionLabel={localModelActionLabel}
+          onLocalModelAction={onLocalModelAction}
+          isBusy={isLocalModelBusy}
           trailingAction={
             <button
               className="assistant-tools-trigger"

@@ -712,6 +712,27 @@ textarea {
   gap: 8px;
 }
 
+.chat-composer__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.76rem;
+}
+
+.chat-composer__status-action {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .chat-composer__toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -754,6 +775,12 @@ textarea {
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.chat-composer__send:disabled,
+.chat-composer__field:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .workspace-sidebar,

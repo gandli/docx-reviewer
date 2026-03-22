@@ -16,6 +16,31 @@ const { parseDocxDocumentMock, renderDocxPreviewMock } = vi.hoisted(() => ({
     return Promise.resolve();
   }),
 }));
+const {
+  ensureLocalLLMMock,
+  runLocalLLMTaskMock,
+  isLocalLLMSupportedMock,
+  getLocalLLMModelIdMock,
+} = vi.hoisted(() => ({
+  ensureLocalLLMMock: vi.fn(() => Promise.resolve()),
+  runLocalLLMTaskMock: vi.fn(async ({ action }: { action: string }) => {
+    if (action === "review") {
+      return "问题：付款条件不明确。 原因：没有写清触发条件。 建议：补充验收与发票条件。";
+    }
+
+    if (action === "revise") {
+      return "付款应在验收通过且发票齐全后，按约定节点分阶段支付。";
+    }
+
+    if (action === "polish") {
+      return "建议在验收通过并完成票据核验后，按约定节点安排付款。";
+    }
+
+    return "这是本地模型返回的真实回复。";
+  }),
+  isLocalLLMSupportedMock: vi.fn(() => true),
+  getLocalLLMModelIdMock: vi.fn(() => "Qwen3-0.6B-q4f16_1-MLC"),
+}));
 
 vi.mock("@/services/import/pdf-document", () => ({
   parsePdfDocument: parsePdfDocumentMock,
@@ -27,6 +52,13 @@ vi.mock("@/services/import/docx-document", () => ({
 
 vi.mock("docx-preview", () => ({
   renderAsync: renderDocxPreviewMock,
+}));
+
+vi.mock("@/services/ai/local-llm", () => ({
+  ensureLocalLLM: ensureLocalLLMMock,
+  runLocalLLMTask: runLocalLLMTaskMock,
+  isLocalLLMSupported: isLocalLLMSupportedMock,
+  getLocalLLMModelId: getLocalLLMModelIdMock,
 }));
 
 vi.mock("react-pdf", async () => {
@@ -80,6 +112,12 @@ describe("workspace shell", () => {
     parsePdfDocumentMock.mockReset();
     parseDocxDocumentMock.mockReset();
     renderDocxPreviewMock.mockClear();
+    ensureLocalLLMMock.mockClear();
+    runLocalLLMTaskMock.mockClear();
+    isLocalLLMSupportedMock.mockClear();
+    isLocalLLMSupportedMock.mockReturnValue(true);
+    getLocalLLMModelIdMock.mockClear();
+    getLocalLLMModelIdMock.mockReturnValue("Qwen3-0.6B-q4f16_1-MLC");
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -165,6 +203,8 @@ describe("workspace shell", () => {
     expect(screen.getByText("找问题")).toBeInTheDocument();
     expect(screen.getByText("直接改写")).toBeInTheDocument();
     expect(screen.getByText("润色表达")).toBeInTheDocument();
+    expect(screen.getByText(/本地模型未加载/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "启用本地模型" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
@@ -245,7 +285,14 @@ describe("workspace shell", () => {
         screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"),
       ).toHaveValue("");
       expect(screen.getByText("请把语气改得更正式")).toBeInTheDocument();
-      expect(screen.getAllByText(/已记录你的要求：请把语气改得更正式/)).toHaveLength(2);
+      expect(screen.getAllByText("这是本地模型返回的真实回复。").length).toBeGreaterThan(0);
+      expect(ensureLocalLLMMock).toHaveBeenCalled();
+      expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "chat",
+          userMessage: "请把语气改得更正式",
+        }),
+      );
     });
   });
 
@@ -561,8 +608,15 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
-      expect(screen.getByText("已定位到你选中的内容，接下来我会先帮你找问题。")).toBeInTheDocument();
+      expect(screen.getAllByText(/问题：付款条件不明确/).length).toBeGreaterThan(0);
       expect(screen.queryByTestId("pdf-selection-popover")).not.toBeInTheDocument();
+      expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "review",
+          clauseTitle: "第 1 页",
+          clauseText: "付款正文",
+        }),
+      );
     });
   });
 

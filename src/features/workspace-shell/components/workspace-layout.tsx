@@ -12,9 +12,18 @@ type WorkspaceLayoutProps = {
   previewDocument?: WorkspacePreviewDocument;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
-  onSelectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
+  onSelectText: (payload: {
+    text: string;
+    blockId?: string;
+    contextLabel?: string;
+    intent?: "review" | "revise" | "polish";
+  }) => void;
   onSendMessage: (message: string) => void;
   onImportDocument: (file: File) => void | Promise<void>;
+  localModelLabel: string;
+  localModelActionLabel?: string;
+  onLocalModelAction?: () => void;
+  isLocalModelBusy?: boolean;
 };
 
 export function WorkspaceLayout({
@@ -25,6 +34,10 @@ export function WorkspaceLayout({
   onSelectText,
   onSendMessage,
   onImportDocument,
+  localModelLabel,
+  localModelActionLabel,
+  onLocalModelAction,
+  isLocalModelBusy,
 }: WorkspaceLayoutProps) {
   return (
     <div className="workspace-layout">
@@ -54,6 +67,10 @@ export function WorkspaceLayout({
         onApplySuggestion={onApplySuggestion}
         onJumpToSelection={onJumpToSelection}
         onSendMessage={onSendMessage}
+        localModelLabel={localModelLabel}
+        localModelActionLabel={localModelActionLabel}
+        onLocalModelAction={onLocalModelAction}
+        isLocalModelBusy={isLocalModelBusy}
       />
     </div>
   );
