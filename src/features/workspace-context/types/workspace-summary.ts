@@ -5,6 +5,10 @@ export type WorkspaceSummary = {
   workspaceTitle: string;
   activeDocumentId: string;
   activeNodeId?: string;
+  activeClauseTitle: string;
+  activeClauseText: string;
+  suggestedRevisionText: string;
+  isSelectionFocused: boolean;
   currentTask: WorkspaceTaskType;
   currentTaskStatus: "idle" | "in_progress" | "ready_to_resume";
   lastUserIntent: string;

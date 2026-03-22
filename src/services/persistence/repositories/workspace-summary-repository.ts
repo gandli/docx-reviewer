@@ -23,3 +23,39 @@ export function createMemoryWorkspaceSummaryRepository(
     },
   };
 }
+
+export function createBrowserWorkspaceSummaryRepository(
+  fallbackSummary?: WorkspaceSummary,
+): WorkspaceSummaryRepository {
+  const memory = createMemoryWorkspaceSummaryRepository(fallbackSummary);
+
+  const getStorage = () => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    return window.localStorage;
+  };
+
+  return {
+    async load(workspaceId) {
+      const storage = getStorage();
+      const value = storage?.getItem(`workspace-summary:${workspaceId}`);
+
+      if (!value) {
+        return memory.load(workspaceId);
+      }
+
+      try {
+        return JSON.parse(value) as WorkspaceSummary;
+      } catch {
+        return memory.load(workspaceId);
+      }
+    },
+    async save(summary) {
+      const storage = getStorage();
+      storage?.setItem(`workspace-summary:${summary.workspaceId}`, JSON.stringify(summary));
+      await memory.save(summary);
+    },
+  };
+}

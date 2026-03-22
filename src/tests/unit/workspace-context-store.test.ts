@@ -20,4 +20,14 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.currentTask).toBe("revise");
     expect(store.getState().summary?.workspaceTitle).toBe("企业文档工作区");
   });
+
+  it("applies suggestion and focuses current selection", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    store.getState().applySuggestion();
+
+    expect(store.getState().summary?.activeClauseText).toContain("分阶段支付");
+    expect(store.getState().summary?.isSelectionFocused).toBe(true);
+  });
 });

@@ -7,15 +7,27 @@ import { ActionPanel } from "@/features/assistant-panel/components/action-panel"
 
 type AssistantPanelProps = {
   summary: WorkspaceSummary;
+  onApplySuggestion: () => void;
+  onJumpToSelection: () => void;
 };
 
-export function AssistantPanel({ summary }: AssistantPanelProps) {
+export function AssistantPanel({
+  summary,
+  onApplySuggestion,
+  onJumpToSelection,
+}: AssistantPanelProps) {
   return (
     <section className="assistant-panel" data-testid="assistant-panel">
       <AssistantContextHeader summary={summary} />
       <SuggestedActions />
-      <AssistantMessageList messages={mockAssistantMessages} />
-      <ActionPanel />
+      <AssistantMessageList
+        messages={mockAssistantMessages}
+        latestConclusion={summary.latestConclusion}
+      />
+      <ActionPanel
+        onApplySuggestion={onApplySuggestion}
+        onJumpToSelection={onJumpToSelection}
+      />
       <div className="context-card">
         <div className="eyebrow">跨 Agent 接续</div>
         <div className="muted">

@@ -6,17 +6,27 @@ import { AssistantPanel } from "@/features/assistant-panel/components/assistant-
 
 type WorkspaceLayoutProps = {
   summary: WorkspaceSummary;
+  onApplySuggestion: () => void;
+  onJumpToSelection: () => void;
 };
 
-export function WorkspaceLayout({ summary }: WorkspaceLayoutProps) {
+export function WorkspaceLayout({
+  summary,
+  onApplySuggestion,
+  onJumpToSelection,
+}: WorkspaceLayoutProps) {
   return (
     <div className="workspace-layout">
       <WorkspaceSidebar summary={summary} />
       <main className="workspace-main">
         <DocumentHeader title="采购与付款管理制度" />
-        <DocumentCanvas />
+        <DocumentCanvas summary={summary} />
       </main>
-      <AssistantPanel summary={summary} />
+      <AssistantPanel
+        summary={summary}
+        onApplySuggestion={onApplySuggestion}
+        onJumpToSelection={onJumpToSelection}
+      />
     </div>
   );
 }
