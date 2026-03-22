@@ -389,9 +389,7 @@ textarea {
   display: block;
   width: 100%;
   padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
+  cursor: text;
 }
 
 .pdf-document .react-pdf__Page {
@@ -405,11 +403,7 @@ textarea {
   height: auto !important;
 }
 
-.pdf-page-card__excerpt {
-  margin-top: 10px;
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.7;
+.pdf-document .react-pdf__Page__textContent {
   user-select: text;
   cursor: text;
 }

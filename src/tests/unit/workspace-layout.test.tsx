@@ -56,7 +56,9 @@ vi.mock("react-pdf", async () => {
       return <div data-testid="pdf-document">{children}</div>;
     },
     Page: ({ pageNumber }: { pageNumber: number }) => (
-      <div data-testid={`pdf-page-${pageNumber}`}>PDF Page {pageNumber}</div>
+      <div data-testid={`pdf-page-${pageNumber}`}>
+        <span data-testid={`pdf-page-text-${pageNumber}`}>PDF Page {pageNumber} 正文</span>
+      </div>
     ),
   };
 });
@@ -368,7 +370,6 @@ describe("workspace shell", () => {
       expect(screen.getByText("PDF 原样预览 · 共 2 页")).toBeInTheDocument();
       expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
-      expect(screen.getByText("付款安排应以验收和发票齐备为支付前提。")).toBeInTheDocument();
       expect(screen.getByText("导入文件 · 制度附件.pdf")).toBeInTheDocument();
     });
 
@@ -408,12 +409,11 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 2 页")).toBeInTheDocument();
-      expect(screen.getByText("第二页正文。")).toBeInTheDocument();
       expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
     });
   });
 
-  it("shows an action popover after selecting text inside a pdf excerpt", async () => {
+  it("shows an action popover after selecting text inside the pdf page", async () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -437,11 +437,12 @@ describe("workspace shell", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("pdf-page-excerpt-1")).toBeInTheDocument();
+      expect(screen.getByTestId("pdf-page-card-1")).toBeInTheDocument();
     });
 
-    const excerpt = screen.getByTestId("pdf-page-excerpt-1");
-    const textNode = excerpt.firstChild;
+    const pageText = screen.getByTestId("pdf-page-text-1");
+    const pageCard = screen.getByTestId("pdf-page-card-1");
+    const textNode = pageText.firstChild;
     const selectionMock = {
       toString: () => "付款正文",
       rangeCount: 1,
@@ -465,7 +466,7 @@ describe("workspace shell", () => {
 
     vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
 
-    fireEvent.mouseUp(excerpt);
+    fireEvent.mouseUp(pageCard);
 
     await waitFor(() => {
       expect(screen.getByTestId("pdf-selection-popover")).toBeInTheDocument();

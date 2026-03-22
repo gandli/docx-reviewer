@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/TextLayer.css";
 import type {
   WorkspacePreviewDocument,
   WorkspaceSummary,
@@ -170,7 +171,7 @@ export function PdfDocumentCanvas({
                 contextLabel,
               });
 
-            const handleExcerptMouseUp = (event: MouseEvent<HTMLDivElement>) => {
+            const handlePreviewMouseUp = (event: MouseEvent<HTMLDivElement>) => {
               const selection = window.getSelection();
               const text = selection?.toString().trim();
 
@@ -204,6 +205,15 @@ export function PdfDocumentCanvas({
               });
             };
 
+            const handlePreviewClick = () => {
+              const selectedText = window.getSelection()?.toString().trim();
+              if (selectedText) {
+                return;
+              }
+
+              handleSelectPage();
+            };
+
             return (
               <div
                 key={`pdf-page-${pageNumber}`}
@@ -224,25 +234,18 @@ export function PdfDocumentCanvas({
                   </button>
                   {isActive ? <span className="pdf-page-card__status">当前上下文</span> : null}
                 </div>
-                <button
+                <div
                   className="pdf-page-card__preview"
                   data-testid={`pdf-page-card-${pageNumber}`}
-                  type="button"
-                  onClick={handleSelectPage}
+                  onClick={handlePreviewClick}
+                  onMouseUp={handlePreviewMouseUp}
                 >
                   <Page
                     pageNumber={pageNumber}
                     width={width}
                     renderAnnotationLayer={false}
-                    renderTextLayer={false}
+                    renderTextLayer
                   />
-                </button>
-                <div
-                  className="pdf-page-card__excerpt"
-                  data-testid={`pdf-page-excerpt-${pageNumber}`}
-                  onMouseUp={handleExcerptMouseUp}
-                >
-                  {pageContext?.text || `第 ${pageNumber} 页暂未提取到可用正文。`}
                 </div>
               </div>
             );
