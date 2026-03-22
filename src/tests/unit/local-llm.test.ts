@@ -34,8 +34,20 @@ describe("local llm", () => {
     });
 
     expect(messages[0]?.content).toContain("商务文档审阅助手");
-    expect(messages[0]?.content).toContain("只列出 2 到 3 条最重要的问题");
-    expect(messages[0]?.content).toContain("风险等级");
+    expect(messages[0]?.content).toContain("按以下顺序逐一检查");
+    expect(messages[0]?.content).toContain("用词");
+    expect(messages[0]?.content).toContain("标点");
+    expect(messages[0]?.content).toContain("语法");
+    expect(messages[0]?.content).toContain("语句通顺性");
+    expect(messages[0]?.content).toContain("逻辑是否清楚");
+    expect(messages[0]?.content).toContain("事实是否完整");
+    expect(messages[0]?.content).toContain("条款风险");
+    expect(messages[0]?.content).toContain("问题归类");
+    expect(messages[0]?.content).toContain("笔误类");
+    expect(messages[0]?.content).toContain("语法类");
+    expect(messages[0]?.content).toContain("条款风险类");
+    expect(messages[0]?.content).toContain("原文：");
+    expect(messages[0]?.content).toContain("修改建议：");
     expect(messages[1]?.content).toContain("请审阅下面这段");
   });
 
@@ -47,8 +59,11 @@ describe("local llm", () => {
     });
 
     expect(messages[0]?.content).toContain("文档校改助手");
-    expect(messages[0]?.content).toContain("直接输出改写后的正式正文");
-    expect(messages[0]?.content).toContain("不要解释");
+    expect(messages[0]?.content).toContain("正式文件校改成稿");
+    expect(messages[0]?.content).toContain("修正用词、标点、语法、语句不通顺");
+    expect(messages[0]?.content).toContain("补齐逻辑不清、事实不完整");
+    expect(messages[0]?.content).toContain("消除明显的条款风险");
+    expect(messages[0]?.content).toContain("只输出改写后的正文");
     expect(messages[1]?.content).toContain("请直接改写下面这段");
   });
 
@@ -60,8 +75,11 @@ describe("local llm", () => {
     });
 
     expect(messages[0]?.content).toContain("文档润色助手");
+    expect(messages[0]?.content).toContain("轻度润色模式");
     expect(messages[0]?.content).toContain("不能改变原意");
-    expect(messages[0]?.content).toContain("更规范、更专业、更适合正式文档");
+    expect(messages[0]?.content).toContain("不能新增事实");
+    expect(messages[0]?.content).toContain("不能改变责任边界");
+    expect(messages[0]?.content).toContain("只优化措辞、标点、语气、节奏和书面感");
     expect(messages[1]?.content).toContain("请润色下面这段");
   });
 });

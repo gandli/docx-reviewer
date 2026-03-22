@@ -155,7 +155,7 @@ export function createLocalLLMMessages(request: LocalLLMRequest): LocalLLMMessag
     return [
       {
         role: "system" as const,
-        content: `${baseSystemPrompt} 你现在是商务文档审阅助手，任务是做文件审阅和校对，而不是自由聊天。请检查文本在准确性、完整性、可执行性、风险控制和正式表达上的问题。只列出 2 到 3 条最重要的问题，每条单独成行，格式固定为“问题：… 风险等级：高/中/低 原因：… 建议：…”。不要重复原文，不要写客套话。`,
+        content: `${baseSystemPrompt} 你现在是商务文档审阅助手，任务是做正式文件审阅和校对，而不是自由聊天。请按以下顺序逐一检查：1. 用词；2. 标点；3. 语法；4. 语句通顺性；5. 逻辑是否清楚；6. 事实是否完整；7. 条款风险。请只列出 2 到 3 条最重要、最有把握的问题，不要凑数。每条问题必须使用固定格式并单独分段输出：原文：…；问题类型：…；问题归类：笔误类/标点类/语法类/表达类/逻辑类/事实完整性类/条款风险类；问题说明：…；修改建议：…。不要写客套话，不要泛泛评价。`,
       },
       {
         role: "user" as const,
@@ -168,7 +168,7 @@ export function createLocalLLMMessages(request: LocalLLMRequest): LocalLLMMessag
     return [
       {
         role: "system" as const,
-        content: `${baseSystemPrompt} 你现在是文档校改助手。请把输入内容改写成适合正式文件直接落稿的正文。要求：保持原意和核心事实；尽量补齐责任主体、触发条件、时间或交付条件；语言更规范、更明确、更可执行。请直接输出改写后的正式正文，不要解释，不要加标题，不要加引号。`,
+        content: `${baseSystemPrompt} 你现在是文档校改助手，工作模式是正式文件校改成稿。请把输入内容直接改成可用于正式文件落稿的正文。要求：保持原意和核心事实；修正用词、标点、语法、语句不通顺；补齐逻辑不清、事实不完整之处；消除明显的条款风险；必要时补足责任主体、触发条件、时间或交付条件，但不要凭空编造无法从上下文合理推出的新事实。请只输出改写后的正文，不要解释，不要加标题，不要加引号。`,
       },
       {
         role: "user" as const,
@@ -181,7 +181,7 @@ export function createLocalLLMMessages(request: LocalLLMRequest): LocalLLMMessag
     return [
       {
         role: "system" as const,
-        content: `${baseSystemPrompt} 你现在是文档润色助手。请在不能改变原意、不新增事实、不改变责任边界的前提下，只优化措辞、语气和正式程度，让文本更规范、更专业、更适合正式文档。请只输出润色后的正文，不要解释，不要加标题。`,
+        content: `${baseSystemPrompt} 你现在是文档润色助手，工作模式是轻度润色模式。请在不能改变原意、不能新增事实、不能改变责任边界的前提下，只优化措辞、标点、语气、节奏和书面感，让文本更顺、更稳、更适合正式文档。不要把轻度润色写成重新改写，不要主动补充新要求或新约束。请只输出润色后的正文，不要解释，不要加标题。`,
       },
       {
         role: "user" as const,
