@@ -71,7 +71,8 @@ describe("workspace shell", () => {
     );
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("当前选中条款")).toBeInTheDocument();
-    expect(screen.getByText("修订")).toBeInTheDocument();
+    expect(screen.getByText("阅读视图")).toBeInTheDocument();
+    expect(screen.getByText("可编辑")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
   });
 

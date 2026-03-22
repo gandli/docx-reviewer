@@ -239,32 +239,28 @@ textarea {
 
 .document-header {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 18px;
 }
 
-.document-status {
-  display: flex;
+.document-status-inline {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  color: var(--color-text-muted);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
-}
-
-.status-pill {
-  padding: 9px 13px;
-  border: 1px solid var(--color-border-soft);
-  border-radius: 999px;
-  background: #f2ebdf;
-  color: var(--color-text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
-.status-pill.is-primary {
-  background: var(--color-ink-strong);
-  border-color: var(--color-ink-strong);
-  color: #fffdf9;
+.document-status-inline__item.is-active {
+  color: var(--color-text-primary);
+}
+
+.document-status-inline__divider {
+  color: rgba(109, 100, 87, 0.55);
 }
 
 .document-canvas {

@@ -11,9 +11,12 @@ export function DocumentHeader({ title }: DocumentHeaderProps) {
           {title}
         </div>
       </div>
-      <div className="document-status">
-        <div className="status-pill">阅读态</div>
-        <div className="status-pill is-primary">可编辑</div>
+      <div className="document-status-inline">
+        <span className="document-status-inline__item">阅读视图</span>
+        <span className="document-status-inline__divider" aria-hidden="true">
+          ·
+        </span>
+        <span className="document-status-inline__item is-active">可编辑</span>
       </div>
     </header>
   );
