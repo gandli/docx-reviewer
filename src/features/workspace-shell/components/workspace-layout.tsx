@@ -8,12 +8,14 @@ type WorkspaceLayoutProps = {
   summary: WorkspaceSummary;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
+  onSendMessage: (message: string) => void;
 };
 
 export function WorkspaceLayout({
   summary,
   onApplySuggestion,
   onJumpToSelection,
+  onSendMessage,
 }: WorkspaceLayoutProps) {
   return (
     <div className="workspace-layout">
@@ -26,6 +28,7 @@ export function WorkspaceLayout({
         summary={summary}
         onApplySuggestion={onApplySuggestion}
         onJumpToSelection={onJumpToSelection}
+        onSendMessage={onSendMessage}
       />
     </div>
   );

@@ -31,6 +31,7 @@ export function WorkspacePage() {
         summary={summary}
         onApplySuggestion={() => store.getState().applySuggestion()}
         onJumpToSelection={() => store.getState().focusSelection()}
+        onSendMessage={(message) => store.getState().sendMessage(message)}
       />
     </div>
   );

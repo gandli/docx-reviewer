@@ -1,4 +1,30 @@
-import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
+import type {
+  WorkspaceAssistantMessage,
+  WorkspaceSummary,
+} from "@/features/workspace-context/types/workspace-summary";
+
+export const mockAssistantMessages: WorkspaceAssistantMessage[] = [
+  {
+    id: "user-1",
+    role: "user",
+    content: "继续优化付款条款，降低履约争议。",
+  },
+  {
+    id: "assistant-1",
+    role: "assistant",
+    content: "我建议把付款方式改成分阶段支付，并补充验收通过后的付款触发条件。",
+  },
+  {
+    id: "assistant-2",
+    role: "assistant",
+    content: "这样可以降低履约争议，也更符合多数企业制度写法。",
+  },
+  {
+    id: "assistant-3",
+    role: "assistant",
+    content: "证据来源：参考资料《付款节点说明》、Sheet2《采购付款计划》。",
+  },
+];
 
 export const mockWorkspaceSummary: WorkspaceSummary = {
   workspaceId: "ws-enterprise",
@@ -17,6 +43,7 @@ export const mockWorkspaceSummary: WorkspaceSummary = {
   openQuestions: ["是否需要加入违约责任上限条款"],
   pendingSuggestionIds: ["suggestion-payment-1", "suggestion-payment-2"],
   recentEvidenceRefs: ["付款节点说明 · 第 4 页", "采购付款计划 · Sheet2"],
+  assistantMessages: mockAssistantMessages,
   updatedAt: "2 分钟前",
 };
 
@@ -64,26 +91,3 @@ export const mockAssetGroups = [
     ],
   },
 ] as const;
-
-export const mockAssistantMessages = [
-  {
-    id: "user-1",
-    role: "user" as const,
-    content: "继续优化付款条款，降低履约争议。",
-  },
-  {
-    id: "assistant-1",
-    role: "assistant" as const,
-    content: "我建议把付款方式改成分阶段支付，并补充验收通过后的付款触发条件。",
-  },
-  {
-    id: "assistant-2",
-    role: "assistant" as const,
-    content: "这样可以降低履约争议，也更符合多数企业制度写法。",
-  },
-  {
-    id: "assistant-3",
-    role: "assistant" as const,
-    content: "证据来源：参考资料《付款节点说明》、Sheet2《采购付款计划》。",
-  },
-];

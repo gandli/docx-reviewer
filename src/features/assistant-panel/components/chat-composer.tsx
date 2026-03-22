@@ -1,12 +1,25 @@
-import type { ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 
 type ChatComposerProps = {
   trailingAction?: ReactNode;
+  onSendMessage: (message: string) => void;
 };
 
-export function ChatComposer({ trailingAction }: ChatComposerProps) {
+export function ChatComposer({ trailingAction, onSendMessage }: ChatComposerProps) {
+  const [draft, setDraft] = useState("");
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!draft.trim()) {
+      return;
+    }
+
+    onSendMessage(draft);
+    setDraft("");
+  };
+
   return (
-    <div className="chat-composer">
+    <form className="chat-composer" onSubmit={handleSubmit}>
       <div className="chat-composer__toolbar">
         <div className="suggested-action">生成</div>
         <div className="suggested-action">审阅</div>
@@ -15,13 +28,16 @@ export function ChatComposer({ trailingAction }: ChatComposerProps) {
         {trailingAction}
       </div>
       <div className="chat-composer__input">
-        <div className="chat-composer__placeholder">
-          继续输入你的要求，或让助手基于当前条款继续处理
-        </div>
-        <button className="chat-composer__send" type="button">
+        <input
+          className="chat-composer__field"
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="继续输入你的要求，或让助手基于当前条款继续处理"
+        />
+        <button className="chat-composer__send" type="submit">
           发送
         </button>
       </div>
-    </div>
+    </form>
   );
 }

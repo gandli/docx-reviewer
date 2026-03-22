@@ -34,6 +34,17 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.isSelectionFocused).toBe(true);
   });
 
+  it("appends user and assistant messages when sending a new prompt", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    store.getState().sendMessage("请改得更正式一些");
+
+    expect(store.getState().summary?.assistantMessages.at(-2)?.content).toBe("请改得更正式一些");
+    expect(store.getState().summary?.assistantMessages.at(-1)?.role).toBe("assistant");
+    expect(store.getState().summary?.latestConclusion).toContain("已记录你的要求");
+  });
+
   it("normalizes restored browser summaries to the current workspace title", async () => {
     window.localStorage.setItem(
       `workspace-summary:${mockWorkspaceSummary.workspaceId}`,

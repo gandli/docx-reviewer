@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
-import { mockAssistantMessages } from "@/shared/mocks/workspace-shell";
 import { AssistantContextHeader } from "@/features/assistant-panel/components/assistant-context-header";
 import { AssistantMessageList } from "@/features/assistant-panel/components/assistant-message-list";
 import { ActionPanel } from "@/features/assistant-panel/components/action-panel";
@@ -10,12 +9,14 @@ type AssistantPanelProps = {
   summary: WorkspaceSummary;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
+  onSendMessage: (message: string) => void;
 };
 
 export function AssistantPanel({
   summary,
   onApplySuggestion,
   onJumpToSelection,
+  onSendMessage,
 }: AssistantPanelProps) {
   const [isActionPanelOpen, setIsActionPanelOpen] = useState(false);
 
@@ -24,7 +25,7 @@ export function AssistantPanel({
       <AssistantContextHeader summary={summary} />
       <div className="assistant-thread">
         <AssistantMessageList
-          messages={mockAssistantMessages}
+          messages={summary.assistantMessages}
           latestConclusion={summary.latestConclusion}
         />
       </div>
@@ -40,6 +41,7 @@ export function AssistantPanel({
           ) : null}
         </div>
         <ChatComposer
+          onSendMessage={onSendMessage}
           trailingAction={
             <button
               className="assistant-tools-trigger"

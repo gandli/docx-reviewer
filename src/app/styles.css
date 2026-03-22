@@ -527,12 +527,20 @@ textarea {
   background: rgba(255, 252, 247, 0.9);
 }
 
-.chat-composer__placeholder {
+.chat-composer__field {
   flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
   color: var(--color-text-muted);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   font-size: 0.88rem;
   line-height: 1.4;
+}
+
+.chat-composer__field::placeholder {
+  color: var(--color-text-muted);
 }
 
 .chat-composer__send {

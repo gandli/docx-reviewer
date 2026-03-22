@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { App } from "@/app/App";
 import { WorkspacePage } from "@/features/workspace-shell/routes/workspace-page";
@@ -124,5 +124,24 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "跳到原文位置" }));
 
     expect(screen.getByText("已定位到当前条款")).toBeInTheDocument();
+  });
+
+  it("sends a chat message and appends it to the assistant thread", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"), {
+      target: { value: "请把语气改得更正式" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "发送" }));
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("")).toBeInTheDocument();
+      expect(screen.getByText("请把语气改得更正式")).toBeInTheDocument();
+      expect(screen.getAllByText(/已记录你的要求：请把语气改得更正式/)).toHaveLength(2);
+    });
   });
 });

@@ -1,11 +1,7 @@
-type AssistantMessage = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-};
+import type { WorkspaceAssistantMessage } from "@/features/workspace-context/types/workspace-summary";
 
 type AssistantMessageListProps = {
-  messages: readonly AssistantMessage[];
+  messages: readonly WorkspaceAssistantMessage[];
   latestConclusion: string;
 };
 
