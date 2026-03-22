@@ -29,6 +29,7 @@ export type WorkspaceContextState = {
     userMessage?: string;
     task?: WorkspaceSummary["currentTask"];
     nextAction?: string;
+    variant?: "chat" | "review" | "revise" | "polish";
   }) => void;
   importDocument: (document: WorkspaceImportedDocument, fileName: string) => void;
 };
@@ -179,18 +180,20 @@ export function createWorkspaceContextStore(
                 id: `user-${state.summary.assistantMessages.length + 1}`,
                 role: "user",
                 content: trimmedMessage,
+                variant: "chat",
               },
               {
                 id: `assistant-${state.summary.assistantMessages.length + 2}`,
                 role: "assistant",
                 content: assistantReply,
+                variant: "chat",
               },
             ],
           },
           state.previewDocument,
         );
       }),
-    completeAssistantTurn: ({ assistantReply, userMessage, task, nextAction }) =>
+    completeAssistantTurn: ({ assistantReply, userMessage, task, nextAction, variant }) =>
       set((state) => {
         if (!state.summary || !assistantReply.trim()) {
           return state;
@@ -203,6 +206,7 @@ export function createWorkspaceContextStore(
             id: `user-${messages.length + 1}`,
             role: "user",
             content: userMessage.trim(),
+            variant: "chat",
           });
         }
 
@@ -210,6 +214,7 @@ export function createWorkspaceContextStore(
           id: `assistant-${messages.length + 1}`,
           role: "assistant",
           content: assistantReply.trim(),
+          variant: variant ?? "chat",
         });
 
         return persist(

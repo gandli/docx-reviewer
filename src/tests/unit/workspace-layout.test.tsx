@@ -30,7 +30,13 @@ const {
   ensureLocalLLMMock: vi.fn(() => Promise.resolve()),
   runLocalLLMTaskMock: vi.fn(async ({ action }: { action: string }) => {
     if (action === "review") {
-      return "问题：付款条件不明确。 原因：没有写清触发条件。 建议：补充验收与发票条件。";
+      return [
+        "原文：合同签订后一次性支付全部款项。",
+        "问题类型：条款风险",
+        "问题归类：条款风险类",
+        "问题说明：付款触发条件和验收前提没有写清，容易产生执行争议。",
+        "修改建议：补充验收通过、发票齐备和审批完成后的付款条件。",
+      ].join("\n");
     }
 
     if (action === "revise") {
@@ -660,7 +666,9 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("已选文本")).toBeInTheDocument();
-      expect(screen.getByText("已定位到你选中的内容，接下来我会直接帮你改写。")).toBeInTheDocument();
+      expect(screen.getByText("改写结果")).toBeInTheDocument();
+      expect(screen.getByText("可直接采用")).toBeInTheDocument();
+      expect(screen.getAllByText("付款应在验收通过且发票齐全后，按约定节点分阶段支付。").length).toBeGreaterThan(0);
       expect(screen.queryByTestId("docx-selection-popover")).not.toBeInTheDocument();
     });
   });
@@ -848,7 +856,10 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
-      expect(screen.getAllByText(/问题：付款条件不明确/).length).toBeGreaterThan(0);
+      expect(screen.getByText("校阅发现")).toBeInTheDocument();
+      expect(screen.getByText("问题归类")).toBeInTheDocument();
+      expect(screen.getByText("条款风险类")).toBeInTheDocument();
+      expect(screen.getByText("修改建议")).toBeInTheDocument();
       expect(screen.queryByTestId("pdf-selection-popover")).not.toBeInTheDocument();
       expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -905,6 +916,8 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("付款方式")).toBeInTheDocument();
+      expect(screen.getByText("润色结果")).toBeInTheDocument();
+      expect(screen.getByText("保留原意")).toBeInTheDocument();
       expect(screen.getAllByText("建议在验收通过并完成票据核验后，按约定节点安排付款。").length).toBeGreaterThan(0);
       expect(screen.queryByTestId("document-selection-popover")).not.toBeInTheDocument();
       expect(removeAllRangesMock).toHaveBeenCalled();

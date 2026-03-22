@@ -141,6 +141,7 @@ export function WorkspacePage() {
       store.getState().completeAssistantTurn({
         userMessage: message,
         assistantReply: reply,
+        variant: "chat",
       });
       setLocalModelStatus("ready");
       setLocalModelDetail(`本地模型已就绪 · ${selectedModel?.label ?? getLocalLLMModelId(selectedModelId)}`);
@@ -192,6 +193,7 @@ export function WorkspacePage() {
         userMessage: labelMap[payload.intent],
         assistantReply: reply,
         task: taskMap[payload.intent],
+        variant: payload.intent,
       });
       setLocalModelStatus("ready");
       setLocalModelDetail(`本地模型已就绪 · ${selectedModel?.label ?? getLocalLLMModelId(selectedModelId)}`);

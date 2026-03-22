@@ -4,6 +4,7 @@ export type WorkspaceAssistantMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  variant?: "chat" | "review" | "revise" | "polish";
 };
 
 export type WorkspaceDocumentBlock = {
