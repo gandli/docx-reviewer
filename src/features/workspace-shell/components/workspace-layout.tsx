@@ -65,7 +65,7 @@ export function WorkspaceLayout({
         onToggleCollapse={() => setIsLeftCollapsed((current) => !current)}
       />
       <main
-        className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-6 pt-5 pb-6 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
+        className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-0 pt-4 pb-0 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
         data-scroll-region="true"
       >
         <DocumentHeader
