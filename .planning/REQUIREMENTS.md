@@ -13,10 +13,20 @@
 
 ### Documents
 
+- [ ] **DOC-00**: 系统可识别导入文件类型，并按 `pdf / doc / docx / txt / md` 走对应处理流程
 - [ ] **DOC-01**: 用户可导入 `.docx` 模板和背景资料文件
+- [ ] **DOC-01A**: 用户可导入 `pdf` 作为原文参考，并在页面中保留原始分页预览
+- [ ] **DOC-01B**: 用户导入 `.doc` 时，系统可先转换或提示转换为 `.docx` 后再处理
+- [ ] **DOC-01C**: 用户可导入 `txt` 和 `md` 资料并直接纳入本地知识库
 - [ ] **DOC-02**: 系统可提取标题、段落、条款、表格和编号等文档结构
 - [ ] **DOC-03**: 系统可将文档片段切分、向量化并建立本地检索索引
 - [ ] **DOC-04**: 用户可查看导入结果、解析状态和索引状态
+
+### Preview
+
+- [ ] **PREV-01**: 用户可在网页中查看接近原文样式的 `docx` 预览
+- [ ] **PREV-02**: 用户可在网页中查看 `pdf` 的分页预览并定位原文内容
+- [ ] **PREV-03**: 用户可在同一任务中同时查看原文预览和结构化编辑稿
 
 ### Grounding
 
@@ -43,6 +53,13 @@
 - [ ] **OUT-02**: 用户可接受、拒绝或手动调整修订建议，并保留变更记录
 - [ ] **OUT-03**: 用户可导出结构完整、可在 Word 中正常打开的 `.docx` 文件
 - [ ] **OUT-04**: 用户可导出审阅摘要或问题清单
+
+### Editing
+
+- [ ] **EDIT-01**: 系统可将导入文档转换为结构化可编辑稿，而不是直接编辑原始预览 DOM
+- [ ] **EDIT-02**: 用户可按章节、条款、字段和表格单元进行定向编辑
+- [ ] **EDIT-03**: AI 修订建议可按条款逐条接受、拒绝或再次生成
+- [ ] **EDIT-04**: 系统可记录每条修订对应的问题、建议和最终处理结果
 
 ## v2 Requirements
 
@@ -77,10 +94,17 @@
 | PLAT-01 | Phase 1 | Pending |
 | PLAT-02 | Phase 1 | Pending |
 | PLAT-03 | Phase 1 | Pending |
+| DOC-00 | Phase 2 | Pending |
 | DOC-01 | Phase 2 | Pending |
+| DOC-01A | Phase 2 | Pending |
+| DOC-01B | Phase 2 | Pending |
+| DOC-01C | Phase 2 | Pending |
 | DOC-02 | Phase 2 | Pending |
 | DOC-03 | Phase 2 | Pending |
 | DOC-04 | Phase 2 | Pending |
+| PREV-01 | Phase 2 | Pending |
+| PREV-02 | Phase 2 | Pending |
+| PREV-03 | Phase 2 | Pending |
 | RAG-01 | Phase 3 | Pending |
 | RAG-02 | Phase 3 | Pending |
 | RAG-03 | Phase 3 | Pending |
@@ -92,13 +116,17 @@
 | REV-02 | Phase 5 | Pending |
 | REV-03 | Phase 5 | Pending |
 | OUT-01 | Phase 5 | Pending |
+| EDIT-01 | Phase 4 | Pending |
+| EDIT-02 | Phase 4 | Pending |
+| EDIT-03 | Phase 5 | Pending |
+| EDIT-04 | Phase 6 | Pending |
 | OUT-02 | Phase 6 | Pending |
 | OUT-03 | Phase 6 | Pending |
 | OUT-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 21 total
-- Mapped to phases: 21
+- v1 requirements: 31 total
+- Mapped to phases: 31
 - Unmapped: 0 ✓
 
 ---

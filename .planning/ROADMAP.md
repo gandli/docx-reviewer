@@ -37,20 +37,22 @@ Plans:
 - [ ] 01-03: 接入本地模型加载流程并验证离线重启恢复
 
 ### Phase 2: Document Ingestion
-**Goal**: 用户可导入 `.docx` 模板与背景资料，系统能稳定提取结构并建立可复用的文档中间表示
+**Goal**: 用户可导入 `pdf/doc/docx/txt/md` 等文件，完成格式分流、原文预览和结构提取，并建立可复用的文档中间表示
 **Depends on**: Phase 1
-**Requirements**: [DOC-01, DOC-02, DOC-03, DOC-04]
+**Requirements**: [DOC-00, DOC-01, DOC-01A, DOC-01B, DOC-01C, DOC-02, DOC-03, DOC-04, PREV-01, PREV-02, PREV-03]
 **Success Criteria** (what must be TRUE):
-  1. 用户可导入 `.docx` 模板和背景资料并看到处理进度
+  1. 用户可导入 `pdf/doc/docx/txt/md` 文件并看到对应处理路径和进度
   2. 系统可提取标题、条款、表格和编号结构，并以统一模型保存
-  3. 导入后的文档片段可完成切分、嵌入和本地索引入库
-  4. 用户可查看每份资料的解析和索引状态
-**Plans**: 3 plans
+  3. 用户可查看接近原文样式的 `docx` 预览，以及 `pdf` 的分页预览
+  4. 导入后的文档片段可完成切分、嵌入和本地索引入库
+  5. 用户可在同一任务中同时查看原文预览和结构化编辑稿
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: 搭建导入工作台与文件解析管线
-- [ ] 02-02: 定义文档中间表示并实现结构提取与标准化
-- [ ] 02-03: 完成片段切分、向量化和索引入库可视化
+- [ ] 02-01: 搭建导入工作台与多格式文件分流管线
+- [ ] 02-02: 集成 `pdf` 与 `docx` 原文预览能力
+- [ ] 02-03: 定义文档中间表示并实现结构提取与标准化
+- [ ] 02-04: 完成片段切分、向量化和索引入库可视化
 
 ### Phase 3: Grounded Knowledge Layer
 **Goal**: 生成、审阅和修订共用一套本地知识底座，并能为每次结论提供可追溯证据
@@ -68,30 +70,33 @@ Plans:
 - [ ] 03-03: 完成生成/审阅共用知识底座的端到端验证
 
 ### Phase 4: Draft Generation
-**Goal**: 用户可基于模板和背景资料生成完整初稿，或只填充指定字段、章节和表格
+**Goal**: 用户可基于模板和背景资料生成完整初稿，并在结构化编辑稿中按章节、条款、字段和表格定向修改
 **Depends on**: Phase 3
-**Requirements**: [GEN-01, GEN-02, GEN-03, GEN-04]
+**Requirements**: [GEN-01, GEN-02, GEN-03, GEN-04, EDIT-01, EDIT-02]
 **Success Criteria** (what must be TRUE):
   1. 用户可选择模板与背景资料生成结构化初稿
   2. 用户可仅更新指定字段、章节或表格
   3. 生成结果保留章节层级和编号逻辑
-  4. 每次生成都附带可核查的依据摘要
-**Plans**: 3 plans
+  4. 用户可在独立的结构化编辑稿中修改章节、条款、字段和表格单元
+  5. 每次生成都附带可核查的依据摘要
+**Plans**: 4 plans
 
 Plans:
 - [ ] 04-01: 构建生成任务 schema、提示编排和结果校验
 - [ ] 04-02: 实现模板生成、字段填充和章节级更新流程
-- [ ] 04-03: 加入依据摘要、结果预览和失败恢复机制
+- [ ] 04-03: 构建结构化编辑稿与原文预览联动
+- [ ] 04-04: 加入依据摘要、结果预览和失败恢复机制
 
 ### Phase 5: Review and Risk Engine
 **Goal**: 用户可对已有文档进行审阅，查看问题清单、定位风险条款，并生成针对性的修订建议
 **Depends on**: Phase 4
-**Requirements**: [REV-01, REV-02, REV-03, OUT-01]
+**Requirements**: [REV-01, REV-02, REV-03, OUT-01, EDIT-03]
 **Success Criteria** (what must be TRUE):
   1. 用户可对现有文档发起审阅并得到结构化问题清单
   2. 系统可识别缺失条款、风险条款和关键字段不一致
   3. 每个问题都能跳转到原文位置，并说明触发原因
   4. 用户可对问题条款生成替代文本或修订建议
+  5. 用户可逐条接受、拒绝或重生修订建议
 **Plans**: 4 plans
 
 Plans:
@@ -103,7 +108,7 @@ Plans:
 ### Phase 6: Export and Finalization
 **Goal**: 用户可确认修订结果、保留变更记录，并导出可直接交付的 `.docx` 和审阅摘要
 **Depends on**: Phase 5
-**Requirements**: [OUT-02, OUT-03, OUT-04]
+**Requirements**: [OUT-02, OUT-03, OUT-04, EDIT-04]
 **Success Criteria** (what must be TRUE):
   1. 用户可接受、拒绝或手动调整修订建议
   2. 系统可保留最终变更记录和导出前摘要
@@ -124,8 +129,8 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Runtime Foundation | 0/3 | Not started | - |
-| 2. Document Ingestion | 0/3 | Not started | - |
+| 2. Document Ingestion | 0/4 | Not started | - |
 | 3. Grounded Knowledge Layer | 0/3 | Not started | - |
-| 4. Draft Generation | 0/3 | Not started | - |
+| 4. Draft Generation | 0/4 | Not started | - |
 | 5. Review and Risk Engine | 0/4 | Not started | - |
 | 6. Export and Finalization | 0/3 | Not started | - |

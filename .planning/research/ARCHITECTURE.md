@@ -36,6 +36,7 @@
 
 | Component | Responsibility | Typical Implementation |
 |-----------|----------------|------------------------|
+| 原文预览器 | 保留用户对原文件样式、分页和位置的感知 | PDF.js / docx preview renderer |
 | 文档解析器 | 把模板、背景资料和待审文档转成统一结构 | `.docx` 读取 + 结构化中间表示 |
 | 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | Transformers.js + Voy + IndexedDB |
 | LLM 运行时 | 本地对话、生成、结构化输出和流式回复 | WebLLM + WebGPU |
@@ -133,9 +134,10 @@ const result = await llm.runTask({ task, evidence, schema });
 ### Key Data Flows
 
 1. **导入流:** 用户上传模板或文档后，系统解析结构、切分内容、生成向量并写入本地库。
-2. **生成流:** 用户选择模板和资料后，系统按字段或章节检索背景信息，再调用本地模型生成内容。
-3. **审阅流:** 系统对现有文档提取结构，运行规则检查和语义检查，再生成问题清单与修订建议。
-4. **导出流:** 系统把用户确认后的结构化结果生成 `.docx`，同时写出审阅摘要。
+2. **预览流:** 原文件进入预览器，保留分页和样式供用户核对，但不直接在预览层上修改。
+3. **生成流:** 用户选择模板和资料后，系统按字段或章节检索背景信息，再调用本地模型生成内容写入结构化编辑稿。
+4. **审阅流:** 系统对现有文档提取结构，运行规则检查和语义检查，再生成问题清单与修订建议。
+5. **导出流:** 系统把用户确认后的结构化结果生成 `.docx`，同时写出审阅摘要。
 
 ## Scaling Considerations
 
@@ -163,6 +165,12 @@ const result = await llm.runTask({ task, evidence, schema });
 **What people do:** 导入时拿到什么结构，导出时就直接原样回写。  
 **Why it's wrong:** 一旦生成或修订流程改变结构，系统会快速变脆。  
 **Do this instead:** 维护稳定的中间表示层，让解析和导出都围绕它工作。
+
+### Anti-Pattern 3: Editing directly on preview DOM
+
+**What people do:** 在 `pdf` 或 `docx` 预览 DOM 上直接做正文编辑。  
+**Why it's wrong:** 预览层的目标是“像原文”，不是“可控编辑”，后续修订记录和导出都会失控。  
+**Do this instead:** 让预览层只负责核对，编辑永远落在结构化稿上。
 
 ## Integration Points
 

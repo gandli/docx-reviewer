@@ -46,6 +46,7 @@ Recent decisions affecting current work:
 - [Phase 0]: 生成链路优先采用 WebLLM + WebGPU
 - [Phase 0]: v1 文档主链路聚焦结构化 `.docx`
 - [Phase 0]: 检索链路采用 Transformers.js + Voy + IndexedDB
+- [Phase 0]: 文档交互采用“原文预览 + 结构化编辑稿”双视图
 
 ### Pending Todos
 
