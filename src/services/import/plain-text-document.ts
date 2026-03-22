@@ -78,6 +78,7 @@ export function parseTextDocumentContent(
   const firstParagraph = blocks.find((block) => block.kind === "paragraph");
 
   return {
+    mode: "structured",
     title: firstHeading?.text ?? getTitleFromFileName(fileName),
     blocks,
     activeClauseTitle: firstHeading?.text ?? getTitleFromFileName(fileName),

@@ -64,6 +64,28 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.assistantMessages).toHaveLength(1);
   });
 
+  it("imports a pdf document into preview mode and resets the assistant thread", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    store.getState().importDocument(
+      {
+        mode: "pdf",
+        title: "付款附件",
+        blocks: [],
+        activeClauseTitle: "PDF 预览",
+        activeClauseText: "当前文档已按原样预览打开，可继续围绕整份文档发起审阅或修订。",
+        pdfSource: "data:application/pdf;base64,ZmFrZQ==",
+      },
+      "付款附件.pdf",
+    );
+
+    expect(store.getState().summary?.activeDocumentMode).toBe("pdf");
+    expect(store.getState().summary?.activeDocumentTitle).toBe("付款附件");
+    expect(store.getState().summary?.assistantMessages).toHaveLength(1);
+    expect(store.getState().previewDocument?.mode).toBe("pdf");
+  });
+
   it("switches the current context to selected text", () => {
     const store = createWorkspaceContextStore();
     store.getState().setSummary(mockWorkspaceSummary);

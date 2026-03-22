@@ -1,5 +1,6 @@
 import type { WorkspaceImportedDocument } from "@/features/workspace-context/types/workspace-summary";
 import { parseDocxDocument } from "@/services/import/docx-document";
+import { parsePdfDocument } from "@/services/import/pdf-document";
 import { parsePlainTextDocument } from "@/services/import/plain-text-document";
 
 function getExtension(fileName: string) {
@@ -16,6 +17,10 @@ export async function importDocumentFile(file: File): Promise<WorkspaceImportedD
 
   if (extension === "docx") {
     return parseDocxDocument(file);
+  }
+
+  if (extension === "pdf") {
+    return parsePdfDocument(file);
   }
 
   throw new Error(`暂不支持导入该文件类型：${file.name}`);

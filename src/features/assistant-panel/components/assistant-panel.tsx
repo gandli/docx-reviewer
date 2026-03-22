@@ -33,6 +33,8 @@ export function AssistantPanel({
         <div className="assistant-floating-tools">
           {isActionPanelOpen ? (
             <ActionPanel
+              documentMode={summary.activeDocumentMode}
+              hasSuggestion={Boolean(summary.suggestedRevisionText)}
               summaryLabel={summary.activeClauseTitle}
               onApplySuggestion={onApplySuggestion}
               onJumpToSelection={onJumpToSelection}

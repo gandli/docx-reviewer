@@ -2,10 +2,13 @@ import type { WorkspaceSummary } from "@/features/workspace-context/types/worksp
 import { WorkspaceSidebar } from "@/features/workspace-shell/components/workspace-sidebar";
 import { DocumentHeader } from "@/features/editor-draft/components/document-header";
 import { DocumentCanvas } from "@/features/editor-draft/components/document-canvas";
+import { PdfDocumentCanvas } from "@/features/editor-draft/components/pdf-document-canvas";
 import { AssistantPanel } from "@/features/assistant-panel/components/assistant-panel";
+import type { WorkspacePreviewDocument } from "@/features/workspace-context/types/workspace-summary";
 
 type WorkspaceLayoutProps = {
   summary: WorkspaceSummary;
+  previewDocument?: WorkspacePreviewDocument;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
   onSelectText: (payload: { text: string; blockId?: string }) => void;
@@ -15,6 +18,7 @@ type WorkspaceLayoutProps = {
 
 export function WorkspaceLayout({
   summary,
+  previewDocument,
   onApplySuggestion,
   onJumpToSelection,
   onSelectText,
@@ -25,8 +29,12 @@ export function WorkspaceLayout({
     <div className="workspace-layout">
       <WorkspaceSidebar summary={summary} onImportDocument={onImportDocument} />
       <main className="workspace-main">
-        <DocumentHeader title={summary.activeDocumentTitle} />
-        <DocumentCanvas summary={summary} onSelectText={onSelectText} />
+        <DocumentHeader title={summary.activeDocumentTitle} mode={summary.activeDocumentMode} />
+        {summary.activeDocumentMode === "pdf" ? (
+          <PdfDocumentCanvas title={summary.activeDocumentTitle} previewDocument={previewDocument} />
+        ) : (
+          <DocumentCanvas summary={summary} onSelectText={onSelectText} />
+        )}
       </main>
       <AssistantPanel
         summary={summary}

@@ -5,6 +5,42 @@ import { WorkspacePage } from "@/features/workspace-shell/routes/workspace-page"
 import { themeTokens } from "@/shared/constants/theme";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
+vi.mock("react-pdf", async () => {
+  const React = await import("react");
+
+  return {
+    pdfjs: {
+      GlobalWorkerOptions: {},
+    },
+    Document: ({
+      children,
+      onLoadSuccess,
+      loading,
+      file,
+    }: {
+      children?: React.ReactNode;
+      onLoadSuccess?: ({ numPages }: { numPages: number }) => void;
+      loading?: React.ReactNode;
+      file?: string;
+    }) => {
+      React.useEffect(() => {
+        if (file) {
+          onLoadSuccess?.({ numPages: 2 });
+        }
+      }, [file, onLoadSuccess]);
+
+      if (!file) {
+        return <>{loading}</>;
+      }
+
+      return <div data-testid="pdf-document">{children}</div>;
+    },
+    Page: ({ pageNumber }: { pageNumber: number }) => (
+      <div data-testid={`pdf-page-${pageNumber}`}>PDF Page {pageNumber}</div>
+    ),
+  };
+});
+
 describe("workspace shell", () => {
   const scrollIntoViewMock = vi.fn();
   const getActiveClauseHeading = () =>
@@ -19,6 +55,14 @@ describe("workspace shell", () => {
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
       value: scrollIntoViewMock,
+    });
+    Object.defineProperty(globalThis, "ResizeObserver", {
+      configurable: true,
+      writable: true,
+      value: class {
+        observe() {}
+        disconnect() {}
+      },
     });
   });
 
@@ -213,6 +257,32 @@ describe("workspace shell", () => {
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
       expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
       expect(screen.getAllByText(/已导入文档《差旅报销制度》/).length).toBeGreaterThan(0);
+    });
+
+    expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();
+  });
+
+  it("imports a pdf file and switches the center panel to preview mode", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const file = new File(["%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF"], "制度附件.pdf", {
+      type: "application/pdf",
+    });
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText("制度附件").length).toBeGreaterThan(0);
+      expect(screen.getByText("原样预览")).toBeInTheDocument();
+      expect(screen.getByText("PDF 原样预览 · 共 2 页")).toBeInTheDocument();
+      expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
+      expect(screen.getByText("导入文件 · 制度附件.pdf")).toBeInTheDocument();
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();

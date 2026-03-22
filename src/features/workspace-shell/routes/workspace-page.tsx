@@ -21,10 +21,8 @@ export function WorkspacePage() {
     void store.getState().hydrate(workspaceId);
   }, [store, workspaceId]);
 
-  const summary = useSyncExternalStore(
-    store.subscribe,
-    () => store.getState().summary ?? mockWorkspaceSummary,
-  );
+  const workspaceState = useSyncExternalStore(store.subscribe, () => store.getState());
+  const summary = workspaceState.summary ?? mockWorkspaceSummary;
 
   const handleImportDocument = async (file: File) => {
     const importedDocument = await importDocumentFile(file);
@@ -35,6 +33,7 @@ export function WorkspacePage() {
     <div className="workspace-page">
       <WorkspaceLayout
         summary={summary}
+        previewDocument={workspaceState.previewDocument}
         onApplySuggestion={() => store.getState().applySuggestion()}
         onJumpToSelection={() => store.getState().focusSelection()}
         onSelectText={(payload) => store.getState().selectText(payload)}

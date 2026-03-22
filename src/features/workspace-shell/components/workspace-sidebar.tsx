@@ -44,7 +44,7 @@ export function WorkspaceSidebar({ summary, onImportDocument }: WorkspaceSidebar
           className="workspace-actions__input"
           data-testid="workspace-import-input"
           type="file"
-          accept=".txt,.md,.docx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          accept=".txt,.md,.docx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           onChange={(event) => {
             const [file] = Array.from(event.target.files ?? []);
             if (!file) {

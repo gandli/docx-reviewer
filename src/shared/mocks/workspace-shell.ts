@@ -62,6 +62,7 @@ export const mockWorkspaceSummary: WorkspaceSummary = {
   workspaceTitle: "文档工作台",
   activeDocumentId: "doc-procurement-policy",
   activeDocumentTitle: "采购与付款管理制度",
+  activeDocumentMode: "structured",
   activeNodeId: "clause-payment",
   activeSelectionBlockId: "paragraph-2",
   activeClauseTitle: "付款方式",

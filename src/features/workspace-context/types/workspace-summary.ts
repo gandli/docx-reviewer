@@ -13,11 +13,20 @@ export type WorkspaceDocumentBlock = {
   level?: 1 | 2 | 3;
 };
 
+export type WorkspaceDocumentMode = "structured" | "pdf";
+
 export type WorkspaceImportedDocument = {
+  mode: WorkspaceDocumentMode;
   title: string;
   blocks: WorkspaceDocumentBlock[];
   activeClauseTitle: string;
   activeClauseText: string;
+  pdfSource?: string;
+};
+
+export type WorkspacePreviewDocument = {
+  mode: "pdf";
+  source: string;
 };
 
 export type WorkspaceSummary = {
@@ -25,6 +34,7 @@ export type WorkspaceSummary = {
   workspaceTitle: string;
   activeDocumentId: string;
   activeDocumentTitle: string;
+  activeDocumentMode: WorkspaceDocumentMode;
   activeNodeId?: string;
   activeSelectionBlockId?: string;
   activeClauseTitle: string;

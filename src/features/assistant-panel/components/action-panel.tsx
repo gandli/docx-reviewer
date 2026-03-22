@@ -1,4 +1,6 @@
 type ActionPanelProps = {
+  documentMode: "structured" | "pdf";
+  hasSuggestion: boolean;
   summaryLabel: string;
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
@@ -6,6 +8,8 @@ type ActionPanelProps = {
 };
 
 export function ActionPanel({
+  documentMode,
+  hasSuggestion,
   summaryLabel,
   onApplySuggestion,
   onJumpToSelection,
@@ -21,29 +25,33 @@ export function ActionPanel({
       </div>
       <div className="muted">当前聚焦：{summaryLabel}</div>
       <div className="assistant-actions">
-        <button
-          className="assistant-primary-action"
-          type="button"
-          onClick={() => {
-            onApplySuggestion();
-            onClose();
-          }}
-        >
-        接受建议
-        </button>
+        {documentMode === "structured" && hasSuggestion ? (
+          <button
+            className="assistant-primary-action"
+            type="button"
+            onClick={() => {
+              onApplySuggestion();
+              onClose();
+            }}
+          >
+            接受建议
+          </button>
+        ) : null}
         <button className="assistant-secondary-action" type="button" onClick={onClose}>
           重新生成
         </button>
-        <button
-          className="assistant-secondary-action"
-          type="button"
-          onClick={() => {
-            onJumpToSelection();
-            onClose();
-          }}
-        >
-          跳到原文位置
-        </button>
+        {documentMode === "structured" ? (
+          <button
+            className="assistant-secondary-action"
+            type="button"
+            onClick={() => {
+              onJumpToSelection();
+              onClose();
+            }}
+          >
+            跳到原文位置
+          </button>
+        ) : null}
       </div>
     </div>
   );

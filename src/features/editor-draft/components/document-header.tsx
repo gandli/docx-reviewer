@@ -1,8 +1,11 @@
+import type { WorkspaceDocumentMode } from "@/features/workspace-context/types/workspace-summary";
+
 type DocumentHeaderProps = {
   title: string;
+  mode: WorkspaceDocumentMode;
 };
 
-export function DocumentHeader({ title }: DocumentHeaderProps) {
+export function DocumentHeader({ title, mode }: DocumentHeaderProps) {
   return (
     <header className="document-header">
       <div>
@@ -12,11 +15,17 @@ export function DocumentHeader({ title }: DocumentHeaderProps) {
         </div>
       </div>
       <div className="document-status-inline">
-        <span className="document-status-inline__item">阅读视图</span>
-        <span className="document-status-inline__divider" aria-hidden="true">
-          ·
-        </span>
-        <span className="document-status-inline__item is-active">可编辑</span>
+        {mode === "pdf" ? (
+          <span className="document-status-inline__item is-active">原样预览</span>
+        ) : (
+          <>
+            <span className="document-status-inline__item">阅读视图</span>
+            <span className="document-status-inline__divider" aria-hidden="true">
+              ·
+            </span>
+            <span className="document-status-inline__item is-active">可编辑</span>
+          </>
+        )}
       </div>
     </header>
   );

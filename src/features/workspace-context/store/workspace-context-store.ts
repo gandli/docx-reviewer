@@ -1,12 +1,14 @@
 import { createStore } from "zustand/vanilla";
 import type {
   WorkspaceImportedDocument,
+  WorkspacePreviewDocument,
   WorkspaceSummary,
 } from "@/features/workspace-context/types/workspace-summary";
 import type { WorkspaceSummaryRepository } from "@/services/persistence/repositories/workspace-summary-repository";
 
 export type WorkspaceContextState = {
   summary?: WorkspaceSummary;
+  previewDocument?: WorkspacePreviewDocument;
   setSummary: (summary: WorkspaceSummary) => void;
   hydrate: (workspaceId: string) => Promise<void>;
   focusSelection: () => void;
@@ -30,6 +32,7 @@ export function createWorkspaceContextStore(
 
   return createStore<WorkspaceContextState>((set) => ({
     summary: initialSummary,
+    previewDocument: undefined,
     setSummary: (summary) => {
       set({ summary: persist(summary) });
     },
@@ -137,13 +140,24 @@ export function createWorkspaceContextStore(
         }
 
         const importedReply = `已导入文档《${document.title}》，可以继续生成、审阅或修订。`;
+        const isPdfDocument = document.mode === "pdf";
 
         return {
+          previewDocument:
+            isPdfDocument && document.pdfSource
+              ? {
+                  mode: "pdf",
+                  source: document.pdfSource,
+                }
+              : undefined,
           summary: persist({
             ...state.summary,
             activeDocumentId: `imported-${Date.now()}`,
             activeDocumentTitle: document.title,
-            activeSelectionBlockId: document.blocks.find((block) => block.kind === "paragraph")?.id,
+            activeDocumentMode: document.mode,
+            activeSelectionBlockId: isPdfDocument
+              ? undefined
+              : document.blocks.find((block) => block.kind === "paragraph")?.id,
             activeClauseTitle: document.activeClauseTitle,
             activeClauseText: document.activeClauseText,
             suggestedRevisionText: "",
@@ -155,7 +169,7 @@ export function createWorkspaceContextStore(
             lastUserIntent: `导入文档 ${fileName}`,
             documentBlocks: document.blocks,
             updatedAt: "刚刚",
-            isSelectionFocused: false,
+            isSelectionFocused: isPdfDocument,
             assistantMessages: [
               {
                 id: "assistant-1",

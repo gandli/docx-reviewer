@@ -55,6 +55,7 @@ function parseDocxHtml(fileName: string, html: string): WorkspaceImportedDocumen
   const firstParagraph = blocks.find((block) => block.kind === "paragraph");
 
   return {
+    mode: "structured",
     title: firstHeading?.text ?? blocks[0].text ?? fileName.replace(/\.[^.]+$/, ""),
     blocks,
     activeClauseTitle: firstHeading?.text ?? blocks[0].text ?? fileName.replace(/\.[^.]+$/, ""),
