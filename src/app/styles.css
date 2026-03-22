@@ -324,10 +324,7 @@ textarea {
 .pdf-page-card {
   width: min(100%, 900px);
   padding: 0;
-  border: none;
-  background: transparent;
   text-align: left;
-  cursor: pointer;
 }
 
 .pdf-page-card__meta {
@@ -341,8 +338,26 @@ textarea {
   font-weight: 600;
 }
 
+.pdf-page-card__page-trigger {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
 .pdf-page-card__status {
   color: rgba(138, 106, 55, 0.92);
+}
+
+.pdf-page-card__preview {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
 .pdf-document .react-pdf__Page {
@@ -361,6 +376,8 @@ textarea {
   color: var(--color-text-secondary);
   font-size: 0.9rem;
   line-height: 1.7;
+  user-select: text;
+  cursor: text;
 }
 
 .pdf-page-card--active .react-pdf__Page {
@@ -386,6 +403,39 @@ textarea {
   font-size: 0.92rem;
   line-height: 1.7;
   text-align: center;
+}
+
+.pdf-selection-popover {
+  position: fixed;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(216, 207, 193, 0.92);
+  border-radius: 14px;
+  background: rgba(255, 251, 244, 0.96);
+  box-shadow: 0 18px 36px rgba(71, 53, 33, 0.14);
+  transform: translate(-50%, 0);
+}
+
+.pdf-selection-popover__action,
+.pdf-selection-popover__dismiss {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.pdf-selection-popover__action {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.pdf-selection-popover__dismiss {
+  color: var(--color-text-muted);
 }
 
 .document-block {

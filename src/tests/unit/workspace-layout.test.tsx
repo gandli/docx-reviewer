@@ -361,6 +361,74 @@ describe("workspace shell", () => {
     });
   });
 
+  it("shows an action popover after selecting text inside a pdf excerpt", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    parsePdfDocumentMock.mockResolvedValue({
+      mode: "pdf",
+      title: "制度附件",
+      blocks: [
+        { id: "pdf-heading-1", kind: "heading", level: 2, pageNumber: 1, text: "第 1 页" },
+        { id: "pdf-paragraph-1", kind: "paragraph", pageNumber: 1, text: "第一页付款正文。" },
+      ],
+      activeClauseTitle: "第 1 页",
+      activeClauseText: "第一页付款正文。",
+      pdfSource: "data:application/pdf;base64,ZmFrZQ==",
+    });
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: { files: [new File(["fake"], "制度附件.pdf", { type: "application/pdf" })] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-page-excerpt-1")).toBeInTheDocument();
+    });
+
+    const excerpt = screen.getByTestId("pdf-page-excerpt-1");
+    const textNode = excerpt.firstChild;
+    const selectionMock = {
+      toString: () => "付款正文",
+      rangeCount: 1,
+      getRangeAt: () =>
+        ({
+          commonAncestorContainer: textNode,
+          getBoundingClientRect: () => ({
+            top: 160,
+            left: 320,
+            width: 80,
+            height: 18,
+            right: 400,
+            bottom: 178,
+            x: 320,
+            y: 160,
+            toJSON: () => ({}),
+          }),
+        }) as Range,
+      removeAllRanges: vi.fn(),
+    };
+
+    vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
+
+    fireEvent.mouseUp(excerpt);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-selection-popover")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "围绕所选内容继续处理" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "围绕所选内容继续处理" }));
+
+    await waitFor(() => {
+      expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
+      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+      expect(screen.queryByTestId("pdf-selection-popover")).not.toBeInTheDocument();
+    });
+  });
+
   it("updates the assistant context after selecting text in the document", async () => {
     render(
       <MemoryRouter>
