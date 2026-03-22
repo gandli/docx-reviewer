@@ -41,7 +41,8 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("文档")).toBeInTheDocument();
     expect(screen.getByText("刚刚更新")).toBeInTheDocument();
-    expect(screen.getByText(/已继承当前工作区摘要/)).toBeInTheDocument();
+    expect(screen.getByText("当前上下文")).toBeInTheDocument();
+    expect(screen.getAllByText("付款方式").length).toBeGreaterThan(0);
   });
 
   it("collapses and expands asset groups", () => {

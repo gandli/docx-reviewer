@@ -7,11 +7,13 @@ type AssistantContextHeaderProps = {
 export function AssistantContextHeader({ summary }: AssistantContextHeaderProps) {
   return (
     <div className="assistant-context">
-      <div className="eyebrow">Assistant</div>
-      <div className="title-lg" style={{ fontSize: "1.05rem", marginTop: 10 }}>
-        当前上下文：{summary.activeClauseTitle}
+      <div className="assistant-context__row">
+        <div className="eyebrow">Assistant</div>
+        <div className="assistant-context__summary">
+          <span className="assistant-context__label">当前上下文</span>
+          <span className="assistant-context__value">{summary.activeClauseTitle}</span>
+        </div>
       </div>
-      <div className="muted">已继承当前工作区摘要和最近处理状态</div>
     </div>
   );
 }
