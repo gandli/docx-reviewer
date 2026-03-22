@@ -6,9 +6,11 @@ from pathlib import Path
 
 from openpyxl import Workbook
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 import xlwt
 
 
@@ -157,26 +159,54 @@ def run_textutil(html_path: Path, fmt: str) -> None:
 def build_pdf() -> None:
     pdf_path = OUT_DIR / "sample-procurement-spec.pdf"
     styles = getSampleStyleSheet()
+    pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+    title_style = ParagraphStyle(
+      "FixtureTitle",
+      parent=styles["Title"],
+      fontName="STSong-Light",
+      fontSize=22,
+      leading=28,
+      textColor=colors.HexColor("#294e80"),
+      alignment=1,
+    )
+    heading_style = ParagraphStyle(
+      "FixtureHeading",
+      parent=styles["Heading2"],
+      fontName="STSong-Light",
+      fontSize=16,
+      leading=22,
+      textColor=colors.HexColor("#294e80"),
+      spaceBefore=8,
+      spaceAfter=8,
+    )
+    body_style = ParagraphStyle(
+      "FixtureBody",
+      parent=styles["BodyText"],
+      fontName="STSong-Light",
+      fontSize=11,
+      leading=18,
+      textColor=colors.HexColor("#222222"),
+    )
     doc = SimpleDocTemplate(str(pdf_path), pagesize=A4, title=TITLE)
 
     story = [
-      Paragraph(f"<b>{TITLE}</b>", styles["Title"]),
+      Paragraph(TITLE, title_style),
       Spacer(1, 12),
-      Paragraph("<b>一、项目背景</b>", styles["Heading2"]),
+      Paragraph("一、项目背景", heading_style),
       Paragraph(
         "随着公司业务规模扩大和远程协作常态化，现有部分办公设备已连续使用超过 4 年，"
         "出现性能下降、电池续航缩短和硬件故障率升高等问题。",
-        styles["BodyText"],
+        body_style,
       ),
       Spacer(1, 10),
-      Paragraph("<b>二、采购目标</b>", styles["Heading2"]),
-      Paragraph("1. 提升员工日常办公效率", styles["BodyText"]),
-      Paragraph("2. 降低设备故障造成的业务中断风险", styles["BodyText"]),
-      Paragraph("3. 统一 IT 资产管理口径", styles["BodyText"]),
+      Paragraph("二、采购目标", heading_style),
+      Paragraph("1. 提升员工日常办公效率", body_style),
+      Paragraph("2. 降低设备故障造成的业务中断风险", body_style),
+      Paragraph("3. 统一 IT 资产管理口径", body_style),
       Spacer(1, 10),
-      Paragraph("<b>三、预算与付款</b>", styles["Heading2"]),
-      Paragraph("预算上限为人民币 225,000 元。", styles["BodyText"]),
-      Paragraph("建议在验收通过且发票齐备后，按约定节点分阶段支付。", styles["BodyText"]),
+      Paragraph("三、预算与付款", heading_style),
+      Paragraph("预算上限为人民币 225,000 元。", body_style),
+      Paragraph("建议在验收通过且发票齐备后，按约定节点分阶段支付。", body_style),
       Spacer(1, 14),
     ]
 
@@ -197,6 +227,8 @@ def build_pdf() -> None:
           ("GRID", (0, 0), (-1, -1), 0.8, colors.HexColor("#333333")),
           ("VALIGN", (0, 0), (-1, -1), "TOP"),
           ("PADDING", (0, 0), (-1, -1), 6),
+          ("FONTNAME", (0, 0), (-1, -1), "STSong-Light"),
+          ("FONTSIZE", (0, 0), (-1, -1), 11),
         ]
       )
     )
