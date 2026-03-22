@@ -175,12 +175,12 @@ export function PdfDocumentCanvas({
           className="grid w-full justify-items-center gap-[18px]"
           file={previewDocument.source}
           loading={
-            <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+            <div className="mx-auto w-full max-w-[720px] rounded-[18px] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
               正在打开《{title}》…
             </div>
           }
           error={
-            <div className="mx-auto w-full max-w-[720px] rounded-[18px] border border-dashed border-[rgba(181,142,83,0.28)] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
+            <div className="mx-auto w-full max-w-[720px] rounded-[18px] px-7 py-[72px] text-center font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-muted)]">
               {loadError ?? "PDF 打开失败，请重新导入后重试。"}
             </div>
           }
