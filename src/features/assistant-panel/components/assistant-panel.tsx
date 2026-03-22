@@ -35,31 +35,9 @@ export function AssistantPanel({
       }`}
       data-testid="assistant-panel"
     >
-      <button
-        aria-label={isCollapsed ? "展开右栏" : "收起右栏"}
-        className="mb-3 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center self-start rounded-xl border border-[rgba(216,207,193,0.82)] bg-[rgba(255,251,244,0.72)] text-[var(--color-text-secondary)] shadow-[0_8px_18px_rgba(71,53,33,0.06)] transition hover:border-[rgba(181,142,83,0.35)] hover:bg-[rgba(255,251,244,0.92)]"
-        type="button"
-        onClick={onToggleCollapse}
-      >
-        <svg
-          aria-hidden="true"
-          className={`h-4 w-4 transition-transform ${isCollapsed ? "" : "rotate-180"}`}
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12.5 4.5L7 10L12.5 15.5"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
       {!isCollapsed ? (
         <>
-          <AssistantContextHeader summary={summary} />
+          <AssistantContextHeader summary={summary} onToggleCollapse={onToggleCollapse} />
           <div
             className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto pt-4 pb-3"
             data-scroll-region="true"
@@ -79,7 +57,30 @@ export function AssistantPanel({
             />
           </div>
         </>
-      ) : null}
+      ) : (
+        <button
+          aria-label="展开右栏"
+          className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center self-start rounded-xl border border-[rgba(216,207,193,0.82)] bg-[rgba(255,251,244,0.72)] text-[var(--color-text-secondary)] shadow-[0_8px_18px_rgba(71,53,33,0.06)] transition hover:border-[rgba(181,142,83,0.35)] hover:bg-[rgba(255,251,244,0.92)]"
+          type="button"
+          onClick={onToggleCollapse}
+        >
+          <svg
+            aria-hidden="true"
+            className="h-4 w-4"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12.5 4.5L7 10L12.5 15.5"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
     </section>
   );
 }

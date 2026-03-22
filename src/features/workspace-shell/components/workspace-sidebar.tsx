@@ -46,41 +46,42 @@ export function WorkspaceSidebar({
       data-testid="workspace-sidebar"
       data-scroll-region="true"
     >
-      <button
-        aria-label={isCollapsed ? "展开左栏" : "收起左栏"}
-        className="mb-3 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-[rgba(216,207,193,0.82)] bg-[rgba(255,251,244,0.72)] text-[var(--color-text-secondary)] shadow-[0_8px_18px_rgba(71,53,33,0.06)] transition hover:border-[rgba(181,142,83,0.35)] hover:bg-[rgba(255,251,244,0.92)]"
-        type="button"
-        onClick={onToggleCollapse}
-      >
-        <svg
-          aria-hidden="true"
-          className={`h-4 w-4 transition-transform ${isCollapsed ? "rotate-180" : ""}`}
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12.5 4.5L7 10L12.5 15.5"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-
       {!isCollapsed ? (
         <>
-          <div>
-            <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
-              Workspace
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
+                Workspace
+              </div>
+              <div className="mt-2 mb-1 text-[1.15rem] leading-[1.25] font-bold text-[var(--color-text-primary)]">
+                {summary.workspaceTitle}
+              </div>
+              <div className="font-sans text-[0.85rem] leading-[1.5] text-[var(--color-text-muted)]">
+                最近更新：{summary.updatedAt}
+              </div>
             </div>
-            <div className="mt-2 mb-1 text-[1.15rem] leading-[1.25] font-bold text-[var(--color-text-primary)]">
-              {summary.workspaceTitle}
-            </div>
-            <div className="font-sans text-[0.85rem] leading-[1.5] text-[var(--color-text-muted)]">
-              最近更新：{summary.updatedAt}
-            </div>
+            <button
+              aria-label="收起左栏"
+              className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-[rgba(216,207,193,0.7)] bg-[rgba(255,251,244,0.52)] text-[var(--color-text-secondary)] transition hover:border-[rgba(181,142,83,0.35)] hover:bg-[rgba(255,251,244,0.88)]"
+              type="button"
+              onClick={onToggleCollapse}
+            >
+              <svg
+                aria-hidden="true"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12.5 4.5L7 10L12.5 15.5"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
 
           <WorkspaceAssetGroups groups={groups} />
@@ -133,22 +134,46 @@ export function WorkspaceSidebar({
           </div>
         </>
       ) : (
-        <input
-          ref={fileInputRef}
-          className="hidden"
-          data-testid="workspace-import-input"
-          type="file"
-          accept=".txt,.md,.docx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-          onChange={(event) => {
-            const [file] = Array.from(event.target.files ?? []);
-            if (!file) {
-              return;
-            }
+        <>
+          <button
+            aria-label="展开左栏"
+            className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-[rgba(216,207,193,0.82)] bg-[rgba(255,251,244,0.72)] text-[var(--color-text-secondary)] shadow-[0_8px_18px_rgba(71,53,33,0.06)] transition hover:border-[rgba(181,142,83,0.35)] hover:bg-[rgba(255,251,244,0.92)]"
+            type="button"
+            onClick={onToggleCollapse}
+          >
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4 rotate-180"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12.5 4.5L7 10L12.5 15.5"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <input
+            ref={fileInputRef}
+            className="hidden"
+            data-testid="workspace-import-input"
+            type="file"
+            accept=".txt,.md,.docx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            onChange={(event) => {
+              const [file] = Array.from(event.target.files ?? []);
+              if (!file) {
+                return;
+              }
 
-            void onImportDocument(file);
-            event.currentTarget.value = "";
-          }}
-        />
+              void onImportDocument(file);
+              event.currentTarget.value = "";
+            }}
+          />
+        </>
       )}
     </aside>
   );
