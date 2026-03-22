@@ -3,6 +3,7 @@ import { useState } from "react";
 type AssetItem = {
   id: string;
   label: string;
+  kind: string;
   updatedAt: string;
   selected?: boolean;
 };
@@ -60,7 +61,10 @@ export function WorkspaceAssetGroups({ groups }: WorkspaceAssetGroupsProps) {
                     key={item.id}
                     className={`asset-card__item${item.selected ? " is-selected" : ""}`}
                   >
-                    <div className="asset-card__item-title">{item.label}</div>
+                    <div className="asset-card__item-header">
+                      <div className="asset-card__item-title">{item.label}</div>
+                      <div className="asset-card__item-kind">{item.kind}</div>
+                    </div>
                     <div className="asset-card__item-meta">{item.updatedAt}</div>
                   </div>
                 ))}

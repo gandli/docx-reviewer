@@ -177,12 +177,31 @@ textarea {
   box-shadow: inset 0 0 0 1px rgba(216, 207, 193, 0.82);
 }
 
+.asset-card__item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .asset-card__item-title {
   color: inherit;
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.45;
+}
+
+.asset-card__item-kind {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(236, 228, 216, 0.78);
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .asset-card__item-meta {

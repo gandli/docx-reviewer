@@ -30,6 +30,7 @@ export const mockAssetGroups = [
       {
         id: "doc-procurement-policy",
         label: "采购与付款管理制度",
+        kind: "文档",
         updatedAt: "刚刚更新",
         selected: true,
       },
@@ -40,8 +41,8 @@ export const mockAssetGroups = [
     label: "模板",
     defaultExpanded: false,
     items: [
-      { id: "tpl-policy-v3", label: "制度模板 v3", updatedAt: "今天 14:20" },
-      { id: "tpl-contract-clauses", label: "合同条款模板", updatedAt: "昨天 18:40" },
+      { id: "tpl-policy-v3", label: "制度模板 v3", kind: "模板", updatedAt: "今天 14:20" },
+      { id: "tpl-contract-clauses", label: "合同条款模板", kind: "模板", updatedAt: "昨天 18:40" },
     ],
   },
   {
@@ -49,8 +50,8 @@ export const mockAssetGroups = [
     label: "参考资料",
     defaultExpanded: false,
     items: [
-      { id: "ref-payment", label: "付款节点说明", updatedAt: "今天 09:15" },
-      { id: "ref-procurement", label: "采购管理办法", updatedAt: "昨天 11:30" },
+      { id: "ref-payment", label: "付款节点说明", kind: "资料", updatedAt: "今天 09:15" },
+      { id: "ref-procurement", label: "采购管理办法", kind: "资料", updatedAt: "昨天 11:30" },
     ],
   },
   {
@@ -58,8 +59,8 @@ export const mockAssetGroups = [
     label: "表格资料",
     defaultExpanded: false,
     items: [
-      { id: "sheet-plan", label: "采购付款计划", updatedAt: "今天 10:05" },
-      { id: "sheet-vendors", label: "供应商信息表", updatedAt: "昨天 16:12" },
+      { id: "sheet-plan", label: "采购付款计划", kind: "表格", updatedAt: "今天 10:05" },
+      { id: "sheet-vendors", label: "供应商信息表", kind: "表格", updatedAt: "昨天 16:12" },
     ],
   },
 ] as const;
