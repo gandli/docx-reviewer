@@ -1,0 +1,75 @@
+name: Update Page Screenshots
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    if: github.actor != 'github-actions[bot]' && !contains(github.event.head_commit.message, '[skip ci]')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: 安装 Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: 安装依赖
+        run: bun install --frozen-lockfile
+
+      - name: 安装 Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: 构建站点
+        run: bun run build
+
+      - name: 启动预览服务
+        run: |
+          bun run preview -- --host 127.0.0.1 --port 4173 > /tmp/vite-preview.log 2>&1 &
+          echo $! > /tmp/vite-preview.pid
+
+      - name: 等待站点可访问
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173 > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "预览服务启动失败"
+          cat /tmp/vite-preview.log
+          exit 1
+
+      - name: 生成页面截图
+        run: bun run screenshots
+
+      - name: 提交更新后的截图
+        run: |
+          if git diff --quiet -- docs/screenshots README.md; then
+            echo "截图没有变化"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots README.md bun.lock package.json
+          git commit -m "docs: update page screenshots [skip ci]"
+          git push
+
+      - name: 停止预览服务
+        if: always()
+        run: |
+          if [ -f /tmp/vite-preview.pid ]; then
+            kill "$(cat /tmp/vite-preview.pid)" || true
+          fi

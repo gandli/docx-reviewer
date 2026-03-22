@@ -50,6 +50,14 @@ bun run preview
 bun run test
 ```
 
+## 页面预览
+
+当前主工作台会在推送到主分支后由 GitHub Actions 自动截图，并更新下面这张预览图。
+
+### 主工作台
+
+![主工作台预览](docs/screenshots/workspace-main.png)
+
 ## 项目结构
 
 ```

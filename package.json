@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "screenshots": "node scripts/capture-screenshots.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -30,6 +31,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.1",
     "jsdom": "29.0.1",
+    "playwright": "^1.58.2",
     "tailwindcss": "4.2.2",
     "vite": "8.0.1",
     "vitest": "4.1.0"
