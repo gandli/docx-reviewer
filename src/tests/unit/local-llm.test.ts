@@ -15,9 +15,12 @@ describe("local llm", () => {
   it("provides a curated local model list with a stable default", () => {
     const models = getAvailableLocalLLMModels();
 
-    expect(models.length).toBeGreaterThanOrEqual(4);
+    expect(models.length).toBeGreaterThanOrEqual(9);
     expect(models.some((model) => model.id === getDefaultLocalLLMModelId())).toBe(true);
     expect(models.some((model) => model.id === "Qwen2.5-1.5B-Instruct-q4f16_1-MLC")).toBe(true);
+    expect(models.some((model) => model.id === "SmolLM2-360M-Instruct-q4f16_1-MLC")).toBe(true);
+    expect(models.some((model) => model.id === "Qwen2.5-3B-Instruct-q4f16_1-MLC")).toBe(true);
+    expect(models.some((model) => model.id === "Llama-3.2-3B-Instruct-q4f16_1-MLC")).toBe(true);
   });
 
   it("persists and restores selected model id", () => {

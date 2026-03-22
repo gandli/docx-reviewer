@@ -31,6 +31,18 @@ const LOCAL_MODEL_STORAGE_KEY = "local-llm:selected-model";
 const DEFAULT_LOCAL_MODEL_ID = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
 const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
   {
+    id: "SmolLM2-360M-Instruct-q4f16_1-MLC",
+    label: "SmolLM2 360M",
+    summary: "最轻量，适合先快速验证流程或低资源设备。",
+    tags: ["轻量", "快速", "入门"],
+  },
+  {
+    id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+    label: "Qwen2.5 0.5B",
+    summary: "中文友好，加载更快，适合轻量审阅和短文本处理。",
+    tags: ["中文", "轻量", "快速"],
+  },
+  {
     id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
     label: "Qwen2.5 1.5B",
     summary: "中文审阅和校改更稳，适合正式文档处理。",
@@ -49,6 +61,30 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["平衡", "中文"],
   },
   {
+    id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
+    label: "Qwen2.5 3B",
+    summary: "比 1.5B 更稳，适合更复杂的正式文书生成和审阅。",
+    tags: ["中文", "增强", "审阅"],
+  },
+  {
+    id: "Qwen3-4B-q4f16_1-MLC",
+    label: "Qwen3 4B",
+    summary: "更强的上下文理解与改写能力，适合长一点的文书任务。",
+    tags: ["增强", "中文", "长文"],
+  },
+  {
+    id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+    label: "Llama 3.2 1B",
+    summary: "通用能力稳定，可作为 Qwen 之外的轻量备选。",
+    tags: ["通用", "轻量", "备选"],
+  },
+  {
+    id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+    label: "Llama 3.2 3B",
+    summary: "质量更稳，适合做对比生成和通用文书处理。",
+    tags: ["通用", "平衡", "备选"],
+  },
+  {
     id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
     label: "Phi 3.5 Mini",
     summary: "英文和通用写作表现稳定，可作备选。",
@@ -59,6 +95,12 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     label: "Gemma 2 2B",
     summary: "适合对比不同风格输出，回复更克制。",
     tags: ["备选", "克制"],
+  },
+  {
+    id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
+    label: "SmolLM2 1.7B",
+    summary: "在较低资源下保持不错的响应速度，适合轻量长文处理。",
+    tags: ["轻量", "平衡", "低资源"],
   },
 ];
 
