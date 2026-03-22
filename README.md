@@ -15,7 +15,7 @@
 | 组件 | 技术 | 说明 |
 |------|------|------|
 | 生成引擎 | `@mlc-ai/web-llm` | WebGPU 加速的浏览器内 LLM 推理 |
-| 本地模型 | Qwen2.5-1.5B | 中文文档任务优化的轻量模型 |
+| 本地模型 | Qwen2.5-1.5B 等| 中文文档任务优化的轻量模型 |
 | 向量检索 | `@huggingface/transformers` + `voy-search` | 浏览器端嵌入生成和近邻检索 |
 | 文档解析 | `mammoth` | `.docx` 转结构化 HTML/文本 |
 | 文档导出 | `docx` / `docxtemplater` | 生成规范 Word 文件 |
