@@ -1,6 +1,5 @@
 import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
 import { mockAssetGroups } from "@/shared/mocks/workspace-shell";
-import { WorkspaceResumeCard } from "@/features/workspace-shell/components/workspace-resume-card";
 import { WorkspaceAssetGroups } from "@/features/workspace-shell/components/workspace-asset-groups";
 import { WorkspaceEvidenceList } from "@/features/workspace-shell/components/workspace-evidence-list";
 
@@ -17,7 +16,6 @@ export function WorkspaceSidebar({ summary }: WorkspaceSidebarProps) {
         <div className="muted">最近更新：{summary.updatedAt}</div>
       </div>
 
-      <WorkspaceResumeCard summary={summary} />
       <WorkspaceAssetGroups groups={mockAssetGroups} />
       <WorkspaceEvidenceList evidence={summary.recentEvidenceRefs} />
 

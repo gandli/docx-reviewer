@@ -38,7 +38,6 @@ describe("workspace shell", () => {
     expect(screen.getByText("主文档")).toBeInTheDocument();
     expect(screen.getByText("参考资料")).toBeInTheDocument();
     expect(screen.getByText("最近引用")).toBeInTheDocument();
-    expect(screen.getByText("继续上次工作")).toBeInTheDocument();
     expect(screen.getByText(/已继承当前工作区摘要/)).toBeInTheDocument();
   });
 
@@ -51,7 +50,7 @@ describe("workspace shell", () => {
     expect(screen.getByText("采购与付款管理制度")).toBeInTheDocument();
     expect(screen.getByText("当前选中条款")).toBeInTheDocument();
     expect(screen.getByText("修订")).toBeInTheDocument();
-    expect(screen.getByText("接受建议")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
   });
 
   it("applies the suggestion and updates the clause text", () => {
@@ -61,6 +60,7 @@ describe("workspace shell", () => {
       </MemoryRouter>,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "更多操作" }));
     fireEvent.click(screen.getByRole("button", { name: "接受建议" }));
 
     expect(screen.getByText(mockWorkspaceSummary.suggestedRevisionText)).toBeInTheDocument();
@@ -95,6 +95,7 @@ describe("workspace shell", () => {
       </MemoryRouter>,
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "更多操作" }));
     fireEvent.click(screen.getByRole("button", { name: "跳到原文位置" }));
 
     expect(screen.getByText("已定位到当前条款")).toBeInTheDocument();

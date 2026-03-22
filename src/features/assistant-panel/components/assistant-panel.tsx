@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
 import { mockAssistantMessages } from "@/shared/mocks/workspace-shell";
 import { AssistantContextHeader } from "@/features/assistant-panel/components/assistant-context-header";
@@ -16,6 +17,8 @@ export function AssistantPanel({
   onApplySuggestion,
   onJumpToSelection,
 }: AssistantPanelProps) {
+  const [isActionPanelOpen, setIsActionPanelOpen] = useState(false);
+
   return (
     <section className="assistant-panel" data-testid="assistant-panel">
       <AssistantContextHeader summary={summary} />
@@ -26,17 +29,24 @@ export function AssistantPanel({
         />
       </div>
       <div className="assistant-footer">
-        <ActionPanel
-          onApplySuggestion={onApplySuggestion}
-          onJumpToSelection={onJumpToSelection}
-        />
-        <ChatComposer />
-        <div className="context-card">
-          <div className="eyebrow">工作区摘要</div>
-          <div className="muted">
-            当前视图基于工作区摘要、当前节点、待处理建议和最近证据恢复。
-          </div>
+        <div className="assistant-floating-tools">
+          {isActionPanelOpen ? (
+            <ActionPanel
+              summaryLabel={summary.activeClauseTitle}
+              onApplySuggestion={onApplySuggestion}
+              onJumpToSelection={onJumpToSelection}
+              onClose={() => setIsActionPanelOpen(false)}
+            />
+          ) : null}
+          <button
+            className="assistant-tools-trigger"
+            type="button"
+            onClick={() => setIsActionPanelOpen((current) => !current)}
+          >
+            更多操作
+          </button>
         </div>
+        <ChatComposer />
       </div>
     </section>
   );
