@@ -21,17 +21,24 @@
 
 | Area | Choice | Current Version Verified | Why |
 |------|--------|--------------------------|-----|
-| Frontend build | Vite + TypeScript | existing recommendation | 启动快、现代浏览器友好、适合纯前端项目 |
-| UI runtime | React | project recommendation | 适合工作台式复杂状态界面 |
-| Global app state | Zustand | not pinned here | 状态轻，适合流程型页面 |
+| Frontend build | Vite + TypeScript | `vite@8.0.1` + `typescript@5.9.3` | 启动快、现代浏览器友好、适合纯前端项目 |
+| UI runtime | React | `react@19.2.4` | 适合工作台式复杂状态界面 |
+| Global app state | Zustand | `zustand@5.0.12` | 状态轻，适合流程型页面 |
 | IndexedDB wrapper | Dexie | 4.3.0 | schema、版本迁移、查询和事务体验更稳 |
 | Fallback IndexedDB helper | `idb` | 8.0.3 | 适合少量底层封装或兼容工具 |
 | Local LLM runtime | `@mlc-ai/web-llm` | 0.2.82 | 浏览器本地生成主链路 |
-| PDF preview | `pdfjs-dist` | 5.5.207 | 官方维护，文本层和分页能力成熟 |
+| PDF preview | `react-pdf` | `react-pdf@10.4.1` | React 组件化接入更稳，适合作为 PDF 原文预览主层 |
+| PDF rendering engine | `pdfjs-dist` | 5.5.207 | 作为 `react-pdf` 底层渲染能力与文本层基础 |
 | DOCX preview | `docx-preview` | 0.3.7 | 接近 Word 样式的网页预览 |
 | DOCX semantic parse | `mammoth` | 1.12.0 | 语义解析适合结构化处理 |
 | Spreadsheet parse | `xlsx` (SheetJS) | 0.18.5 | 浏览器里最现实的 `xls/xlsx` 方案 |
 | Structured editor | Tiptap | `@tiptap/core@3.20.4` | ProseMirror 之上，适合节点化编辑 |
+
+约束原则：
+
+- 这里列出的版本默认指 2026-03-22 当天核验到的最新稳定正式版
+- Phase 1 和 Phase 2 实施时不引入 `beta`、`rc`、`canary` 版本
+- 若某依赖后续升级，需要先验证和 WebGPU、IndexedDB、Worker 组合是否兼容
 
 ## 3. Frontend Project Structure
 

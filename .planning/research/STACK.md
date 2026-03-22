@@ -4,6 +4,12 @@
 **Researched:** 2026-03-22
 **Confidence:** MEDIUM
 
+## Version Policy
+
+- 默认采用 2026-03-22 当天核验到的最新稳定正式版
+- 不追 `beta`、`rc`、`canary`、`next` 等预发布版本
+- 若未来某个库出现重大破坏性升级，先验证兼容性，再整体升级规划文档
+
 ## Recommended Stack
 
 ### Core Technologies
@@ -20,32 +26,43 @@
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
+| `react` | 19.2.4 | 工作台界面、预览页面和编辑器外壳 | 作为前端 UI 运行时基座 |
+| `vite` | 8.0.1 | 本地开发与生产打包 | 作为前端构建工具 |
+| `typescript` | 5.9.3 | 类型约束、领域模型和服务边界 | 作为整个前端工程的语言基线 |
+| `zustand` | 5.0.12 | 导入流程、运行时状态和工作台状态 | 作为全局状态容器 |
+| `react-pdf` | 10.4.1 | PDF 原文预览、分页查看和页码跳转 | 作为首选 PDF 预览层 |
+| `pdfjs-dist` | 5.5.207 | PDF 文本层、底层渲染能力 | 作为 `react-pdf` 的底层依赖能力认知 |
 | `voy-search` | 0.6.3 | 浏览器内向量索引与近邻检索 | 适合中小规模本地知识库和离线检索，但要对其不稳定 API 保持隔离 |
+| `dexie` | 4.3.0 | IndexedDB schema、迁移和事务封装 | 作为本地持久化主封装层 |
+| `idb` | 8.0.3 | 少量底层 IndexedDB 封装和工具函数 | 作为补充工具层 |
 | `docx` | 9.6.1 | 生成规范 `.docx` 文件 | 最终导出 Word 时使用，适合自己控制结构输出 |
 | `mammoth` | 1.12.0 | 将现有 `.docx` 转成结构化 HTML/文本以便审阅和分析 | 适合“读旧文档”，不适合作为最终保真导出方案 |
+| `docx-preview` | 0.3.7 | 将 `.docx` 近似渲染到网页 | 作为 DOCX 原文预览层 |
 | `docxtemplater` | 3.68.3 | 基于既有 Word 模板做字段替换和块填充 | 当模板格式必须高度保留时使用，尤其适合固定版式模板 |
-| `zod` | current | 约束任务输入、模板字段和结构化输出 | 需要把“文档类型配置”变成可校验数据时使用 |
+| `xlsx` | 0.18.5 | 解析 `xls/xlsx`，提取工作表、区域和单元格数据 | 作为电子表格导入主方案 |
+| `@tiptap/core` | 3.20.4 | 结构化编辑稿和节点式编辑能力 | 作为编辑器内核 |
+| `zod` | 4.3.6 | 约束任务输入、模板字段和结构化输出 | 需要把“文档类型配置”变成可校验数据时使用 |
 
 ### Development Tools
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| `bun` | 前端依赖安装、脚本执行和本地开发 | 启动快，适合纯前端/TypeScript 项目 |
-| `vite` | 本地开发与打包 | 对 Web Worker、现代浏览器和前端构建支持友好 |
-| `vitest` | 单元测试 | 适合验证解析、规则命中、结构化输出等纯逻辑模块 |
-| `playwright` | 浏览器端真实流程验证 | 用于验证导入、生成、审阅、导出主链路 |
+| Tool | Version | Purpose | Notes |
+|------|---------|---------|-------|
+| `bun` | 1.3.11 | 前端依赖安装、脚本执行和本地开发 | 启动快，适合纯前端/TypeScript 项目 |
+| `vite` | 8.0.1 | 本地开发与打包 | 对 Web Worker、现代浏览器和前端构建支持友好 |
+| `vitest` | 4.1.0 | 单元测试 | 适合验证解析、规则命中、结构化输出等纯逻辑模块 |
+| `playwright` | 1.58.2 | 浏览器端真实流程验证 | 用于验证导入、生成、审阅、导出主链路 |
 
 ## Installation
 
 ```bash
-# Core
-bun add @mlc-ai/web-llm @huggingface/transformers voy-search
+# Runtime
+bun add react@19.2.4 zustand@5.0.12 react-pdf@10.4.1 @mlc-ai/web-llm@0.2.82 @huggingface/transformers@3.8.1 voy-search@0.6.3 dexie@4.3.0 idb@8.0.3 zod@4.3.6
 
-# Supporting
-bun add docx mammoth docxtemplater zod
+# Documents
+bun add docx@9.6.1 mammoth@1.12.0 docx-preview@0.3.7 docxtemplater@3.68.3 xlsx@0.18.5 @tiptap/core@3.20.4 pdfjs-dist@5.5.207
 
 # Dev dependencies
-bun add -d vite vitest playwright typescript
+bun add -d vite@8.0.1 vitest@4.1.0 playwright@1.58.2 typescript@5.9.3
 ```
 
 ## Alternatives Considered
@@ -81,6 +98,7 @@ bun add -d vite vitest playwright typescript
 
 | Package A | Compatible With | Notes |
 |-----------|-----------------|-------|
+| `react-pdf@10.4.1` | `pdfjs-dist@5.5.207` | 作为项目的 PDF 原文预览组合 |
 | `@mlc-ai/web-llm@0.2.82` | WebGPU-capable browsers | 官方仓库明确说明其以 WebGPU 为浏览器内高性能推理基础 |
 | `@huggingface/transformers@3.8.1` | WebGPU-capable Chromium-class browsers | 在本项目中更适合承担嵌入与特征提取 |
 | `voy-search@0.6.3` | Transformers.js 生成的嵌入向量 | 仓库说明其可与 Transformers.js 等库配合，但 API 仍未稳定 |
@@ -93,7 +111,7 @@ bun add -d vite vitest playwright typescript
 - [Qwen/Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) — 验证了模型规模、结构化文本能力和上下文说明
 - [tantaraio/voy](https://github.com/tantaraio/voy) — 验证了 Voy 的用途，以及 1.0 前 API 不稳定的事实
 - [Mammoth.js](https://github.com/mwilliamson/mammoth.js) — 验证了其定位是 `.docx` 到 HTML 的语义读取
-- `npm view @mlc-ai/web-llm version` / `@huggingface/transformers version` / `voy-search version` / `docx version` / `mammoth version` / `docxtemplater version` — 2026-03-22 校验当前包版本
+- `npm view react version` / `vite version` / `typescript version` / `zustand version` / `react-pdf version` / `pdfjs-dist version` / `@mlc-ai/web-llm version` / `@huggingface/transformers version` / `voy-search version` / `dexie version` / `idb version` / `docx version` / `mammoth version` / `docx-preview version` / `docxtemplater version` / `xlsx version` / `@tiptap/core version` / `zod version` / `vitest version` / `playwright version` / `bun --version` — 2026-03-22 校验当前稳定版本
 
 ---
 *Stack research for: 浏览器本地离线商务文档智能处理系统*

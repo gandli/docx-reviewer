@@ -48,6 +48,7 @@ Recent decisions affecting current work:
 - [Phase 0]: `xlsx` 作为结构化资料输入纳入首版范围，`xls` 为受限兼容
 - [Phase 0]: 检索链路采用 Transformers.js + Voy + IndexedDB
 - [Phase 0]: 文档交互采用“原文预览 + 结构化编辑稿”双视图
+- [Phase 0]: 技术栈默认采用当天核验到的最新稳定正式版，不追预发布版本
 
 ### Pending Todos
 
