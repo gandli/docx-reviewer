@@ -166,9 +166,6 @@ export function PdfDocumentCanvas({
       className="relative min-w-0 bg-white px-6 py-7"
       data-testid="document-canvas"
     >
-      <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
-        {pageCount > 0 ? `PDF 原样预览 · 共 ${pageCount} 页` : "正在载入 PDF 预览"}
-      </div>
       <div
         ref={containerRef}
         className="flex min-h-[540px] justify-center"

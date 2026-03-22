@@ -141,9 +141,6 @@ export function DocxDocumentCanvas({
       className="relative min-w-0 bg-white px-6 py-7"
       data-testid="document-canvas"
     >
-      <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
-        Word 原样预览
-      </div>
       <div
         className="flex min-h-[540px] w-full max-w-full justify-center overflow-x-auto overflow-y-hidden"
         data-testid="docx-document-viewer"

@@ -53,7 +53,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
   const [selectionPopover, setSelectionPopover] = useState<DocumentSelectionPopover | undefined>();
   const noteText =
     summary.activeDocumentMode === "plain"
-      ? summary.activePreviewLabel ?? "文本原样预览"
+      ? undefined
       : suggestionCount > 0
         ? `检测到 ${suggestionCount} 处建议`
         : "已载入真实正文";
@@ -127,9 +127,11 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
       className="relative min-w-0 bg-white px-6 py-7"
       data-testid="document-canvas"
     >
-      <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
-        {noteText}
-      </div>
+      {noteText ? (
+        <div className="mb-5 text-right font-sans text-[0.75rem] font-bold tracking-[0.02em] text-[rgba(138,106,55,0.88)]">
+          {noteText}
+        </div>
+      ) : null}
       <div
         ref={contentRef}
         className="mb-[22px] grid gap-[14px]"

@@ -70,8 +70,6 @@ export function WorkspaceLayout({
       >
         <DocumentHeader
           title={summary.activeDocumentTitle}
-          mode={summary.activeDocumentMode}
-          previewLabel={summary.activePreviewLabel}
         />
         {summary.activeDocumentMode === "pdf" ? (
           <PdfDocumentCanvas

@@ -282,8 +282,8 @@ describe("workspace shell", () => {
       </MemoryRouter>,
     );
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
-    expect(screen.getByText("阅读视图")).toBeInTheDocument();
-    expect(screen.getByText("可编辑")).toBeInTheDocument();
+    expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
+    expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
     expect(screen.getByText(/尚未加载/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "模型设置" })).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
@@ -486,8 +486,8 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("差旅报销制度").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("原样预览").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("Markdown 原样预览").length).toBeGreaterThan(0);
+      expect(screen.queryByText("原样预览")).not.toBeInTheDocument();
+      expect(screen.queryByText("Markdown 原样预览")).not.toBeInTheDocument();
       expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
       expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
@@ -518,8 +518,8 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("办公用品领用规则").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("原样预览").length).toBeGreaterThan(0);
-      expect(screen.getAllByText("文本原样预览").length).toBeGreaterThan(0);
+      expect(screen.queryByText("原样预览")).not.toBeInTheDocument();
+      expect(screen.queryByText("文本原样预览")).not.toBeInTheDocument();
       expect(screen.getAllByText("员工领用办公用品时，应按月登记并说明用途。").length).toBeGreaterThan(0);
     });
   });
@@ -555,7 +555,7 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(parseDocxDocumentMock).toHaveBeenCalled();
-      expect(screen.getByText("原样预览")).toBeInTheDocument();
+      expect(screen.queryByText("原样预览")).not.toBeInTheDocument();
       expect(screen.getByTestId("docx-document-viewer")).toBeInTheDocument();
       expect(renderDocxPreviewMock).toHaveBeenCalled();
       expect(screen.getByTestId("docx-preview-text")).toBeInTheDocument();
@@ -714,8 +714,8 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("制度附件").length).toBeGreaterThan(0);
-      expect(screen.getByText("原样预览")).toBeInTheDocument();
-      expect(screen.getByText("PDF 原样预览 · 共 2 页")).toBeInTheDocument();
+      expect(screen.queryByText("原样预览")).not.toBeInTheDocument();
+      expect(screen.queryByText("PDF 原样预览 · 共 2 页")).not.toBeInTheDocument();
       expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
       expect(screen.getByText("导入文件 · 制度附件.pdf")).toBeInTheDocument();
@@ -747,7 +747,7 @@ describe("workspace shell", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("PDF 原样预览 · 共 2 页")).toBeInTheDocument();
+      expect(screen.queryByText("PDF 原样预览 · 共 2 页")).not.toBeInTheDocument();
       expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
       expect(screen.queryByText("PDF 预览需要重新导入原文件")).not.toBeInTheDocument();
     });
