@@ -314,6 +314,40 @@ textarea {
   min-height: 540px;
 }
 
+.docx-document-viewer {
+  min-height: 540px;
+}
+
+.docx-preview-host {
+  width: 100%;
+}
+
+.docx-preview-host .docx-preview-surface {
+  background: transparent;
+}
+
+.docx-preview-host .docx-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.docx-preview-host .docx {
+  margin: 0 !important;
+  box-shadow: 0 18px 36px rgba(71, 53, 33, 0.12);
+}
+
+.docx-document-summary {
+  margin-top: 18px;
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
 .pdf-document {
   display: grid;
   justify-items: center;

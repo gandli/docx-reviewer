@@ -151,7 +151,12 @@ export function createWorkspaceContextStore(
                   mode: "pdf",
                   source: document.pdfSource,
                 }
-              : undefined,
+              : document.mode === "docx" && document.docxSource
+                ? {
+                    mode: "docx",
+                    source: document.docxSource,
+                  }
+                : undefined,
           summary: persist({
             ...state.summary,
             activeDocumentId: `imported-${Date.now()}`,

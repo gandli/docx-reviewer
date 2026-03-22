@@ -69,10 +69,20 @@ export async function parseDocxDocument(file: File): Promise<WorkspaceImportedDo
   const parsedHtml = parseDocxHtml(file.name, htmlResult.value);
 
   if (parsedHtml) {
-    return parsedHtml;
+    return {
+      ...parsedHtml,
+      mode: "docx",
+      docxSource: arrayBuffer,
+    };
   }
 
   const textResult = await mammoth.extractRawText({ arrayBuffer });
 
-  return parseTextDocumentContent(file.name, textResult.value);
+  const parsedText = parseTextDocumentContent(file.name, textResult.value);
+
+  return {
+    ...parsedText,
+    mode: "docx",
+    docxSource: arrayBuffer,
+  };
 }

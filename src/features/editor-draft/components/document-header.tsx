@@ -15,7 +15,7 @@ export function DocumentHeader({ title, mode }: DocumentHeaderProps) {
         </div>
       </div>
       <div className="document-status-inline">
-        {mode === "pdf" ? (
+        {mode === "pdf" || mode === "docx" ? (
           <span className="document-status-inline__item is-active">原样预览</span>
         ) : (
           <>

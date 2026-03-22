@@ -90,6 +90,30 @@ describe("workspace context store", () => {
     expect(store.getState().previewDocument?.mode).toBe("pdf");
   });
 
+  it("imports a docx document into preview mode", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    store.getState().importDocument(
+      {
+        mode: "docx",
+        title: "制度范本",
+        blocks: [
+          { id: "heading-1", kind: "heading", level: 1, text: "制度范本" },
+          { id: "paragraph-1", kind: "paragraph", text: "第一条 付款应以验收通过为前提。" },
+        ],
+        activeClauseTitle: "制度范本",
+        activeClauseText: "第一条 付款应以验收通过为前提。",
+        docxSource: new ArrayBuffer(12),
+      },
+      "制度范本.docx",
+    );
+
+    expect(store.getState().summary?.activeDocumentMode).toBe("docx");
+    expect(store.getState().summary?.activeDocumentTitle).toBe("制度范本");
+    expect(store.getState().previewDocument?.mode).toBe("docx");
+  });
+
   it("switches the current context to selected text", () => {
     const store = createWorkspaceContextStore();
     store.getState().setSummary(mockWorkspaceSummary);

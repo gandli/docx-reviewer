@@ -3,6 +3,7 @@ import { WorkspaceSidebar } from "@/features/workspace-shell/components/workspac
 import { DocumentHeader } from "@/features/editor-draft/components/document-header";
 import { DocumentCanvas } from "@/features/editor-draft/components/document-canvas";
 import { PdfDocumentCanvas } from "@/features/editor-draft/components/pdf-document-canvas";
+import { DocxDocumentCanvas } from "@/features/editor-draft/components/docx-document-canvas";
 import { AssistantPanel } from "@/features/assistant-panel/components/assistant-panel";
 import type { WorkspacePreviewDocument } from "@/features/workspace-context/types/workspace-summary";
 
@@ -36,6 +37,12 @@ export function WorkspaceLayout({
             title={summary.activeDocumentTitle}
             previewDocument={previewDocument}
             onSelectText={onSelectText}
+          />
+        ) : summary.activeDocumentMode === "docx" ? (
+          <DocxDocumentCanvas
+            summary={summary}
+            title={summary.activeDocumentTitle}
+            previewDocument={previewDocument}
           />
         ) : (
           <DocumentCanvas summary={summary} onSelectText={onSelectText} />

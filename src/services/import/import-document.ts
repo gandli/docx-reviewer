@@ -19,6 +19,10 @@ export async function importDocumentFile(file: File): Promise<WorkspaceImportedD
     return parseDocxDocument(file);
   }
 
+  if (extension === "doc") {
+    throw new Error("当前版本暂不支持直接预览 .doc，请先转换为 .docx 后再导入。");
+  }
+
   if (extension === "pdf") {
     return parsePdfDocument(file);
   }

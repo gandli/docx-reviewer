@@ -8,9 +8,21 @@ import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 const { parsePdfDocumentMock } = vi.hoisted(() => ({
   parsePdfDocumentMock: vi.fn(),
 }));
+const { parseDocxDocumentMock, renderDocxPreviewMock } = vi.hoisted(() => ({
+  parseDocxDocumentMock: vi.fn(),
+  renderDocxPreviewMock: vi.fn(() => Promise.resolve()),
+}));
 
 vi.mock("@/services/import/pdf-document", () => ({
   parsePdfDocument: parsePdfDocumentMock,
+}));
+
+vi.mock("@/services/import/docx-document", () => ({
+  parseDocxDocument: parseDocxDocumentMock,
+}));
+
+vi.mock("docx-preview", () => ({
+  renderAsync: renderDocxPreviewMock,
 }));
 
 vi.mock("react-pdf", async () => {
@@ -60,6 +72,8 @@ describe("workspace shell", () => {
     window.localStorage.clear();
     vi.restoreAllMocks();
     parsePdfDocumentMock.mockReset();
+    parseDocxDocumentMock.mockReset();
+    renderDocxPreviewMock.mockClear();
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -269,6 +283,44 @@ describe("workspace shell", () => {
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();
+  });
+
+  it("imports a docx file and renders the original-style preview", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    parseDocxDocumentMock.mockResolvedValue({
+      mode: "docx",
+      title: "制度范本",
+      blocks: [
+        { id: "heading-1", kind: "heading", level: 1, text: "制度范本" },
+        { id: "paragraph-1", kind: "paragraph", text: "第一条 付款应以验收通过为前提。" },
+      ],
+      activeClauseTitle: "制度范本",
+      activeClauseText: "第一条 付款应以验收通过为前提。",
+      docxSource: new ArrayBuffer(16),
+    });
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: {
+        files: [
+          new File(["fake"], "制度范本.docx", {
+            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          }),
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(parseDocxDocumentMock).toHaveBeenCalled();
+      expect(screen.getByText("原样预览")).toBeInTheDocument();
+      expect(screen.getByTestId("docx-document-viewer")).toBeInTheDocument();
+      expect(renderDocxPreviewMock).toHaveBeenCalled();
+      expect(screen.getByText(/已载入《制度范本》的原样排版预览/)).toBeInTheDocument();
+    });
   });
 
   it("imports a pdf file and switches the center panel to preview mode", async () => {

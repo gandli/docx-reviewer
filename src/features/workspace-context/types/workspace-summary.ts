@@ -14,7 +14,7 @@ export type WorkspaceDocumentBlock = {
   pageNumber?: number;
 };
 
-export type WorkspaceDocumentMode = "structured" | "pdf";
+export type WorkspaceDocumentMode = "structured" | "pdf" | "docx";
 
 export type WorkspaceImportedDocument = {
   mode: WorkspaceDocumentMode;
@@ -23,12 +23,18 @@ export type WorkspaceImportedDocument = {
   activeClauseTitle: string;
   activeClauseText: string;
   pdfSource?: string;
+  docxSource?: ArrayBuffer;
 };
 
-export type WorkspacePreviewDocument = {
-  mode: "pdf";
-  source: string;
-};
+export type WorkspacePreviewDocument =
+  | {
+      mode: "pdf";
+      source: string;
+    }
+  | {
+      mode: "docx";
+      source: ArrayBuffer;
+    };
 
 export type WorkspaceSummary = {
   workspaceId: string;
