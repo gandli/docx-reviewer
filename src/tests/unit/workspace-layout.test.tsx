@@ -190,7 +190,7 @@ describe("workspace shell", () => {
     expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
   });
 
-  it("renders document header, highlighted active clause, and assistant actions", () => {
+  it("renders document header, highlighted active clause, and local model controls", () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -199,30 +199,9 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("阅读视图")).toBeInTheDocument();
     expect(screen.getByText("可编辑")).toBeInTheDocument();
-    expect(screen.getByText("起草内容")).toBeInTheDocument();
-    expect(screen.getByText("找问题")).toBeInTheDocument();
-    expect(screen.getByText("直接改写")).toBeInTheDocument();
-    expect(screen.getByText("润色表达")).toBeInTheDocument();
     expect(screen.getByText(/本地模型未加载/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "启用本地模型" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
-  });
-
-  it("applies the suggestion and updates the clause text", () => {
-    render(
-      <MemoryRouter>
-        <WorkspacePage />
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "更多操作" }));
-    fireEvent.click(screen.getByRole("button", { name: "接受建议" }));
-
-    expect(screen.getAllByText(mockWorkspaceSummary.suggestedRevisionText).length).toBeGreaterThan(
-      0,
-    );
-    expect(screen.getByText(`已应用建议：${mockWorkspaceSummary.suggestedRevisionText}`)).toBeInTheDocument();
   });
 
   it("restores a saved workspace summary from local storage", async () => {
@@ -252,20 +231,6 @@ describe("workspace shell", () => {
 
     expect(await screen.findByText("付款分三期执行，验收通过后支付尾款。")).toBeInTheDocument();
     expect(await screen.findByText(/已从本地恢复付款条款修订结果/)).toBeInTheDocument();
-  });
-
-  it("jumps back to the current clause when asked", () => {
-    render(
-      <MemoryRouter>
-        <WorkspacePage />
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "更多操作" }));
-    fireEvent.click(screen.getByRole("button", { name: "跳到原文位置" }));
-
-    expect(screen.getByText("已定位到当前条款")).toBeInTheDocument();
-    expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
 
   it("sends a chat message and appends it to the assistant thread", async () => {

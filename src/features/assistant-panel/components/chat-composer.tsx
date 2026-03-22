@@ -1,7 +1,6 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent } from "react";
 
 type ChatComposerProps = {
-  trailingAction?: ReactNode;
   onSendMessage: (message: string) => void;
   localModelLabel: string;
   localModelActionLabel?: string;
@@ -10,7 +9,6 @@ type ChatComposerProps = {
 };
 
 export function ChatComposer({
-  trailingAction,
   onSendMessage,
   localModelLabel,
   localModelActionLabel,
@@ -42,13 +40,6 @@ export function ChatComposer({
             {localModelActionLabel}
           </button>
         ) : null}
-      </div>
-      <div className="chat-composer__toolbar">
-        <div className="suggested-action">起草内容</div>
-        <div className="suggested-action">找问题</div>
-        <div className="suggested-action is-active">直接改写</div>
-        <div className="suggested-action">润色表达</div>
-        {trailingAction}
       </div>
       <div className="chat-composer__input">
         <input
