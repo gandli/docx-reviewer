@@ -201,6 +201,10 @@ const result = await llm.runTask({ task, evidence, schema });
 ## Related Design Notes
 
 - `.planning/research/DOCUMENT-PIPELINE.md` — 多格式读取、原文预览、结构化编辑与修订链路细化设计
+- `.planning/research/PHASE-1-2-IMPLEMENTATION.md` — Phase 1/2 实施拆解
+- `.planning/research/FRONTEND-STRUCTURE.md` — 前端目录结构与模块归属
+- `.planning/research/INDEXEDDB-SCHEMA.md` — IndexedDB / Dexie schema
+- `.planning/research/document-model.ts` — 文档中间表示 TypeScript 类型
 
 ---
 *Architecture research for: 浏览器本地离线商务文档智能处理系统*
