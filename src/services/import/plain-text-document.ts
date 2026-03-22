@@ -1,6 +1,7 @@
 import type {
   WorkspaceDocumentBlock,
   WorkspaceImportedDocument,
+  WorkspacePreviewLabel,
 } from "@/features/workspace-context/types/workspace-summary";
 
 const headingPattern = /^(#{1,3})\s+(.*)$/;
@@ -11,6 +12,10 @@ function createBlockId(prefix: string, index: number) {
 
 function getTitleFromFileName(fileName: string) {
   return fileName.replace(/\.[^.]+$/, "") || "未命名文档";
+}
+
+function getPlainPreviewLabel(fileName: string): WorkspacePreviewLabel {
+  return fileName.toLowerCase().endsWith(".md") ? "Markdown 原样预览" : "文本原样预览";
 }
 
 function collectBlocks(content: string) {
@@ -78,11 +83,12 @@ export function parseTextDocumentContent(
   const firstParagraph = blocks.find((block) => block.kind === "paragraph");
 
   return {
-    mode: "structured",
+    mode: "plain",
     title: firstHeading?.text ?? getTitleFromFileName(fileName),
     blocks,
     activeClauseTitle: firstHeading?.text ?? getTitleFromFileName(fileName),
     activeClauseText: firstParagraph?.text ?? "暂无正文内容。",
+    previewLabel: getPlainPreviewLabel(fileName),
   };
 }
 

@@ -14,7 +14,9 @@ export type WorkspaceDocumentBlock = {
   pageNumber?: number;
 };
 
-export type WorkspaceDocumentMode = "structured" | "pdf" | "docx";
+export type WorkspaceDocumentMode = "structured" | "plain" | "pdf" | "docx";
+
+export type WorkspacePreviewLabel = "文本原样预览" | "Markdown 原样预览";
 
 export type WorkspaceImportedDocument = {
   mode: WorkspaceDocumentMode;
@@ -22,6 +24,7 @@ export type WorkspaceImportedDocument = {
   blocks: WorkspaceDocumentBlock[];
   activeClauseTitle: string;
   activeClauseText: string;
+  previewLabel?: WorkspacePreviewLabel;
   pdfSource?: string;
   docxSource?: ArrayBuffer;
 };
@@ -42,6 +45,7 @@ export type WorkspaceSummary = {
   activeDocumentId: string;
   activeDocumentTitle: string;
   activeDocumentMode: WorkspaceDocumentMode;
+  activePreviewLabel?: WorkspacePreviewLabel;
   activeNodeId?: string;
   activeSelectionBlockId?: string;
   activeClauseTitle: string;

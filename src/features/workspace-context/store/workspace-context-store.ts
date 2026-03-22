@@ -232,6 +232,7 @@ export function createWorkspaceContextStore(
             activeDocumentId: `imported-${Date.now()}`,
             activeDocumentTitle: document.title,
             activeDocumentMode: document.mode,
+            activePreviewLabel: document.previewLabel,
             activeSelectionBlockId: defaultActiveBlockId,
             activeClauseTitle: document.activeClauseTitle,
             activeClauseText: document.activeClauseText,

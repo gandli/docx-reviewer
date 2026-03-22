@@ -43,7 +43,11 @@ export function WorkspaceLayout({
     <div className="workspace-layout">
       <WorkspaceSidebar summary={summary} onImportDocument={onImportDocument} />
       <main className="workspace-main">
-        <DocumentHeader title={summary.activeDocumentTitle} mode={summary.activeDocumentMode} />
+        <DocumentHeader
+          title={summary.activeDocumentTitle}
+          mode={summary.activeDocumentMode}
+          previewLabel={summary.activePreviewLabel}
+        />
         {summary.activeDocumentMode === "pdf" ? (
           <PdfDocumentCanvas
             summary={summary}

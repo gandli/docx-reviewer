@@ -280,7 +280,7 @@ describe("workspace shell", () => {
     });
   });
 
-  it("imports a txt or md file and renders the real document content", async () => {
+  it("imports a markdown file and switches the center panel to plain preview mode", async () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -299,12 +299,41 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("差旅报销制度").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("原样预览").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Markdown 原样预览").length).toBeGreaterThan(0);
+      expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
+      expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
       expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
       expect(screen.getByText("可以直接选中内容开始处理，或在右侧输入你的要求。")).toBeInTheDocument();
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();
+  });
+
+  it("imports a txt file and shows text preview mode", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const file = new File(
+      ["办公用品领用规则\n\n员工领用办公用品时，应按月登记并说明用途。"],
+      "办公用品领用规则.txt",
+      { type: "text/plain" },
+    );
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: { files: [file] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText("办公用品领用规则").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("原样预览").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("文本原样预览").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("员工领用办公用品时，应按月登记并说明用途。").length).toBeGreaterThan(0);
+    });
   });
 
   it("imports a docx file and renders the original-style preview", async () => {

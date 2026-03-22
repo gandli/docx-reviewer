@@ -34,6 +34,12 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const selectionPopoverRef = useRef<HTMLDivElement | null>(null);
   const [selectionPopover, setSelectionPopover] = useState<DocumentSelectionPopover | undefined>();
+  const noteText =
+    summary.activeDocumentMode === "plain"
+      ? summary.activePreviewLabel ?? "文本原样预览"
+      : suggestionCount > 0
+        ? `检测到 ${suggestionCount} 处建议`
+        : "已载入真实正文";
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -101,9 +107,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
 
   return (
     <section className="document-canvas" data-testid="document-canvas">
-      <div className="document-canvas__note">
-        {suggestionCount > 0 ? `检测到 ${suggestionCount} 处建议` : "已载入真实正文"}
-      </div>
+      <div className="document-canvas__note">{noteText}</div>
       <div ref={contentRef} className="document-content" onMouseUp={handleMouseUp}>
         {summary.documentBlocks.map((block) => {
           const isActiveHeading =
