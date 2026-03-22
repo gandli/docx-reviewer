@@ -5,6 +5,21 @@ export interface WorkspaceSummaryRepository {
   save(summary: WorkspaceSummary): Promise<void>;
 }
 
+function normalizeWorkspaceSummary(
+  summary: WorkspaceSummary,
+  fallbackSummary?: WorkspaceSummary,
+): WorkspaceSummary {
+  if (!fallbackSummary || fallbackSummary.workspaceId !== summary.workspaceId) {
+    return summary;
+  }
+
+  return {
+    ...fallbackSummary,
+    ...summary,
+    workspaceTitle: fallbackSummary.workspaceTitle,
+  };
+}
+
 export function createMemoryWorkspaceSummaryRepository(
   initialSummary?: WorkspaceSummary,
 ): WorkspaceSummaryRepository {
@@ -47,7 +62,10 @@ export function createBrowserWorkspaceSummaryRepository(
       }
 
       try {
-        return JSON.parse(value) as WorkspaceSummary;
+        return normalizeWorkspaceSummary(
+          JSON.parse(value) as WorkspaceSummary,
+          fallbackSummary,
+        );
       } catch {
         return memory.load(workspaceId);
       }

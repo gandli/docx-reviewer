@@ -1,5 +1,8 @@
 import { createWorkspaceContextStore } from "@/features/workspace-context/store/workspace-context-store";
-import { createMemoryWorkspaceSummaryRepository } from "@/services/persistence/repositories/workspace-summary-repository";
+import {
+  createBrowserWorkspaceSummaryRepository,
+  createMemoryWorkspaceSummaryRepository,
+} from "@/services/persistence/repositories/workspace-summary-repository";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
 describe("workspace context store", () => {
@@ -29,5 +32,22 @@ describe("workspace context store", () => {
 
     expect(store.getState().summary?.activeClauseText).toContain("分阶段支付");
     expect(store.getState().summary?.isSelectionFocused).toBe(true);
+  });
+
+  it("normalizes restored browser summaries to the current workspace title", async () => {
+    window.localStorage.setItem(
+      `workspace-summary:${mockWorkspaceSummary.workspaceId}`,
+      JSON.stringify({
+        ...mockWorkspaceSummary,
+        workspaceTitle: "企业文档工作区",
+      }),
+    );
+
+    const repository = createBrowserWorkspaceSummaryRepository(mockWorkspaceSummary);
+    const store = createWorkspaceContextStore(repository);
+
+    await store.getState().hydrate(mockWorkspaceSummary.workspaceId);
+
+    expect(store.getState().summary?.workspaceTitle).toBe("文档工作台");
   });
 });
