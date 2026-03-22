@@ -37,22 +37,24 @@ Plans:
 - [ ] 01-03: 接入本地模型加载流程并验证离线重启恢复
 
 ### Phase 2: Document Ingestion
-**Goal**: 用户可导入 `pdf/doc/docx/txt/md` 等文件，完成格式分流、原文预览和结构提取，并建立可复用的文档中间表示
+**Goal**: 用户可导入 `pdf/doc/docx/xls/xlsx/txt/md` 等文件，完成格式分流、原文预览和结构提取，并建立可复用的文档中间表示
 **Depends on**: Phase 1
-**Requirements**: [DOC-00, DOC-01, DOC-01A, DOC-01B, DOC-01C, DOC-02, DOC-03, DOC-04, PREV-01, PREV-02, PREV-03]
+**Requirements**: [DOC-00, DOC-01, DOC-01A, DOC-01B, DOC-01C, DOC-01D, DOC-02, DOC-02A, DOC-03, DOC-04, PREV-01, PREV-02, PREV-02A, PREV-03]
 **Success Criteria** (what must be TRUE):
-  1. 用户可导入 `pdf/doc/docx/txt/md` 文件并看到对应处理路径和进度
+  1. 用户可导入 `pdf/doc/docx/xls/xlsx/txt/md` 文件并看到对应处理路径和进度
   2. 系统可提取标题、条款、表格和编号结构，并以统一模型保存
-  3. 用户可查看接近原文样式的 `docx` 预览，以及 `pdf` 的分页预览
-  4. 导入后的文档片段可完成切分、嵌入和本地索引入库
-  5. 用户可在同一任务中同时查看原文预览和结构化编辑稿
-**Plans**: 4 plans
+  3. 系统可提取工作表、表头、行列与单元格区域等表格结构
+  4. 用户可查看接近原文样式的 `docx` 预览、`pdf` 的分页预览，以及 `xls/xlsx` 的工作表预览
+  5. 导入后的文档片段可完成切分、嵌入和本地索引入库
+  6. 用户可在同一任务中同时查看原文预览和结构化编辑稿
+**Plans**: 5 plans
 
 Plans:
 - [ ] 02-01: 搭建导入工作台与多格式文件分流管线
 - [ ] 02-02: 集成 `pdf` 与 `docx` 原文预览能力
-- [ ] 02-03: 定义文档中间表示并实现结构提取与标准化
-- [ ] 02-04: 完成片段切分、向量化和索引入库可视化
+- [ ] 02-03: 集成 `xls/xlsx` 工作表预览与表格解析能力
+- [ ] 02-04: 定义文档中间表示并实现结构提取与标准化
+- [ ] 02-05: 完成片段切分、向量化和索引入库可视化
 
 ### Phase 3: Grounded Knowledge Layer
 **Goal**: 生成、审阅和修订共用一套本地知识底座，并能为每次结论提供可追溯证据
@@ -129,7 +131,7 @@ Phases execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Runtime Foundation | 0/3 | Not started | - |
-| 2. Document Ingestion | 0/4 | Not started | - |
+| 2. Document Ingestion | 0/5 | Not started | - |
 | 3. Grounded Knowledge Layer | 0/3 | Not started | - |
 | 4. Draft Generation | 0/4 | Not started | - |
 | 5. Review and Risk Engine | 0/4 | Not started | - |

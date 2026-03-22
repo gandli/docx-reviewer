@@ -13,12 +13,14 @@
 
 ### Documents
 
-- [ ] **DOC-00**: 系统可识别导入文件类型，并按 `pdf / doc / docx / txt / md` 走对应处理流程
+- [ ] **DOC-00**: 系统可识别导入文件类型，并按 `pdf / doc / docx / xls / xlsx / txt / md` 走对应处理流程
 - [ ] **DOC-01**: 用户可导入 `.docx` 模板和背景资料文件
 - [ ] **DOC-01A**: 用户可导入 `pdf` 作为原文参考，并在页面中保留原始分页预览
 - [ ] **DOC-01B**: 用户导入 `.doc` 时，系统可先转换或提示转换为 `.docx` 后再处理
+- [ ] **DOC-01D**: 用户可导入 `xls` 和 `xlsx` 作为结构化背景资料
 - [ ] **DOC-01C**: 用户可导入 `txt` 和 `md` 资料并直接纳入本地知识库
 - [ ] **DOC-02**: 系统可提取标题、段落、条款、表格和编号等文档结构
+- [ ] **DOC-02A**: 系统可提取工作表、表头、单元格区域和行列结构等表格语义
 - [ ] **DOC-03**: 系统可将文档片段切分、向量化并建立本地检索索引
 - [ ] **DOC-04**: 用户可查看导入结果、解析状态和索引状态
 
@@ -26,6 +28,7 @@
 
 - [ ] **PREV-01**: 用户可在网页中查看接近原文样式的 `docx` 预览
 - [ ] **PREV-02**: 用户可在网页中查看 `pdf` 的分页预览并定位原文内容
+- [ ] **PREV-02A**: 用户可在网页中查看 `xls/xlsx` 的工作表和单元格预览
 - [ ] **PREV-03**: 用户可在同一任务中同时查看原文预览和结构化编辑稿
 
 ### Grounding
@@ -99,11 +102,14 @@
 | DOC-01A | Phase 2 | Pending |
 | DOC-01B | Phase 2 | Pending |
 | DOC-01C | Phase 2 | Pending |
+| DOC-01D | Phase 2 | Pending |
 | DOC-02 | Phase 2 | Pending |
+| DOC-02A | Phase 2 | Pending |
 | DOC-03 | Phase 2 | Pending |
 | DOC-04 | Phase 2 | Pending |
 | PREV-01 | Phase 2 | Pending |
 | PREV-02 | Phase 2 | Pending |
+| PREV-02A | Phase 2 | Pending |
 | PREV-03 | Phase 2 | Pending |
 | RAG-01 | Phase 3 | Pending |
 | RAG-02 | Phase 3 | Pending |
@@ -125,8 +131,8 @@
 | OUT-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 31 total
-- Mapped to phases: 31
+- v1 requirements: 34 total
+- Mapped to phases: 34
 - Unmapped: 0 ✓
 
 ---

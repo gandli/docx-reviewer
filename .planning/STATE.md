@@ -45,6 +45,7 @@ Recent decisions affecting current work:
 - [Phase 0]: 项目固定为浏览器本地优先，不引入业务后端
 - [Phase 0]: 生成链路优先采用 WebLLM + WebGPU
 - [Phase 0]: v1 文档主链路聚焦结构化 `.docx`
+- [Phase 0]: `xlsx` 作为结构化资料输入纳入首版范围，`xls` 为受限兼容
 - [Phase 0]: 检索链路采用 Transformers.js + Voy + IndexedDB
 - [Phase 0]: 文档交互采用“原文预览 + 结构化编辑稿”双视图
 

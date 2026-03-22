@@ -36,7 +36,7 @@
 
 | Component | Responsibility | Typical Implementation |
 |-----------|----------------|------------------------|
-| 原文预览器 | 保留用户对原文件样式、分页和位置的感知 | PDF.js / docx preview renderer |
+| 原文预览器 | 保留用户对原文件样式、分页和位置的感知 | PDF.js / docx preview renderer / spreadsheet grid viewer |
 | 文档解析器 | 把模板、背景资料和待审文档转成统一结构 | `.docx` 读取 + 结构化中间表示 |
 | 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | Transformers.js + Voy + IndexedDB |
 | LLM 运行时 | 本地对话、生成、结构化输出和流式回复 | WebLLM + WebGPU |
