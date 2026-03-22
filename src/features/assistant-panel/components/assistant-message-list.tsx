@@ -1,15 +1,24 @@
+type AssistantMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
+
 type AssistantMessageListProps = {
-  messages: readonly string[];
+  messages: readonly AssistantMessage[];
   latestConclusion: string;
 };
 
 export function AssistantMessageList({ messages, latestConclusion }: AssistantMessageListProps) {
   return (
     <div className="assistant-messages">
-      <div className="assistant-card">{latestConclusion}</div>
+      <div className="assistant-card assistant-card--assistant">{latestConclusion}</div>
       {messages.map((message) => (
-        <div key={message} className="assistant-card">
-          {message}
+        <div
+          key={message.id}
+          className={`assistant-card assistant-card--${message.role}`}
+        >
+          {message.content}
         </div>
       ))}
     </div>

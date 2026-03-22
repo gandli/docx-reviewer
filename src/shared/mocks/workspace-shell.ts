@@ -28,7 +28,24 @@ export const mockAssetGroups = [
 ] as const;
 
 export const mockAssistantMessages = [
-  "我建议把付款方式改成分阶段支付，并补充验收通过后的付款触发条件。",
-  "这样可以降低履约争议，也更符合多数企业制度写法。",
-  "证据来源：参考资料《付款节点说明》、Sheet2《采购付款计划》。",
+  {
+    id: "user-1",
+    role: "user" as const,
+    content: "继续优化付款条款，降低履约争议。",
+  },
+  {
+    id: "assistant-1",
+    role: "assistant" as const,
+    content: "我建议把付款方式改成分阶段支付，并补充验收通过后的付款触发条件。",
+  },
+  {
+    id: "assistant-2",
+    role: "assistant" as const,
+    content: "这样可以降低履约争议，也更符合多数企业制度写法。",
+  },
+  {
+    id: "assistant-3",
+    role: "assistant" as const,
+    content: "证据来源：参考资料《付款节点说明》、Sheet2《采购付款计划》。",
+  },
 ];

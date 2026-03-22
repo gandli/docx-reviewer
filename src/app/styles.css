@@ -58,7 +58,7 @@ textarea {
 .assistant-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
   padding: 24px 18px 18px;
   background: linear-gradient(180deg, rgba(248, 244, 237, 0.72) 0%, rgba(243, 237, 227, 0.5) 100%);
   border-left: 1px solid var(--color-border-soft);
@@ -220,17 +220,16 @@ textarea {
 }
 
 .assistant-context {
-  margin-bottom: 4px;
-  padding-bottom: 14px;
+  margin-bottom: 0;
+  padding-bottom: 16px;
   border-bottom: 1px solid rgba(216, 207, 193, 0.78);
 }
 
-.suggested-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(216, 207, 193, 0.68);
+.assistant-thread {
+  flex: 1;
+  min-height: 0;
+  padding: 16px 0 12px;
+  overflow: auto;
 }
 
 .suggested-action {
@@ -249,10 +248,22 @@ textarea {
 }
 
 .assistant-card {
-  padding: 0 0 12px;
-  border-bottom: 1px solid rgba(216, 207, 193, 0.58);
-  background: transparent;
-  border-radius: 0;
+  max-width: 92%;
+  padding: 12px 14px;
+  border: 1px solid rgba(216, 207, 193, 0.7);
+  border-radius: 18px;
+  background: rgba(255, 251, 244, 0.62);
+  line-height: 1.6;
+}
+
+.assistant-card--assistant {
+  justify-self: start;
+}
+
+.assistant-card--user {
+  justify-self: end;
+  background: rgba(236, 228, 216, 0.9);
+  border-color: rgba(210, 194, 171, 0.88);
 }
 
 .assistant-primary-action,
@@ -286,6 +297,50 @@ textarea {
   border-top: 1px solid rgba(216, 207, 193, 0.82);
   background: transparent;
   border-radius: 0;
+}
+
+.assistant-footer {
+  display: grid;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(216, 207, 193, 0.78);
+}
+
+.chat-composer {
+  display: grid;
+  gap: 10px;
+}
+
+.chat-composer__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chat-composer__input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid rgba(216, 207, 193, 0.88);
+  border-radius: 18px;
+  background: rgba(255, 251, 244, 0.82);
+}
+
+.chat-composer__placeholder {
+  flex: 1;
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.chat-composer__send {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-ink-strong);
+  color: #fffdf9;
 }
 
 @media (max-width: 1180px) {
