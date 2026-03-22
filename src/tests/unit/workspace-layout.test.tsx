@@ -6,6 +6,16 @@ import { themeTokens } from "@/shared/constants/theme";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 
 describe("workspace shell", () => {
+  const scrollIntoViewMock = vi.fn();
+
+  beforeEach(() => {
+    scrollIntoViewMock.mockReset();
+    Object.defineProperty(Element.prototype, "scrollIntoView", {
+      configurable: true,
+      value: scrollIntoViewMock,
+    });
+  });
+
   it("defines warm neutral workspace palette", () => {
     expect(themeTokens.surface.paper).toBeTruthy();
     expect(themeTokens.surface.sidebar).toBeTruthy();
@@ -142,6 +152,25 @@ describe("workspace shell", () => {
       expect(screen.getByDisplayValue("")).toBeInTheDocument();
       expect(screen.getByText("请把语气改得更正式")).toBeInTheDocument();
       expect(screen.getAllByText(/已记录你的要求：请把语气改得更正式/)).toHaveLength(2);
+    });
+  });
+
+  it("scrolls to the latest assistant message after sending", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    scrollIntoViewMock.mockClear();
+
+    fireEvent.change(screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"), {
+      target: { value: "继续补充付款触发条件" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "发送" }));
+
+    await waitFor(() => {
+      expect(scrollIntoViewMock).toHaveBeenCalled();
     });
   });
 });
