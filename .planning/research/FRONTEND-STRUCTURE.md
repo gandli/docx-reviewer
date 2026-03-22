@@ -1,6 +1,6 @@
 # Frontend Structure
 
-**Project:** 离线商务文档智能处理系统  
+**Project:** 离线本地文书工作台  
 **Scope:** Phase 1 + Phase 2 frontend layout  
 **Defined:** 2026-03-22
 

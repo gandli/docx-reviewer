@@ -1,6 +1,6 @@
 # Architecture Research
 
-**Domain:** 浏览器本地离线商务文档智能处理系统
+**Domain:** 浏览器本地离线正式文书工作台
 **Researched:** 2026-03-22
 **Confidence:** MEDIUM
 
@@ -13,7 +13,7 @@
 │                     Presentation Layer                      │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────┐ │
-│  │ 导入工作台 │ │ 生成工作台 │ │ 审阅工作台 │ │ 导出面板 │ │
+│  │ 导入工作台 │ │ 生成主线 │ │ 审阅主线 │ │ 导出面板 │ │
 │  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘ └────┬─────┘ │
 │        │              │              │              │       │
 ├────────┴──────────────┴──────────────┴──────────────┴───────┤
@@ -41,6 +41,7 @@
 | 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | Transformers.js + Voy + IndexedDB |
 | LLM 运行时 | 本地对话、生成、结构化输出和流式回复 | WebLLM + WebGPU |
 | 模板引擎 | 定义字段、章节、固定句式、条件段落和待确认项 | 模板 schema + 规则装配器 |
+| 审阅引擎 | 识别文字问题、逻辑问题、事实缺失和条款风险 | 规则 + LLM 混合判定 |
 | 任务编排器 | 组织“生成 / 填充 / 审阅 / 修订”任务输入输出 | 明确的任务类型和结构化 schema |
 | 规则引擎 | 识别缺失项、风险项、一致性问题 | 规则 + LLM 混合判定 |
 | 导出器 | 把结构化结果转回可交付的 Word | `docx` 或 `docxtemplater` |
@@ -93,7 +94,13 @@ type SectionNode = {
 };
 ```
 
-### Pattern 2: Retrieval-First Task Orchestration
+### Pattern 2: Shared Foundation, Split Task Lines
+
+**What:** 产品明确拆成“文书生成”和“文书审阅”两条任务线，但共用导入、解析、检索、模型和导出底座。  
+**When to use:** 同时既要支持新文书起草，又要支持已有文书校阅的工作台。  
+**Trade-offs:** 任务定义更清晰，但在编排层需要显式区分任务类型。
+
+### Pattern 3: Retrieval-First Task Orchestration
 
 **What:** 生成和审阅都先检索，再把有限上下文交给模型。  
 **When to use:** 文档较长、背景资料较多、需要可追溯时。  
@@ -105,7 +112,7 @@ const evidence = await retrieval.search(task.query, { sectionId, topK: 8 });
 const result = await llm.runTask({ task, evidence, schema });
 ```
 
-### Pattern 3: Template Engine + LLM Hybrid Generation
+### Pattern 4: Template Engine + LLM Hybrid Generation
 
 **What:** 初稿生成先走模板字段填充、固定句式和条件段落装配，只在需要自然语言补写时再调用模型。  
 **When to use:** 行政文书、合同、制度、函件等固定结构明显的场景。  
@@ -121,7 +128,7 @@ const draft = await generator.compose({
 });
 ```
 
-### Pattern 4: Rule + LLM Hybrid Review
+### Pattern 5: Rule + LLM Hybrid Review
 
 **What:** 明确规则先查硬错误，再由模型处理语义风险和修订建议。  
 **When to use:** 合同金额、日期、主体名称等必须准确的场景。  
@@ -226,5 +233,5 @@ const draft = await generator.compose({
 - `.planning/research/document-model.ts` — 文档中间表示 TypeScript 类型
 
 ---
-*Architecture research for: 浏览器本地离线商务文档智能处理系统*
+*Architecture research for: 浏览器本地离线文书工作台*
 *Researched: 2026-03-22*

@@ -1,6 +1,6 @@
 # Stack Research
 
-**Domain:** 浏览器本地离线商务文档智能处理系统
+**Domain:** 浏览器本地离线文书工作台
 **Researched:** 2026-03-22
 **Confidence:** MEDIUM
 
@@ -114,5 +114,5 @@ bun add -d vite@8.0.1 vitest@4.1.0 playwright@1.58.2 typescript@5.9.3
 - `npm view react version` / `vite version` / `typescript version` / `zustand version` / `react-pdf version` / `pdfjs-dist version` / `@mlc-ai/web-llm version` / `@huggingface/transformers version` / `voy-search version` / `dexie version` / `idb version` / `docx version` / `mammoth version` / `docx-preview version` / `docxtemplater version` / `xlsx version` / `@tiptap/core version` / `zod version` / `vitest version` / `playwright version` / `bun --version` — 2026-03-22 校验当前稳定版本
 
 ---
-*Stack research for: 浏览器本地离线商务文档智能处理系统*
+*Stack research for: 浏览器本地离线文书工作台*
 *Researched: 2026-03-22*

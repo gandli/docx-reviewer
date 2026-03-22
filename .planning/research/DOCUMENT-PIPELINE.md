@@ -1,6 +1,6 @@
 # Document Pipeline Design
 
-**Project:** 离线商务文档智能处理系统  
+**Project:** 离线本地文书工作台  
 **Scope:** Phase 2 to Phase 6 implementation guidance  
 **Defined:** 2026-03-22  
 **Status:** Proposed
@@ -16,6 +16,10 @@
 一句话原则：
 
 **预览负责“像原文”，编辑负责“可控修改”，导出负责“重新交付”。**
+
+产品主线原则：
+
+**“文书生成”和“文书审阅”是两条任务线，但共享同一套导入、预览、检索、编辑和导出底座。**
 
 对于“根据模板和背景资料自动生成初稿”这类核心能力，还应补充一句：
 

@@ -1,9 +1,15 @@
-# Requirements: 离线商务文档智能处理系统
+# Requirements: 离线本地文书工作台
 
 **Defined:** 2026-03-22
-**Core Value:** 在不上传敏感文件的前提下，让用户稳定完成结构化商务文档的本地生成、审阅和修订，并导出可直接交付的 Word 文件。
+**Core Value:** 在不上传敏感文件的前提下，让用户稳定完成正式文书的本地生成或本地审阅，并导出可直接交付的 Word 文件。
 
 ## v1 Requirements
+
+### Product Lines
+
+- [ ] **LINE-01**: 产品明确支持两条主线：`文书生成` 与 `文书审阅`
+- [ ] **LINE-02**: 两条主线共用同一套导入、预览、检索、本地模型和导出底座
+- [ ] **LINE-03**: 界面与任务编排应避免把“生成”和“审阅”混成一个模糊动作集合
 
 ### Platform
 
@@ -101,6 +107,9 @@
 | PLAT-01 | Phase 1 | Pending |
 | PLAT-02 | Phase 1 | Pending |
 | PLAT-03 | Phase 1 | Pending |
+| LINE-01 | Phase 0/3 | Pending |
+| LINE-02 | Phase 0/3 | Pending |
+| LINE-03 | Phase 0/4 | Pending |
 | DOC-00 | Phase 2 | Pending |
 | DOC-01 | Phase 2 | Pending |
 | DOC-01A | Phase 2 | Pending |
@@ -139,8 +148,8 @@
 | OUT-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
-- Mapped to phases: 38
+- v1 requirements: 41 total
+- Mapped to phases: 41
 - Unmapped: 0 ✓
 
 ---

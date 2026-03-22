@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 构建文档工作台首版主界面，落地左栏资料区、中栏纸张文档区、右栏连续对话区，以及“工作区接续”能力。
+**Goal:** 构建文书工作台首版主界面，落地左栏资料区、中栏纸张文档区、右栏连续对话区，并让“文书生成 / 文书审阅”两条主线共用同一个工作台。
 
-**Architecture:** 采用固定三栏壳层 `workspace-shell` 承载页面结构，用 `editor-draft` 渲染主文档纸张画布，用 `workspace-context` 保存工作区级连续状态。UI 不直接依赖原聊天线程，而是通过结构化工作摘要恢复当前主文档、当前节点和待处理建议。
+**Architecture:** 采用固定三栏壳层 `workspace-shell` 承载页面结构，用 `editor-draft` 渲染主文档纸张画布，用 `workspace-context` 保存工作区级连续状态。UI 不直接依赖原聊天线程，而是通过结构化工作摘要恢复当前主文档、当前节点和待处理建议。产品虽然分为“文书生成”和“文书审阅”两条主线，但界面继续共用同一套壳层和底层状态。
 
 **Tech Stack:** React 19.2.4, Vite 8.0.1, TypeScript 5.9.3, Zustand 5.0.12, Dexie 4.3.0, Vitest 4.1.0, Playwright 1.58.2
 

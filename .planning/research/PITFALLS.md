@@ -1,6 +1,6 @@
 # Pitfalls Research
 
-**Domain:** 浏览器本地离线商务文档智能处理系统
+**Domain:** 浏览器本地离线文书工作台
 **Researched:** 2026-03-22
 **Confidence:** MEDIUM
 
@@ -170,5 +170,5 @@ Phase 1
 - 针对浏览器端 AI、文档处理和 Word 导出链路的工程经验归纳
 
 ---
-*Pitfalls research for: 浏览器本地离线商务文档智能处理系统*
+*Pitfalls research for: 浏览器本地离线文书工作台*
 *Researched: 2026-03-22*

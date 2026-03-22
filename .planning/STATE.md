@@ -4,7 +4,7 @@
 
 See: .planning/PROJECT.md (updated 2026-03-22)
 
-**Core value:** 在不上传敏感文件的前提下，让用户稳定完成结构化商务文档的本地生成、审阅和修订，并导出可直接交付的 Word 文件。
+**Core value:** 在不上传敏感文件的前提下，让用户稳定完成正式文书的本地生成或本地审阅，并导出可直接交付的 Word 文件。
 **Current focus:** Runtime Foundation
 
 ## Current Position
@@ -49,6 +49,8 @@ Recent decisions affecting current work:
 - [Phase 0]: 检索链路采用 Transformers.js + Voy + IndexedDB
 - [Phase 0]: 文档交互采用“原文预览 + 结构化编辑稿”双视图
 - [Phase 0]: 技术栈默认采用当天核验到的最新稳定正式版，不追预发布版本
+- [Phase 0]: 产品明确拆分为“文书生成”和“文书审阅”两条主线
+- [Phase 0]: 两条主线共用同一套本地工作台底座
 
 ### Pending Todos
 

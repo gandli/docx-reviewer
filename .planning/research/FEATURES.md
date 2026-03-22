@@ -1,6 +1,6 @@
 # Feature Research
 
-**Domain:** 浏览器本地离线商务文档智能处理系统
+**Domain:** 浏览器本地离线正式文书工作台
 **Researched:** 2026-03-22
 **Confidence:** MEDIUM
 
@@ -12,6 +12,7 @@ Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
+| 清晰的产品主线划分 | 如果“生成”和“审阅”混在一起，用户和研发都容易理解偏 | MEDIUM | 需明确两条主线、一个底座 |
 | 模板与背景资料导入 | 不导入现有模板和资料，就无法进入真实商务文档流程 | MEDIUM | 至少支持 `.docx`、文本和结构化字段资料 |
 | 文档结构解析 | 标书和合同不是纯文本，必须识别标题、条款、表格、编号 | HIGH | 需要结构化中间表示，而不是只取全文字符串 |
 | 章节级生成/填充 | 用户常常只想补某一章或某几个字段 | MEDIUM | 比“整篇一键生成”更接近真实使用 |
@@ -29,6 +30,7 @@ Features that set the product apart. Not required, but valuable.
 | 文档类型模板化配置 | 一套底座适配标书、合同、协议等不同文档类型 | MEDIUM | 能把产品从单一 demo 拉到可扩展平台 |
 | 条款风险检测 + 修订建议联动 | 不只是指出问题，还给出改写方向 | HIGH | 是“审阅”到“修订”的关键闭环 |
 | 生成与审阅共用知识底座 | 一份背景资料既能生成，也能审阅时追溯 | MEDIUM | 降低重复维护成本 |
+| 两条主线共用一个工作台 | 既避免两套产品壳，又能保持任务清晰 | MEDIUM | 需要界面和任务编排同时支持 |
 | 审阅报告与正文联动 | 问题清单可直接跳到原文并生成替代条款 | MEDIUM | 体验比普通聊天框更强 |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
@@ -69,6 +71,7 @@ Word 导出 ──requires──> 结构化中间表示
 ### Launch With (v1)
 
 - [ ] 支持导入 `.docx` 模板和背景资料，并建立本地索引 — 没有本地知识底座就无法验证主链路
+- [ ] 明确“文书生成”和“文书审阅”两条主线，并共用同一工作台 — 否则产品边界会持续漂移
 - [ ] 支持按字段/章节生成与填充 — 是真实文档生产的核心动作
 - [ ] 支持对已有 `.docx` 做审阅并输出问题清单 — 覆盖“已有文档优化”场景
 - [ ] 支持风险条款定位、修订建议与来源追溯 — 这是商务文档场景的关键价值
@@ -91,6 +94,7 @@ Word 导出 ──requires──> 结构化中间表示
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
 | 导入与结构解析 | HIGH | HIGH | P1 |
+| 两条主线拆分与共享底座 | HIGH | MEDIUM | P1 |
 | 本地向量检索 | HIGH | MEDIUM | P1 |
 | 模板生成与字段填充 | HIGH | HIGH | P1 |
 | 审阅与风险检测 | HIGH | HIGH | P1 |
@@ -121,5 +125,5 @@ Word 导出 ──requires──> 结构化中间表示
 - 对结构化商务文档工作流的产品模式归纳
 
 ---
-*Feature research for: 浏览器本地离线商务文档智能处理系统*
+*Feature research for: 浏览器本地离线文书工作台*
 *Researched: 2026-03-22*

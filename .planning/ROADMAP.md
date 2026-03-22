@@ -1,8 +1,8 @@
-# Roadmap: 离线商务文档智能处理系统
+# Roadmap: 离线本地文书工作台
 
 ## Overview
 
-这条路线从“浏览器本地可稳定运行”起步，先打通模型缓存与离线存储，再建立文档结构层和统一检索底座，随后分别落下生成、审阅和导出三条关键能力，最终形成一套对结构化商务文档可直接交付的本地闭环工作台。
+这条路线从“浏览器本地可稳定运行”起步，先打通模型缓存与离线存储，再建立文档结构层和统一检索底座，随后分别完成两条业务主线：`文书生成` 与 `文书审阅`，最后收拢到修订确认和导出，形成一套可直接交付的本地文书工作台。
 
 ## Phases
 
@@ -57,7 +57,7 @@ Plans:
 - [ ] 02-05: 完成片段切分、向量化和索引入库可视化
 
 ### Phase 3: Grounded Knowledge Layer
-**Goal**: 生成、审阅和修订共用一套本地知识底座，并建立模板字段映射与规则配置，为模板驱动初稿生成提供稳定输入
+**Goal**: 为“文书生成”和“文书审阅”建立共用知识底座，并补齐模板字段映射与规则配置
 **Depends on**: Phase 2
 **Requirements**: [RAG-01, RAG-02, RAG-03, GEN-01A, GEN-01B]
 **Success Criteria** (what must be TRUE):
@@ -73,7 +73,7 @@ Plans:
 - [ ] 03-03: 完成生成/审阅共用知识底座的端到端验证
 
 ### Phase 4: Draft Generation
-**Goal**: 用户可基于结构化模板和背景资料生成完整初稿，并在结构化编辑稿中按章节、条款、字段和表格定向修改
+**Goal**: 完成“文书生成”主线，让用户可基于结构化模板和背景资料生成完整初稿，并在结构化编辑稿中按章节、条款、字段和表格定向修改
 **Depends on**: Phase 3
 **Requirements**: [GEN-01, GEN-01C, GEN-01D, GEN-02, GEN-03, GEN-04, EDIT-01, EDIT-02]
 **Success Criteria** (what must be TRUE):
@@ -92,7 +92,7 @@ Plans:
 - [ ] 04-04: 加入依据摘要、待确认项标注、结果预览和失败恢复机制
 
 ### Phase 5: Review and Risk Engine
-**Goal**: 用户可对已有文档进行审阅，查看问题清单、定位风险条款，并生成针对性的修订建议
+**Goal**: 完成“文书审阅”主线，让用户可对已有文档进行审阅，查看问题清单、定位风险条款，并生成针对性的修订建议
 **Depends on**: Phase 4
 **Requirements**: [REV-01, REV-02, REV-03, OUT-01, EDIT-03]
 **Success Criteria** (what must be TRUE):
