@@ -284,6 +284,7 @@ textarea {
 }
 
 .document-canvas {
+  --document-preview-padding: 20px;
   position: relative;
   min-width: 0;
   min-height: 680px;
@@ -310,12 +311,15 @@ textarea {
   display: grid;
   gap: 14px;
   margin-bottom: 22px;
+  padding-inline: var(--document-preview-padding);
 }
 
 .pdf-document-viewer {
   display: flex;
   justify-content: center;
   min-height: 540px;
+  padding-inline: var(--document-preview-padding);
+  box-sizing: border-box;
 }
 
 .docx-document-viewer {
@@ -324,6 +328,8 @@ textarea {
   min-height: 540px;
   width: 100%;
   max-width: 100%;
+  padding-inline: var(--document-preview-padding);
+  box-sizing: border-box;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -333,6 +339,7 @@ textarea {
   justify-content: center;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   overflow-x: auto;
   overflow-y: hidden;
 }
@@ -371,6 +378,7 @@ textarea {
   justify-items: center;
   gap: 18px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .pdf-page-card {
