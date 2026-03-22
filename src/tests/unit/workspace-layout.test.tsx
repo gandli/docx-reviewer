@@ -10,7 +10,11 @@ const { parsePdfDocumentMock } = vi.hoisted(() => ({
 }));
 const { parseDocxDocumentMock, renderDocxPreviewMock } = vi.hoisted(() => ({
   parseDocxDocumentMock: vi.fn(),
-  renderDocxPreviewMock: vi.fn(() => Promise.resolve()),
+  renderDocxPreviewMock: vi.fn((_: ArrayBuffer, container: HTMLElement) => {
+    container.innerHTML =
+      '<article data-testid="docx-preview-article"><p><span data-testid="docx-preview-text">第一条 付款应以验收通过为前提。</span></p></article>';
+    return Promise.resolve();
+  }),
 }));
 
 vi.mock("@/services/import/pdf-document", () => ({
@@ -321,7 +325,81 @@ describe("workspace shell", () => {
       expect(screen.getByText("原样预览")).toBeInTheDocument();
       expect(screen.getByTestId("docx-document-viewer")).toBeInTheDocument();
       expect(renderDocxPreviewMock).toHaveBeenCalled();
+      expect(screen.getByTestId("docx-preview-text")).toBeInTheDocument();
       expect(screen.getByText(/已载入《制度范本》的原样排版预览/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows an action popover after selecting text inside the docx preview", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    parseDocxDocumentMock.mockResolvedValue({
+      mode: "docx",
+      title: "制度范本",
+      blocks: [
+        { id: "heading-1", kind: "heading", level: 1, text: "制度范本" },
+        { id: "paragraph-1", kind: "paragraph", text: "第一条 付款应以验收通过为前提。" },
+      ],
+      activeClauseTitle: "制度范本",
+      activeClauseText: "第一条 付款应以验收通过为前提。",
+      docxSource: new ArrayBuffer(16),
+    });
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: {
+        files: [
+          new File(["fake"], "制度范本.docx", {
+            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          }),
+        ],
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("docx-preview-text")).toBeInTheDocument();
+    });
+
+    const previewText = screen.getByTestId("docx-preview-text");
+    const textNode = previewText.firstChild;
+    const selectionMock = {
+      toString: () => "付款应以验收通过为前提",
+      rangeCount: 1,
+      getRangeAt: () =>
+        ({
+          commonAncestorContainer: textNode,
+          getBoundingClientRect: () => ({
+            top: 180,
+            left: 340,
+            width: 120,
+            height: 18,
+            right: 460,
+            bottom: 198,
+            x: 340,
+            y: 180,
+            toJSON: () => ({}),
+          }),
+        }) as Range,
+      removeAllRanges: vi.fn(),
+    };
+
+    vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
+
+    fireEvent.mouseUp(screen.getByTestId("docx-document-viewer"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("docx-selection-popover")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "围绕所选内容继续处理" }));
+
+    await waitFor(() => {
+      expect(within(screen.getByTestId("assistant-panel")).getByText("已选文本")).toBeInTheDocument();
+      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+      expect(screen.queryByTestId("docx-selection-popover")).not.toBeInTheDocument();
     });
   });
 

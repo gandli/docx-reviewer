@@ -43,6 +43,7 @@ export function WorkspaceLayout({
             summary={summary}
             title={summary.activeDocumentTitle}
             previewDocument={previewDocument}
+            onSelectText={onSelectText}
           />
         ) : (
           <DocumentCanvas summary={summary} onSelectText={onSelectText} />
