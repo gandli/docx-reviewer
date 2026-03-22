@@ -198,6 +198,10 @@ const result = await llm.runTask({ task, evidence, schema });
 - Voy 官方仓库说明
 - Mammoth 官方仓库说明
 
+## Related Design Notes
+
+- `.planning/research/DOCUMENT-PIPELINE.md` — 多格式读取、原文预览、结构化编辑与修订链路细化设计
+
 ---
 *Architecture research for: 浏览器本地离线商务文档智能处理系统*
 *Researched: 2026-03-22*
