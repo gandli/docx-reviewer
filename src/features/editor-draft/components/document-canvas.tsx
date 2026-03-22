@@ -10,11 +10,10 @@ type DocumentCanvasProps = {
 
 export function DocumentCanvas({ summary }: DocumentCanvasProps) {
   return (
-    <section
-      className="document-canvas"
-      data-testid="document-canvas"
-      data-suggestion-count={`检测到 ${summary.pendingSuggestionIds.length + 1} 处建议`}
-    >
+    <section className="document-canvas" data-testid="document-canvas">
+      <div className="document-canvas__note">
+        检测到 {summary.pendingSuggestionIds.length + 1} 处建议
+      </div>
       {widths.slice(0, 5).map((width, index) => (
         <div key={`${width}-${index}`} className="line" style={{ width }} />
       ))}
