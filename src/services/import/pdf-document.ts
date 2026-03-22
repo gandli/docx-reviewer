@@ -80,7 +80,7 @@ export async function parsePdfDocument(file: File): Promise<WorkspaceImportedDoc
     blocks,
     activeClauseTitle: "第 1 页",
     activeClauseText:
-      firstPageParagraph?.text || "当前文档已按原样预览打开，可继续围绕整份文档发起审阅或修订。",
+      firstPageParagraph?.text || "当前文档已按原样预览打开，可继续围绕整份文档找问题或直接改写。",
     pdfSource,
   };
 }

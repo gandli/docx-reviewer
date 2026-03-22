@@ -129,6 +129,21 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.latestConclusion).toContain("已切换到你刚刚选中的内容");
   });
 
+  it("switches to review mode when selecting text with the review action", () => {
+    const store = createWorkspaceContextStore();
+    store.getState().setSummary(mockWorkspaceSummary);
+
+    store.getState().selectText({
+      text: "验收通过后方可申请付款。",
+      blockId: "paragraph-2",
+      intent: "review",
+    });
+
+    expect(store.getState().summary?.currentTask).toBe("review");
+    expect(store.getState().summary?.latestConclusion).toBe("已定位到你选中的内容，接下来我会先帮你找问题。");
+    expect(store.getState().summary?.nextAction).toBe("开始找问题");
+  });
+
   it("normalizes restored browser summaries to the current workspace title", async () => {
     window.localStorage.setItem(
       `workspace-summary:${mockWorkspaceSummary.workspaceId}`,

@@ -12,7 +12,12 @@ export type WorkspaceContextState = {
   setSummary: (summary: WorkspaceSummary) => void;
   hydrate: (workspaceId: string) => Promise<void>;
   focusSelection: () => void;
-  selectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
+  selectText: (payload: {
+    text: string;
+    blockId?: string;
+    contextLabel?: string;
+    intent?: "review" | "revise" | "polish";
+  }) => void;
   applySuggestion: () => void;
   sendMessage: (message: string) => void;
   importDocument: (document: WorkspaceImportedDocument, fileName: string) => void;
@@ -56,13 +61,37 @@ export function createWorkspaceContextStore(
           }),
         };
       }),
-    selectText: ({ text, blockId, contextLabel }) =>
+    selectText: ({ text, blockId, contextLabel, intent }) =>
       set((state) => {
         if (!state.summary || !text.trim()) {
           return state;
         }
 
         const selectedText = text.trim();
+        const intentState =
+          intent === "review"
+            ? {
+                currentTask: "review" as const,
+                latestConclusion: "已定位到你选中的内容，接下来我会先帮你找问题。",
+                nextAction: "开始找问题",
+              }
+            : intent === "revise"
+              ? {
+                  currentTask: "revise" as const,
+                  latestConclusion: "已定位到你选中的内容，接下来我会直接帮你改写。",
+                  nextAction: "开始直接改写",
+                }
+              : intent === "polish"
+                ? {
+                    currentTask: "optimize" as const,
+                    latestConclusion: "已定位到你选中的内容，接下来我会帮你润色表达。",
+                    nextAction: "开始润色表达",
+                  }
+                : {
+                    currentTask: state.summary.currentTask,
+                    latestConclusion: "已切换到你刚刚选中的内容，可以继续围绕这段文字处理。",
+                    nextAction: "继续处理选中文本",
+                  };
 
         return {
           summary: persist({
@@ -70,8 +99,9 @@ export function createWorkspaceContextStore(
             activeSelectionBlockId: blockId,
             activeClauseTitle: contextLabel?.trim() || "已选文本",
             activeClauseText: selectedText,
-            latestConclusion: "已切换到你刚刚选中的内容，可以继续围绕这段文字处理。",
-            nextAction: "继续处理选中文本",
+            latestConclusion: intentState.latestConclusion,
+            nextAction: intentState.nextAction,
+            currentTask: intentState.currentTask,
             currentTaskStatus: "in_progress",
             updatedAt: "刚刚",
             isSelectionFocused: true,
@@ -139,7 +169,7 @@ export function createWorkspaceContextStore(
           return state;
         }
 
-        const importedReply = `已导入文档《${document.title}》，可以继续生成、审阅或修订。`;
+        const importedReply = `已导入文档《${document.title}》，可以继续起草内容、找问题或直接改写。`;
         const isPdfDocument = document.mode === "pdf";
         const defaultActiveBlockId =
           document.blocks.find((block) => block.kind === "paragraph")?.id ?? document.blocks[0]?.id;

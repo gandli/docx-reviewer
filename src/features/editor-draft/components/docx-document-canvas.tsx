@@ -9,7 +9,12 @@ type DocxDocumentCanvasProps = {
   summary: WorkspaceSummary;
   title: string;
   previewDocument?: WorkspacePreviewDocument;
-  onSelectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
+  onSelectText: (payload: {
+    text: string;
+    blockId?: string;
+    contextLabel?: string;
+    intent?: "review" | "revise" | "polish";
+  }) => void;
 };
 
 type DocxSelectionPopover = {
@@ -132,7 +137,7 @@ export function DocxDocumentCanvas({
         )}
       </div>
       <div className="docx-document-summary">
-        已载入《{summary.activeDocumentTitle}》的原样排版预览。后续我们可以继续基于正文结构做审阅、修订和导出。
+        已载入《{summary.activeDocumentTitle}》的原样排版预览。后续我们可以继续基于正文结构找问题、直接改写和导出。
       </div>
       {selectionPopover ? (
         <div
@@ -151,12 +156,43 @@ export function DocxDocumentCanvas({
               onSelectText({
                 text: selectionPopover.text,
                 contextLabel: "已选文本",
+                intent: "review",
               });
               window.getSelection()?.removeAllRanges();
               setSelectionPopover(undefined);
             }}
           >
-            围绕所选内容继续处理
+            找问题
+          </button>
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                contextLabel: "已选文本",
+                intent: "revise",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            直接改写
+          </button>
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                contextLabel: "已选文本",
+                intent: "polish",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            润色表达
           </button>
           <button
             className="pdf-selection-popover__dismiss"

@@ -21,10 +21,10 @@ export function ChatComposer({ trailingAction, onSendMessage }: ChatComposerProp
   return (
     <form className="chat-composer" onSubmit={handleSubmit}>
       <div className="chat-composer__toolbar">
-        <div className="suggested-action">生成</div>
-        <div className="suggested-action">审阅</div>
-        <div className="suggested-action is-active">修订</div>
-        <div className="suggested-action">优化</div>
+        <div className="suggested-action">起草内容</div>
+        <div className="suggested-action">找问题</div>
+        <div className="suggested-action is-active">直接改写</div>
+        <div className="suggested-action">润色表达</div>
         {trailingAction}
       </div>
       <div className="chat-composer__input">

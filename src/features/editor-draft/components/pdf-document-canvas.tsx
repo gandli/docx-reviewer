@@ -15,7 +15,12 @@ type PdfDocumentCanvasProps = {
   summary: WorkspaceSummary;
   title: string;
   previewDocument?: WorkspacePreviewDocument;
-  onSelectText: (payload: { text: string; blockId?: string; contextLabel?: string }) => void;
+  onSelectText: (payload: {
+    text: string;
+    blockId?: string;
+    contextLabel?: string;
+    intent?: "review" | "revise" | "polish";
+  }) => void;
 };
 
 type PdfPageContext = {
@@ -270,12 +275,45 @@ export function PdfDocumentCanvas({
                 text: selectionPopover.text,
                 blockId: selectionPopover.blockId,
                 contextLabel: selectionPopover.contextLabel,
+                intent: "review",
               });
               window.getSelection()?.removeAllRanges();
               setSelectionPopover(undefined);
             }}
           >
-            围绕所选内容继续处理
+            找问题
+          </button>
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                blockId: selectionPopover.blockId,
+                contextLabel: selectionPopover.contextLabel,
+                intent: "revise",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            直接改写
+          </button>
+          <button
+            className="pdf-selection-popover__action"
+            type="button"
+            onClick={() => {
+              onSelectText({
+                text: selectionPopover.text,
+                blockId: selectionPopover.blockId,
+                contextLabel: selectionPopover.contextLabel,
+                intent: "polish",
+              });
+              window.getSelection()?.removeAllRanges();
+              setSelectionPopover(undefined);
+            }}
+          >
+            润色表达
           </button>
           <button
             className="pdf-selection-popover__dismiss"

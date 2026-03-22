@@ -161,6 +161,10 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("阅读视图")).toBeInTheDocument();
     expect(screen.getByText("可编辑")).toBeInTheDocument();
+    expect(screen.getByText("起草内容")).toBeInTheDocument();
+    expect(screen.getByText("找问题")).toBeInTheDocument();
+    expect(screen.getByText("直接改写")).toBeInTheDocument();
+    expect(screen.getByText("润色表达")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
@@ -394,11 +398,11 @@ describe("workspace shell", () => {
       expect(screen.getByTestId("docx-selection-popover")).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "围绕所选内容继续处理" }));
+    fireEvent.click(screen.getByRole("button", { name: "直接改写" }));
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("已选文本")).toBeInTheDocument();
-      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+      expect(screen.getByText("已定位到你选中的内容，接下来我会直接帮你改写。")).toBeInTheDocument();
       expect(screen.queryByTestId("docx-selection-popover")).not.toBeInTheDocument();
     });
   });
@@ -548,14 +552,16 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("pdf-selection-popover")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "围绕所选内容继续处理" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "找问题" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "直接改写" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "润色表达" })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "围绕所选内容继续处理" }));
+    fireEvent.click(screen.getByRole("button", { name: "找问题" }));
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 1 页")).toBeInTheDocument();
-      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+      expect(screen.getByText("已定位到你选中的内容，接下来我会先帮你找问题。")).toBeInTheDocument();
       expect(screen.queryByTestId("pdf-selection-popover")).not.toBeInTheDocument();
     });
   });
