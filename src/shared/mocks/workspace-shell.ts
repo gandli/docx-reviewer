@@ -21,10 +21,31 @@ export const mockWorkspaceSummary: WorkspaceSummary = {
 };
 
 export const mockAssetGroups = [
-  { id: "doc", label: "主文档", active: true },
-  { id: "template", label: "模板" },
-  { id: "references", label: "参考资料" },
-  { id: "sheets", label: "表格资料" },
+  {
+    id: "doc",
+    label: "主文档",
+    active: true,
+    defaultExpanded: true,
+    items: ["采购与付款管理制度"],
+  },
+  {
+    id: "template",
+    label: "模板",
+    defaultExpanded: false,
+    items: ["制度模板 v3", "合同条款模板"],
+  },
+  {
+    id: "references",
+    label: "参考资料",
+    defaultExpanded: false,
+    items: ["付款节点说明", "采购管理办法"],
+  },
+  {
+    id: "sheets",
+    label: "表格资料",
+    defaultExpanded: false,
+    items: ["采购付款计划", "供应商信息表"],
+  },
 ] as const;
 
 export const mockAssistantMessages = [

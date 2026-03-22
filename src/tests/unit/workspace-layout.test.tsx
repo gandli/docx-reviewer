@@ -38,7 +38,24 @@ describe("workspace shell", () => {
     expect(screen.getByText("主文档")).toBeInTheDocument();
     expect(screen.getByText("参考资料")).toBeInTheDocument();
     expect(screen.getByText("最近引用")).toBeInTheDocument();
+    expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText(/已继承当前工作区摘要/)).toBeInTheDocument();
+  });
+
+  it("collapses and expands asset groups", () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "参考资料" }));
+    expect(screen.getByText("付款节点说明")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "参考资料" }));
+    expect(screen.queryByText("付款节点说明")).not.toBeInTheDocument();
   });
 
   it("renders document header, selected clause block, and assistant actions", () => {
@@ -47,7 +64,7 @@ describe("workspace shell", () => {
         <WorkspacePage />
       </MemoryRouter>,
     );
-    expect(screen.getByText("采购与付款管理制度")).toBeInTheDocument();
+    expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("当前选中条款")).toBeInTheDocument();
     expect(screen.getByText("修订")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "更多操作" })).toBeInTheDocument();

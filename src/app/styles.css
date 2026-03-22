@@ -124,6 +124,41 @@ textarea {
   border-bottom: 1px solid rgba(216, 207, 193, 0.72);
 }
 
+.asset-card__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.asset-card__chevron {
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.asset-card__items {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding-left: 2px;
+}
+
+.asset-card__item {
+  color: var(--color-text-muted);
+  font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .asset-card.is-active {
   color: var(--color-text-primary);
   font-weight: 700;
