@@ -44,9 +44,9 @@ textarea {
 .workspace-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 22px 18px;
-  background: linear-gradient(180deg, var(--color-surface-sidebar) 0%, #e8dece 100%);
+  gap: 20px;
+  padding: 24px 18px 18px;
+  background: linear-gradient(180deg, rgba(239, 231, 218, 0.82) 0%, rgba(232, 222, 206, 0.58) 100%);
   border-right: 1px solid var(--color-border-soft);
 }
 
@@ -58,9 +58,9 @@ textarea {
 .assistant-panel {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 22px 18px;
-  background: linear-gradient(180deg, #f8f4ed 0%, #f3ede3 100%);
+  gap: 16px;
+  padding: 24px 18px 18px;
+  background: linear-gradient(180deg, rgba(248, 244, 237, 0.72) 0%, rgba(243, 237, 227, 0.5) 100%);
   border-left: 1px solid var(--color-border-soft);
 }
 
@@ -93,15 +93,13 @@ textarea {
 .evidence-card,
 .assistant-card,
 .context-card {
-  border: 1px solid var(--color-border-soft);
-  border-radius: 16px;
-  background: rgba(255, 251, 244, 0.78);
+  border-radius: 14px;
 }
 
 .resume-card,
 .assistant-card,
 .context-card {
-  padding: 14px 15px;
+  padding: 0;
 }
 
 .asset-groups,
@@ -114,18 +112,19 @@ textarea {
 
 .asset-card,
 .evidence-card {
-  padding: 12px 13px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(216, 207, 193, 0.72);
 }
 
 .asset-card.is-active {
-  background: rgba(255, 251, 244, 0.98);
-  border-color: #cabba3;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .workspace-actions {
   margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border-soft);
+  padding-top: 16px;
+  border-top: 1px solid rgba(216, 207, 193, 0.82);
 }
 
 .workspace-actions span {
@@ -221,19 +220,23 @@ textarea {
 }
 
 .assistant-context {
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(216, 207, 193, 0.78);
 }
 
 .suggested-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(216, 207, 193, 0.68);
 }
 
 .suggested-action {
-  padding: 8px 11px;
+  padding: 7px 10px;
   border-radius: 999px;
-  background: #ece4d8;
+  background: rgba(236, 228, 216, 0.72);
   color: var(--color-text-secondary);
   font-family: "Inter", "Avenir Next", "Segoe UI", sans-serif;
   font-size: 0.78rem;
@@ -246,7 +249,10 @@ textarea {
 }
 
 .assistant-card {
-  background: rgba(255, 255, 255, 0.86);
+  padding: 0 0 12px;
+  border-bottom: 1px solid rgba(216, 207, 193, 0.58);
+  background: transparent;
+  border-radius: 0;
 }
 
 .assistant-primary-action,
@@ -264,8 +270,22 @@ textarea {
 }
 
 .assistant-secondary-action {
-  background: #ece4d8;
+  background: rgba(236, 228, 216, 0.76);
   color: var(--color-text-secondary);
+}
+
+.resume-card {
+  padding: 0 0 16px;
+  border-bottom: 1px solid rgba(216, 207, 193, 0.82);
+  background: transparent;
+  border-radius: 0;
+}
+
+.context-card {
+  padding: 14px 0 0;
+  border-top: 1px solid rgba(216, 207, 193, 0.82);
+  background: transparent;
+  border-radius: 0;
 }
 
 @media (max-width: 1180px) {
