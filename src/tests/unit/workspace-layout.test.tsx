@@ -289,7 +289,7 @@ describe("workspace shell", () => {
       expect(screen.getAllByText("差旅报销制度").length).toBeGreaterThan(0);
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
       expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
-      expect(screen.getAllByText(/已导入文档《差旅报销制度》/).length).toBeGreaterThan(0);
+      expect(screen.getByText("可以直接选中内容开始处理，或在右侧输入你的要求。")).toBeInTheDocument();
     });
 
     expect(screen.queryByText("继续优化付款条款，降低履约争议。")).not.toBeInTheDocument();

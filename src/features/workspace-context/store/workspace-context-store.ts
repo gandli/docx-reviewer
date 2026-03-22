@@ -169,7 +169,7 @@ export function createWorkspaceContextStore(
           return state;
         }
 
-        const importedReply = `已导入文档《${document.title}》，可以继续起草内容、找问题或直接改写。`;
+        const importedReply = "可以直接选中内容开始处理，或在右侧输入你的要求。";
         const isPdfDocument = document.mode === "pdf";
         const defaultActiveBlockId =
           document.blocks.find((block) => block.kind === "paragraph")?.id ?? document.blocks[0]?.id;
@@ -199,19 +199,13 @@ export function createWorkspaceContextStore(
             pendingSuggestionIds: [],
             recentEvidenceRefs: [`导入文件 · ${fileName}`],
             latestConclusion: importedReply,
-            nextAction: "继续审阅导入内容",
+            nextAction: "等待下一步操作",
             currentTaskStatus: "in_progress",
             lastUserIntent: `导入文档 ${fileName}`,
             documentBlocks: document.blocks,
             updatedAt: "刚刚",
             isSelectionFocused: false,
-            assistantMessages: [
-              {
-                id: "assistant-1",
-                role: "assistant",
-                content: importedReply,
-              },
-            ],
+            assistantMessages: [],
           }),
         };
       }),

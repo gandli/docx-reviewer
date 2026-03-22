@@ -60,8 +60,8 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.activeDocumentTitle).toBe("付款规范");
     expect(store.getState().summary?.documentBlocks[0]?.text).toBe("付款规范");
     expect(store.getState().summary?.recentEvidenceRefs[0]).toBe("导入文件 · 付款规范.md");
-    expect(store.getState().summary?.latestConclusion).toContain("已导入文档");
-    expect(store.getState().summary?.assistantMessages).toHaveLength(1);
+    expect(store.getState().summary?.latestConclusion).toBe("可以直接选中内容开始处理，或在右侧输入你的要求。");
+    expect(store.getState().summary?.assistantMessages).toHaveLength(0);
   });
 
   it("imports a pdf document into preview mode and resets the assistant thread", () => {
@@ -86,7 +86,7 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.activeDocumentMode).toBe("pdf");
     expect(store.getState().summary?.activeDocumentTitle).toBe("付款附件");
     expect(store.getState().summary?.activeSelectionBlockId).toBe("pdf-paragraph-1");
-    expect(store.getState().summary?.assistantMessages).toHaveLength(1);
+    expect(store.getState().summary?.assistantMessages).toHaveLength(0);
     expect(store.getState().previewDocument?.mode).toBe("pdf");
   });
 
