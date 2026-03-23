@@ -88,7 +88,7 @@ export function WorkspaceSettingsModal({
             </p>
           </div>
           <button
-            className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
+            className="min-w-[72px] cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 text-center font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
             type="button"
             onClick={onClose}
           >
