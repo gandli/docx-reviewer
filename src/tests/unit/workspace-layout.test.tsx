@@ -468,6 +468,13 @@ describe("workspace shell", () => {
     fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
       target: { value: "qwen-reviewer" },
     });
+    expect(screen.getByRole("button", { name: "保存设置" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
@@ -495,6 +502,13 @@ describe("workspace shell", () => {
     fireEvent.change(screen.getByLabelText("Anthropic 风格模型名"), {
       target: { value: "claude-reviewer" },
     });
+    expect(screen.getByRole("button", { name: "保存设置" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
@@ -562,6 +576,24 @@ describe("workspace shell", () => {
   });
 
   it("opens workspace settings, filters models, and persists selected model", async () => {
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "webllm",
+        webllmModelId: "Qwen3-0.6B-q4f16_1-MLC",
+        openAIBaseUrl: "https://api.openai.com/v1",
+        openAIApiKey: "",
+        openAIModel: "gpt-4.1-mini",
+        anthropicBaseUrl: "https://api.anthropic.com/v1",
+        anthropicApiKey: "",
+        anthropicModel: "claude-3-5-sonnet-latest",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -590,6 +622,15 @@ describe("workspace shell", () => {
     expect(selectedModelCard).toHaveTextContent("推荐用于正式文书审阅");
 
     fireEvent.click(selectedModelCard!);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "保存设置" })).toBeDisabled();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
@@ -684,6 +725,24 @@ describe("workspace shell", () => {
   });
 
   it("opens settings, updates the workspace title, and persists it", async () => {
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "webllm",
+        webllmModelId: "Qwen3-0.6B-q4f16_1-MLC",
+        openAIBaseUrl: "https://api.openai.com/v1",
+        openAIApiKey: "",
+        openAIModel: "gpt-4.1-mini",
+        anthropicBaseUrl: "https://api.anthropic.com/v1",
+        anthropicApiKey: "",
+        anthropicModel: "claude-3-5-sonnet-latest",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -700,10 +759,9 @@ describe("workspace shell", () => {
       target: { value: "审阅时优先指出事实缺失" },
     });
     fireEvent.click(screen.getByLabelText("冷灰墨"));
-    fireEvent.change(screen.getByLabelText("搜索本地模型"), {
-      target: { value: "1.5B" },
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "保存设置" })).toBeEnabled();
     });
-    fireEvent.click(screen.getByText("Qwen2.5 1.5B").closest("label")!);
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
@@ -717,7 +775,7 @@ describe("workspace shell", () => {
         "审阅时优先指出事实缺失",
       );
       expect(JSON.parse(window.localStorage.getItem("app-settings") ?? "{}").webllmModelId).toBe(
-        "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+        "Qwen3-0.6B-q4f16_1-MLC",
       );
     });
   });
@@ -740,6 +798,13 @@ describe("workspace shell", () => {
     fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
       target: { value: "qwen-reviewer" },
     });
+    expect(screen.getByRole("button", { name: "保存设置" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {

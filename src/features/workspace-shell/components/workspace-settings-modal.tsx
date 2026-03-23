@@ -184,6 +184,19 @@ export function WorkspaceSettingsModal({
       .toLowerCase()
       .includes(modelQuery.trim().toLowerCase()),
   );
+  const hasModelServiceChanges =
+    draftProvider !== llmProvider ||
+    draftModelId !== selectedModelId ||
+    draftOpenAIBaseUrl.trim() !== openAIBaseUrl.trim() ||
+    draftOpenAIApiKey.trim() !== openAIApiKey.trim() ||
+    draftOpenAIModel.trim() !== openAIModel.trim() ||
+    draftAnthropicBaseUrl.trim() !== anthropicBaseUrl.trim() ||
+    draftAnthropicApiKey.trim() !== anthropicApiKey.trim() ||
+    draftAnthropicModel.trim() !== anthropicModel.trim() ||
+    draftOllamaBaseUrl.trim() !== ollamaBaseUrl.trim() ||
+    draftOllamaModel.trim() !== ollamaModel.trim();
+  const isSaveBlockedByCheck = hasModelServiceChanges && currentCheckVariant !== "success";
+  const saveHint = isSaveBlockedByCheck ? "模型服务已修改，请先检查连接并确认测试成功。" : "";
 
   const handleImportFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -696,6 +709,11 @@ export function WorkspaceSettingsModal({
         </div>
 
         <footer className="shrink-0 flex items-center justify-end gap-3 border-t border-[rgba(216,207,193,0.72)] px-5 py-4 sm:px-6">
+          {saveHint ? (
+            <div className="mr-auto font-sans text-[0.78rem] leading-[1.5] text-[rgba(143,83,52,0.96)]">
+              {saveHint}
+            </div>
+          ) : null}
           <button
             className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
             type="button"
@@ -705,26 +723,26 @@ export function WorkspaceSettingsModal({
           </button>
           <button
             className="cursor-pointer rounded-full border-0 bg-[rgba(47,38,29,0.94)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-60"
-              type="button"
-              disabled={isModelBusy}
-              onClick={() =>
-                onSave({
-                  workspaceTitle: draftTitle,
-                  themeId: draftThemeId,
-                  reviewPromptNote: draftPromptNote,
-                  llmProvider: draftProvider,
-                  modelId: draftModelId,
-                  openAIBaseUrl: draftOpenAIBaseUrl,
-                  openAIApiKey: draftOpenAIApiKey,
-                  openAIModel: draftOpenAIModel,
-                  anthropicBaseUrl: draftAnthropicBaseUrl,
-                  anthropicApiKey: draftAnthropicApiKey,
-                  anthropicModel: draftAnthropicModel,
-                  ollamaBaseUrl: draftOllamaBaseUrl,
-                  ollamaModel: draftOllamaModel,
-                })
-              }
-            >
+            type="button"
+            disabled={isModelBusy || isCheckingConnection || isSaveBlockedByCheck}
+            onClick={() =>
+              onSave({
+                workspaceTitle: draftTitle,
+                themeId: draftThemeId,
+                reviewPromptNote: draftPromptNote,
+                llmProvider: draftProvider,
+                modelId: draftModelId,
+                openAIBaseUrl: draftOpenAIBaseUrl,
+                openAIApiKey: draftOpenAIApiKey,
+                openAIModel: draftOpenAIModel,
+                anthropicBaseUrl: draftAnthropicBaseUrl,
+                anthropicApiKey: draftAnthropicApiKey,
+                anthropicModel: draftAnthropicModel,
+                ollamaBaseUrl: draftOllamaBaseUrl,
+                ollamaModel: draftOllamaModel,
+              })
+            }
+          >
             保存设置
           </button>
         </footer>

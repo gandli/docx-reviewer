@@ -631,8 +631,8 @@ export function WorkspacePage() {
 
       saveAppSettings(imported.settings);
       setAppSettings(imported.settings);
-      setModelCheckStatus("已导入模型配置。");
-      setModelCheckVariant("success");
+      setModelCheckStatus("已导入模型配置，请先检查连接。");
+      setModelCheckVariant(null);
       setLastSuccessfulCheckAt("");
     } catch (error) {
       setModelCheckStatus(error instanceof Error ? error.message : "导入模型配置失败。");
