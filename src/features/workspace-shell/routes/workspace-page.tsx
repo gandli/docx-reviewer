@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useParams } from "react-router-dom";
 import { WorkspaceLayout } from "@/features/workspace-shell/components/workspace-layout";
 import { createWorkspaceContextStore } from "@/features/workspace-context/store/workspace-context-store";
@@ -50,6 +50,7 @@ export function WorkspacePage() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [appSettings, setAppSettings] = useState(() => loadAppSettings());
   const [modelCheckStatus, setModelCheckStatus] = useState("");
+  const [modelCheckVariant, setModelCheckVariant] = useState<"success" | "error" | null>(null);
   const [isCheckingConnection, setIsCheckingConnection] = useState(false);
   const selectedModel = useMemo(
     () =>
@@ -273,6 +274,11 @@ export function WorkspacePage() {
     void ensureModelReady();
   };
 
+  const handleClearModelCheckStatus = useCallback(() => {
+    setModelCheckStatus("");
+    setModelCheckVariant(null);
+  }, []);
+
   const handleCheckModelConnection = async (payload: {
     llmProvider: "webllm" | "openai" | "ollama";
     modelId: string;
@@ -284,6 +290,7 @@ export function WorkspacePage() {
   }) => {
     setIsCheckingConnection(true);
     setModelCheckStatus("");
+    setModelCheckVariant(null);
 
     try {
       const result = await validateLLMProviderConnection({
@@ -297,8 +304,10 @@ export function WorkspacePage() {
         ollamaModel: payload.ollamaModel.trim(),
       });
       setModelCheckStatus(result.message);
+      setModelCheckVariant("success");
     } catch (error) {
       setModelCheckStatus(error instanceof Error ? error.message : "连接检查失败。");
+      setModelCheckVariant("error");
     } finally {
       setIsCheckingConnection(false);
     }
@@ -352,12 +361,14 @@ export function WorkspacePage() {
         activeModelId={appSettings.llmProvider === "webllm" ? getLoadedLocalLLMModelId() : undefined}
         currentModelStatus={localModelDetail}
         currentCheckStatus={modelCheckStatus}
+        currentCheckVariant={modelCheckVariant}
         isCheckingConnection={isCheckingConnection}
         providerOptions={providerOptions}
         modelOptions={modelOptions}
         isModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
         isModelSupported={appSettings.llmProvider === "webllm" ? isLocalLLMSupported() : true}
         onClose={() => setIsWorkspaceSettingsOpen(false)}
+        onClearCheckStatus={handleClearModelCheckStatus}
         onCheckConnection={handleCheckModelConnection}
         onSave={handleSaveWorkspaceSettings}
         onClear={() => {

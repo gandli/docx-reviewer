@@ -18,12 +18,14 @@ type WorkspaceSettingsModalProps = {
   activeModelId?: string;
   currentModelStatus: string;
   currentCheckStatus?: string;
+  currentCheckVariant?: "success" | "error" | null;
   isCheckingConnection?: boolean;
   providerOptions: readonly LLMProviderOption[];
   modelOptions: readonly LocalLLMModelOption[];
   isModelBusy?: boolean;
   isModelSupported?: boolean;
   onClose: () => void;
+  onClearCheckStatus: () => void;
   onCheckConnection: (payload: {
     llmProvider: LLMProvider;
     modelId: string;
@@ -63,12 +65,14 @@ export function WorkspaceSettingsModal({
   activeModelId,
   currentModelStatus,
   currentCheckStatus = "",
+  currentCheckVariant = null,
   isCheckingConnection = false,
   providerOptions,
   modelOptions,
   isModelBusy = false,
   isModelSupported = true,
   onClose,
+  onClearCheckStatus,
   onCheckConnection,
   onSave,
   onClear,
@@ -113,6 +117,24 @@ export function WorkspaceSettingsModal({
     selectedModelId,
     selectedThemeId,
     workspaceTitle,
+  ]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    onClearCheckStatus();
+  }, [
+    draftProvider,
+    draftModelId,
+    draftOpenAIBaseUrl,
+    draftOpenAIApiKey,
+    draftOpenAIModel,
+    draftOllamaBaseUrl,
+    draftOllamaModel,
+    isOpen,
+    onClearCheckStatus,
   ]);
 
   const filteredModels = modelOptions.filter((model) =>
@@ -272,7 +294,15 @@ export function WorkspaceSettingsModal({
                 {isCheckingConnection ? "检查中…" : "检查连接"}
               </button>
               {currentCheckStatus ? (
-                <div className="font-sans text-[0.83rem] leading-[1.6] text-[var(--color-text-secondary)]">
+                <div
+                  className={`rounded-2xl px-3 py-2 font-sans text-[0.83rem] leading-[1.6] ${
+                    currentCheckVariant === "success"
+                      ? "bg-[rgba(232,245,236,0.88)] text-[rgba(41,104,58,0.96)]"
+                      : currentCheckVariant === "error"
+                        ? "bg-[rgba(255,242,238,0.92)] text-[rgba(143,83,52,0.96)]"
+                        : "bg-[rgba(255,251,244,0.78)] text-[var(--color-text-secondary)]"
+                  }`}
+                >
                   {currentCheckStatus}
                 </div>
               ) : null}

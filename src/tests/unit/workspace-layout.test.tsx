@@ -575,6 +575,39 @@ describe("workspace shell", () => {
     });
   });
 
+  it("clears old connection result after model settings change", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByText("OpenAI 风格 API").closest("label")!);
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API 地址"), {
+      target: { value: "https://api.example.com/v1" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API Key"), {
+      target: { value: "sk-demo" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
+      target: { value: "qwen-reviewer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
+      target: { value: "qwen-reviewer-v2" },
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText("接口可用，可继续使用 qwen-reviewer。")).not.toBeInTheDocument();
+    });
+  });
+
   it("clears persisted workspace records from settings", async () => {
     window.localStorage.setItem(
       "workspace-state:ws-enterprise",
