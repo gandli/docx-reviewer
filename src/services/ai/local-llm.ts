@@ -365,15 +365,38 @@ export async function validateLLMProviderConnection(settings: AppSettings) {
   }
 
   if (settings.llmProvider === "openai") {
-    const response = await fetch(`${settings.openAIBaseUrl.replace(/\/$/, "")}/models`, {
-      headers: {
-        Authorization: `Bearer ${settings.openAIApiKey}`,
-      },
-    });
+    try {
+      const response = await fetch(`${settings.openAIBaseUrl.replace(/\/$/, "")}/models`, {
+        headers: {
+          Authorization: `Bearer ${settings.openAIApiKey}`,
+        },
+      });
 
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "OpenAI 风格 API 连接失败。");
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+    } catch {
+      const fallbackResponse = await fetch(
+        `${settings.openAIBaseUrl.replace(/\/$/, "")}/chat/completions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${settings.openAIApiKey}`,
+          },
+          body: JSON.stringify({
+            model: settings.openAIModel,
+            messages: [{ role: "user", content: "ping" }],
+            max_tokens: 1,
+            stream: false,
+          }),
+        },
+      );
+
+      if (!fallbackResponse.ok) {
+        const text = await fallbackResponse.text();
+        throw new Error(text || "OpenAI 风格 API 连接失败。");
+      }
     }
 
     return {

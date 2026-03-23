@@ -8,11 +8,13 @@ import {
   loadSelectedLocalLLMModelId,
   saveReadyLocalLLMModelId,
   saveSelectedLocalLLMModelId,
+  validateLLMProviderConnection,
 } from "@/services/ai/local-llm";
 
 describe("local llm", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    vi.restoreAllMocks();
   });
 
   it("provides a curated local model list with a stable default", () => {
@@ -112,5 +114,49 @@ describe("local llm", () => {
     expect(messages[0]?.content).toContain("只优化措辞、标点、语气、节奏和书面感");
     expect(messages[0]?.content).toContain("Markdown");
     expect(messages[1]?.content).toContain("请润色下面这段");
+  });
+
+  it("falls back to chat completions when openai style model listing is unavailable", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: false,
+        text: async () => "not supported",
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ choices: [] }),
+      } as Response);
+
+    await expect(
+      validateLLMProviderConnection({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "openai",
+        webllmModelId: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+        openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+        openAIApiKey: "glm-key",
+        openAIModel: "glm-4.7-flash",
+        anthropicBaseUrl: "https://api.anthropic.com/v1",
+        anthropicApiKey: "",
+        anthropicModel: "claude-3-5-sonnet-latest",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      message: "接口可用，可继续使用 glm-4.7-flash。",
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "Bearer glm-key",
+        }),
+      }),
+    );
   });
 });
