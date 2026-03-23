@@ -708,6 +708,21 @@ function describeOpenAICompatibleReplyIssue(payload: OpenAICompatiblePayload) {
   return "模型接口已连通，但返回正文为空或返回格式不兼容。";
 }
 
+function getRemoteProviderMaxTokens(action: LocalLLMAction) {
+  switch (action) {
+    case "chat":
+      return 640;
+    case "review":
+      return 1024;
+    case "revise":
+      return 1536;
+    case "polish":
+      return 1024;
+    default:
+      return 1024;
+  }
+}
+
 async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSettings) {
   const response = await fetch(`${settings.openAIBaseUrl.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
@@ -720,7 +735,7 @@ async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSe
       messages: createLocalLLMMessages(request),
       temperature: request.action === "chat" ? 0.4 : 0.2,
       top_p: 0.9,
-      max_tokens: request.action === "review" ? 240 : 320,
+      max_tokens: getRemoteProviderMaxTokens(request.action),
     }),
   });
 
@@ -775,7 +790,7 @@ async function runAnthropicCompatibleTask(request: LocalLLMRequest, settings: Ap
       messages: conversation,
       temperature: request.action === "chat" ? 0.4 : 0.2,
       top_p: 0.9,
-      max_tokens: request.action === "review" ? 240 : 320,
+      max_tokens: getRemoteProviderMaxTokens(request.action),
     }),
   });
 

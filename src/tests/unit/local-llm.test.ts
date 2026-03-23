@@ -294,6 +294,50 @@ describe("local llm", () => {
     ).resolves.toContain("付款条件缺少验收前提");
   });
 
+  it("uses a larger token budget for remote review requests", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: "## 审阅结论\n未发现需要修改的明确问题。",
+            },
+          },
+        ],
+      }),
+    } as Response);
+
+    await runLLMTask(
+      {
+        action: "review",
+        clauseTitle: "付款方式",
+        clauseText: "合同签订后一次性支付全部款项。",
+      },
+      {
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "openai",
+        webllmModelId: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+        openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+        openAIApiKey: "glm-key",
+        openAIModel: "glm-4.7-flash",
+        anthropicBaseUrl: "https://api.anthropic.com/v1",
+        anthropicApiKey: "",
+        anthropicModel: "claude-3-5-sonnet-latest",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      },
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+      expect.objectContaining({
+        body: expect.stringContaining("\"max_tokens\":1024"),
+      }),
+    );
+  });
+
   it("gives a precise error when the remote provider returns no final content", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
       ok: true,
