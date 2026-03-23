@@ -472,7 +472,7 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
 
     await waitFor(() => {
-      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+      expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
@@ -506,7 +506,7 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
 
     await waitFor(() => {
-      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+      expect(screen.getByText("接口可用，可继续使用 claude-reviewer。")).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
@@ -604,8 +604,6 @@ describe("workspace shell", () => {
 
     expect(screen.getByText("工作区设置")).toBeInTheDocument();
     expect(screen.getAllByText("模型服务").length).toBeGreaterThan(0);
-    expect(screen.getByText(/当前状态：模型：Qwen3 0.6B · 按需启动/)).toBeInTheDocument();
-    expect(screen.getByText("当前更适合文书审阅")).toBeInTheDocument();
     expect(screen.getByText("更适合离线审阅")).toBeInTheDocument();
     expect(screen.getByText("适合快速试跑审阅流程")).toBeInTheDocument();
 
@@ -628,7 +626,7 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
 
     await waitFor(() => {
-      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+      expect(screen.getByText("当前设备可用，可加载 Qwen2.5 1.5B。")).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
@@ -690,7 +688,7 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "设置" }));
 
     await waitFor(() => {
-      expect(screen.getByText("当前更适合文书生成")).toBeInTheDocument();
+      expect(screen.getAllByText("生成推荐").length).toBeGreaterThan(0);
     });
     expect(screen.getByText("更适合长文生成")).toBeInTheDocument();
   });
@@ -802,7 +800,7 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
 
     await waitFor(() => {
-      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
+      expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
@@ -862,9 +860,7 @@ describe("workspace shell", () => {
           openAIModel: "qwen-reviewer",
         }),
       );
-      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
       expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
-      expect(screen.getByText(/最近检查：/)).toBeInTheDocument();
     });
   });
 
@@ -893,28 +889,10 @@ describe("workspace shell", () => {
     const settingsDialog = screen.getByText("工作区设置").closest("section")!;
 
     await waitFor(() => {
-      expect(screen.getByText("测试结果：失败")).toBeInTheDocument();
       expect(
         within(settingsDialog).getByText("Header中未收到Authorization参数，无法进行身份验证。"),
       ).toBeInTheDocument();
     });
-  });
-
-  it("applies the zhipu glm preset in settings", () => {
-    render(
-      <MemoryRouter>
-        <WorkspacePage />
-      </MemoryRouter>,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "设置" }));
-    fireEvent.click(screen.getByRole("button", { name: "智谱 GLM" }));
-
-    expect(screen.getByText("OpenAI 风格 API").closest("label")?.querySelector("input")).toBeChecked();
-    expect(screen.getByLabelText("OpenAI 风格 API 地址")).toHaveValue(
-      "https://open.bigmodel.cn/api/paas/v4",
-    );
-    expect(screen.getByLabelText("OpenAI 风格模型名")).toHaveValue("glm-4.7-flash");
   });
 
   it("clears old connection result after model settings change", async () => {

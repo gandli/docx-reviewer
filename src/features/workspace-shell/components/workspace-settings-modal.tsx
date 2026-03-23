@@ -3,7 +3,6 @@ import type { LLMProviderOption, LocalLLMModelOption } from "@/services/ai/local
 import type {
   AppThemeId,
   LLMProvider,
-  ModelServicePreset,
 } from "@/services/persistence/app-settings";
 import type { WorkspaceTaskType } from "@/features/workspace-context/types/workspace-summary";
 import { themeOptions } from "@/shared/constants/theme";
@@ -31,7 +30,6 @@ type WorkspaceSettingsModalProps = {
   isCheckingConnection?: boolean;
   providerOptions: readonly LLMProviderOption[];
   modelOptions: readonly LocalLLMModelOption[];
-  modelServicePresets: readonly ModelServicePreset[];
   isModelBusy?: boolean;
   isModelSupported?: boolean;
   onClose: () => void;
@@ -100,7 +98,6 @@ export function WorkspaceSettingsModal({
   onExportModelConfig,
   onImportModelConfig,
   onClear,
-  modelServicePresets,
 }: WorkspaceSettingsModalProps) {
   const [draftTitle, setDraftTitle] = useState(workspaceTitle);
   const [draftThemeId, setDraftThemeId] = useState<AppThemeId>(selectedThemeId);
@@ -118,9 +115,6 @@ export function WorkspaceSettingsModal({
   const [modelQuery, setModelQuery] = useState("");
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const recommendationFocus = currentTask === "generate" ? "generate" : "review";
-  const recommendationLabel =
-    recommendationFocus === "generate" ? "当前更适合文书生成" : "当前更适合文书审阅";
-
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -206,29 +200,6 @@ export function WorkspaceSettingsModal({
 
     onImportModelConfig(file);
     event.target.value = "";
-  };
-
-  const handleApplyPreset = (preset: ModelServicePreset) => {
-    setDraftProvider(preset.provider);
-
-    if (preset.openAIBaseUrl) {
-      setDraftOpenAIBaseUrl(preset.openAIBaseUrl);
-    }
-    if (preset.openAIModel) {
-      setDraftOpenAIModel(preset.openAIModel);
-    }
-    if (preset.anthropicBaseUrl) {
-      setDraftAnthropicBaseUrl(preset.anthropicBaseUrl);
-    }
-    if (preset.anthropicModel) {
-      setDraftAnthropicModel(preset.anthropicModel);
-    }
-    if (preset.ollamaBaseUrl) {
-      setDraftOllamaBaseUrl(preset.ollamaBaseUrl);
-    }
-    if (preset.ollamaModel) {
-      setDraftOllamaModel(preset.ollamaModel);
-    }
   };
 
   if (!isOpen) {
@@ -357,90 +328,6 @@ export function WorkspaceSettingsModal({
               <p className="font-sans text-[0.85rem] leading-[1.6] text-[var(--color-text-muted)]">
                 这里决定右侧助手实际使用哪一种模型来源。
               </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-3 py-1.5 font-sans text-[0.76rem] font-semibold text-[var(--color-text-secondary)]">
-                {recommendationLabel}
-              </span>
-              <span className="rounded-full border border-[rgba(216,207,193,0.78)] bg-white/70 px-3 py-1.5 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
-                当前状态：{currentModelStatus}
-              </span>
-              {currentCheckStatus ? (
-                <span
-                  className={`rounded-full px-3 py-1.5 font-sans text-[0.76rem] font-semibold ${
-                    currentCheckVariant === "success"
-                      ? "bg-[rgba(232,245,236,0.88)] text-[rgba(41,104,58,0.96)]"
-                      : currentCheckVariant === "error"
-                        ? "bg-[rgba(255,242,238,0.92)] text-[rgba(143,83,52,0.96)]"
-                        : "bg-[rgba(255,251,244,0.78)] text-[var(--color-text-secondary)]"
-                  }`}
-                >
-                  测试结果：
-                  {currentCheckVariant === "success"
-                    ? "成功"
-                    : currentCheckVariant === "error"
-                      ? "失败"
-                      : "未完成"}
-                </span>
-              ) : null}
-            </div>
-            <div className="grid gap-2">
-              <div className="flex flex-wrap gap-2">
-                {modelServicePresets.map((preset) => (
-                  <button
-                    key={preset.id}
-                    className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-3 py-2 font-sans text-[0.78rem] text-[var(--color-text-secondary)]"
-                    type="button"
-                    onClick={() => handleApplyPreset(preset)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
-                type="button"
-                disabled={isCheckingConnection}
-                onClick={() =>
-                  onCheckConnection({
-                    llmProvider: draftProvider,
-                    modelId: draftModelId,
-                    openAIBaseUrl: draftOpenAIBaseUrl,
-                    openAIApiKey: draftOpenAIApiKey,
-                    openAIModel: draftOpenAIModel,
-                    anthropicBaseUrl: draftAnthropicBaseUrl,
-                    anthropicApiKey: draftAnthropicApiKey,
-                    anthropicModel: draftAnthropicModel,
-                    ollamaBaseUrl: draftOllamaBaseUrl,
-                    ollamaModel: draftOllamaModel,
-                  })
-                }
-              >
-                {isCheckingConnection ? "检查中…" : "检查连接"}
-              </button>
-              <button
-                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
-                type="button"
-                onClick={onExportModelConfig}
-              >
-                导出配置
-              </button>
-              <button
-                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
-                type="button"
-                onClick={() => importInputRef.current?.click()}
-              >
-                导入配置
-              </button>
-              <input
-                ref={importInputRef}
-                className="hidden"
-                type="file"
-                accept="application/json"
-                onChange={handleImportFileChange}
-              />
             </div>
             {currentCheckStatus ? (
               <div
@@ -684,6 +571,50 @@ export function WorkspaceSettingsModal({
                 </label>
               </div>
             ) : null}
+            <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(216,207,193,0.68)] pt-3">
+              <button
+                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                disabled={isCheckingConnection}
+                onClick={() =>
+                  onCheckConnection({
+                    llmProvider: draftProvider,
+                    modelId: draftModelId,
+                    openAIBaseUrl: draftOpenAIBaseUrl,
+                    openAIApiKey: draftOpenAIApiKey,
+                    openAIModel: draftOpenAIModel,
+                    anthropicBaseUrl: draftAnthropicBaseUrl,
+                    anthropicApiKey: draftAnthropicApiKey,
+                    anthropicModel: draftAnthropicModel,
+                    ollamaBaseUrl: draftOllamaBaseUrl,
+                    ollamaModel: draftOllamaModel,
+                  })
+                }
+              >
+                {isCheckingConnection ? "检查中…" : "检查连接"}
+              </button>
+              <button
+                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
+                type="button"
+                onClick={onExportModelConfig}
+              >
+                导出配置
+              </button>
+              <button
+                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
+                type="button"
+                onClick={() => importInputRef.current?.click()}
+              >
+                导入配置
+              </button>
+              <input
+                ref={importInputRef}
+                className="hidden"
+                type="file"
+                accept="application/json"
+                onChange={handleImportFileChange}
+              />
+            </div>
           </section>
 
           <section className="grid gap-3 rounded-[24px] border border-[rgba(191,132,104,0.28)] bg-[rgba(255,249,245,0.92)] px-4 py-4">
