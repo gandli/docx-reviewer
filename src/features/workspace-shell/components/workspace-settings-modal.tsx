@@ -329,19 +329,6 @@ export function WorkspaceSettingsModal({
                 这里决定右侧助手实际使用哪一种模型来源。
               </p>
             </div>
-            {currentCheckStatus ? (
-              <div
-                className={`rounded-2xl px-4 py-3 font-sans text-[0.83rem] leading-[1.6] ${
-                  currentCheckVariant === "success"
-                    ? "bg-[rgba(232,245,236,0.88)] text-[rgba(41,104,58,0.96)]"
-                    : currentCheckVariant === "error"
-                      ? "bg-[rgba(255,242,238,0.92)] text-[rgba(143,83,52,0.96)]"
-                      : "bg-[rgba(255,251,244,0.78)] text-[var(--color-text-secondary)]"
-                }`}
-              >
-                {currentCheckStatus}
-              </div>
-            ) : null}
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
               模型服务
             </span>
@@ -571,7 +558,21 @@ export function WorkspaceSettingsModal({
                 </label>
               </div>
             ) : null}
-            <div className="flex flex-wrap items-center gap-3 border-t border-[rgba(216,207,193,0.68)] pt-3">
+            <div className="grid gap-3 border-t border-[rgba(216,207,193,0.68)] pt-3">
+              {currentCheckStatus ? (
+                <div
+                  className={`rounded-2xl px-4 py-3 font-sans text-[0.83rem] leading-[1.6] ${
+                    currentCheckVariant === "success"
+                      ? "bg-[rgba(232,245,236,0.88)] text-[rgba(41,104,58,0.96)]"
+                      : currentCheckVariant === "error"
+                        ? "bg-[rgba(255,242,238,0.92)] text-[rgba(143,83,52,0.96)]"
+                        : "bg-[rgba(255,251,244,0.78)] text-[var(--color-text-secondary)]"
+                  }`}
+                >
+                  {currentCheckStatus}
+                </div>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-3">
               <button
                 className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
                 type="button"
@@ -614,6 +615,7 @@ export function WorkspaceSettingsModal({
                 accept="application/json"
                 onChange={handleImportFileChange}
               />
+              </div>
             </div>
           </section>
 
