@@ -407,6 +407,8 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "设置" }));
 
     expect(screen.getByText("工作区设置")).toBeInTheDocument();
+    expect(screen.getAllByText("模型服务").length).toBeGreaterThan(0);
+    expect(screen.getByText(/当前状态：模型：Qwen3 0.6B · 按需启动/)).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("搜索本地模型"), {
       target: { value: "1.5B" },

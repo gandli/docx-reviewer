@@ -16,6 +16,7 @@ type WorkspaceSettingsModalProps = {
   ollamaBaseUrl: string;
   ollamaModel: string;
   activeModelId?: string;
+  currentModelStatus: string;
   providerOptions: readonly LLMProviderOption[];
   modelOptions: readonly LocalLLMModelOption[];
   isModelBusy?: boolean;
@@ -49,6 +50,7 @@ export function WorkspaceSettingsModal({
   ollamaBaseUrl,
   ollamaModel,
   activeModelId,
+  currentModelStatus,
   providerOptions,
   modelOptions,
   isModelBusy = false,
@@ -144,32 +146,50 @@ export function WorkspaceSettingsModal({
           className="grid flex-1 gap-5 overflow-y-auto px-5 py-5 sm:px-6"
           data-scroll-region="true"
         >
-          <label className="grid gap-2">
-            <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
-              工作区名称
-            </span>
-            <input
-              aria-label="工作区名称"
-              className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.95rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
-              value={draftTitle}
-              onChange={(event) => setDraftTitle(event.target.value)}
-            />
-          </label>
+          <section className="grid gap-4 rounded-[24px] border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.82)] px-4 py-4">
+            <div className="grid gap-1">
+              <div className="font-sans text-[0.78rem] font-semibold tracking-[0.06em] text-[var(--color-text-muted)] uppercase">
+                工作区
+              </div>
+              <p className="font-sans text-[0.85rem] leading-[1.6] text-[var(--color-text-muted)]">
+                这里控制当前工作区名称和审阅偏好，不影响其他工作区。
+              </p>
+            </div>
+            <label className="grid gap-2">
+              <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
+                工作区名称
+              </span>
+              <input
+                aria-label="工作区名称"
+                className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.95rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+                value={draftTitle}
+                onChange={(event) => setDraftTitle(event.target.value)}
+              />
+            </label>
 
-          <div className="grid gap-2">
-            <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
-              提示词偏好
-            </span>
-            <textarea
-              aria-label="提示词偏好"
-              className="min-h-28 w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
-              placeholder="例如：审阅时更严格关注事实完整性；改写时保持更正式的机关文风。"
-              value={draftPromptNote}
-              onChange={(event) => setDraftPromptNote(event.target.value)}
-            />
-          </div>
+            <div className="grid gap-2">
+              <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
+                提示词偏好
+              </span>
+              <textarea
+                aria-label="提示词偏好"
+                className="min-h-28 w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+                placeholder="例如：审阅时更严格关注事实完整性；改写时保持更正式的机关文风。"
+                value={draftPromptNote}
+                onChange={(event) => setDraftPromptNote(event.target.value)}
+              />
+            </div>
+          </section>
 
-          <div className="grid gap-3">
+          <section className="grid gap-3 rounded-[24px] border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.82)] px-4 py-4">
+            <div className="grid gap-1">
+              <div className="font-sans text-[0.78rem] font-semibold tracking-[0.06em] text-[var(--color-text-muted)] uppercase">
+                外观
+              </div>
+              <p className="font-sans text-[0.85rem] leading-[1.6] text-[var(--color-text-muted)]">
+                只调整页面观感，不会影响文档内容和本地模型。
+              </p>
+            </div>
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
               主题色
             </span>
@@ -204,9 +224,20 @@ export function WorkspaceSettingsModal({
                 );
               })}
             </div>
-          </div>
+          </section>
 
-          <div className="grid gap-3">
+          <section className="grid gap-3 rounded-[24px] border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.82)] px-4 py-4">
+            <div className="grid gap-1">
+              <div className="font-sans text-[0.78rem] font-semibold tracking-[0.06em] text-[var(--color-text-muted)] uppercase">
+                模型服务
+              </div>
+              <p className="font-sans text-[0.85rem] leading-[1.6] text-[var(--color-text-muted)]">
+                这里决定右侧助手实际调用哪一种模型来源。
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
+              当前状态：{currentModelStatus}
+            </div>
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
               模型服务
             </span>
@@ -242,90 +273,96 @@ export function WorkspaceSettingsModal({
             </div>
             {draftProvider === "webllm" ? (
               <>
-            <input
-              aria-label="搜索本地模型"
-              className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
-              placeholder="搜索模型"
-              value={modelQuery}
-              onChange={(event) => setModelQuery(event.target.value)}
-            />
-            {!isModelSupported ? (
-              <div className="font-sans text-[0.84rem] leading-[1.6] text-[rgba(143,83,52,0.92)]">
-                当前浏览器不支持 WebGPU，所以这里可以先选模型，但暂时无法实际加载。
-              </div>
-            ) : null}
-            <div className="grid gap-3">
-              {filteredModels.map((model) => {
-                const isSelected = draftModelId === model.id;
-                const isActive = activeModelId === model.id;
-
-                return (
-                  <label
-                    key={model.id}
-                    aria-label={model.label}
-                    className={`cursor-pointer rounded-2xl border px-4 py-4 transition ${
-                      isSelected
-                        ? "border-[rgba(181,142,83,0.72)] bg-[rgba(251,246,233,0.96)] shadow-[0_0_0_3px_rgba(181,142,83,0.12)]"
-                        : "border-[rgba(216,207,193,0.78)] bg-[rgba(255,252,247,0.86)]"
-                    }`}
-                  >
-                    <input
-                      checked={isSelected}
-                      className="sr-only"
-                      name="local-model"
-                      type="radio"
-                      value={model.id}
-                      onChange={() => setDraftModelId(model.id)}
-                    />
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div className="text-[1rem] font-semibold text-[var(--color-text-primary)]">
-                          {model.label}
-                        </div>
-                        <div className="mt-1 font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
-                          {model.summary}
-                        </div>
-                        <div className="mt-3 grid gap-1 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
-                          <div>
-                            推荐设备档位：<span className="font-semibold">{model.deviceTier}</span>
-                          </div>
-                          <div>
-                            显存提示：<span className="font-semibold">{model.vramHint}</span>
-                          </div>
-                        </div>
-                      </div>
-                      {isActive ? (
-                        <span className="shrink-0 rounded-full bg-[rgba(181,142,83,0.14)] px-3 py-1 font-sans text-[0.74rem] font-semibold text-[rgba(138,106,55,0.94)]">
-                          当前加载
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {model.tags.map((tag) => (
-                        <span
-                          key={`${model.id}-${tag}`}
-                          className="rounded-full bg-[rgba(236,228,216,0.82)] px-3 py-1 font-sans text-[0.72rem] font-semibold text-[var(--color-text-muted)]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-3 font-sans text-[0.74rem] text-[var(--color-text-muted)]">
-                      {model.id}
-                    </div>
-                  </label>
-                );
-              })}
-              {filteredModels.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-[rgba(216,207,193,0.8)] px-4 py-6 text-center font-sans text-[0.9rem] text-[var(--color-text-muted)]">
-                  没找到匹配的模型，可以换个关键词试试。
+                <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
+                  直接在浏览器里运行，适合离线使用。首次启用会先下载模型文件。
                 </div>
-              ) : null}
-            </div>
+                <input
+                  aria-label="搜索本地模型"
+                  className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+                  placeholder="搜索模型"
+                  value={modelQuery}
+                  onChange={(event) => setModelQuery(event.target.value)}
+                />
+                {!isModelSupported ? (
+                  <div className="font-sans text-[0.84rem] leading-[1.6] text-[rgba(143,83,52,0.92)]">
+                    当前浏览器不支持 WebGPU，所以这里可以先选模型，但暂时无法实际加载。
+                  </div>
+                ) : null}
+                <div className="grid gap-3">
+                  {filteredModels.map((model) => {
+                    const isSelected = draftModelId === model.id;
+                    const isActive = activeModelId === model.id;
+
+                    return (
+                      <label
+                        key={model.id}
+                        aria-label={model.label}
+                        className={`cursor-pointer rounded-2xl border px-4 py-4 transition ${
+                          isSelected
+                            ? "border-[rgba(181,142,83,0.72)] bg-[rgba(251,246,233,0.96)] shadow-[0_0_0_3px_rgba(181,142,83,0.12)]"
+                            : "border-[rgba(216,207,193,0.78)] bg-[rgba(255,252,247,0.86)]"
+                        }`}
+                      >
+                        <input
+                          checked={isSelected}
+                          className="sr-only"
+                          name="local-model"
+                          type="radio"
+                          value={model.id}
+                          onChange={() => setDraftModelId(model.id)}
+                        />
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="text-[1rem] font-semibold text-[var(--color-text-primary)]">
+                              {model.label}
+                            </div>
+                            <div className="mt-1 font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
+                              {model.summary}
+                            </div>
+                            <div className="mt-3 grid gap-1 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
+                              <div>
+                                推荐设备档位：<span className="font-semibold">{model.deviceTier}</span>
+                              </div>
+                              <div>
+                                显存提示：<span className="font-semibold">{model.vramHint}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {isActive ? (
+                            <span className="shrink-0 rounded-full bg-[rgba(181,142,83,0.14)] px-3 py-1 font-sans text-[0.74rem] font-semibold text-[rgba(138,106,55,0.94)]">
+                              当前加载
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {model.tags.map((tag) => (
+                            <span
+                              key={`${model.id}-${tag}`}
+                              className="rounded-full bg-[rgba(236,228,216,0.82)] px-3 py-1 font-sans text-[0.72rem] font-semibold text-[var(--color-text-muted)]"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="mt-3 font-sans text-[0.74rem] text-[var(--color-text-muted)]">
+                          {model.id}
+                        </div>
+                      </label>
+                    );
+                  })}
+                  {filteredModels.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[rgba(216,207,193,0.8)] px-4 py-6 text-center font-sans text-[0.9rem] text-[var(--color-text-muted)]">
+                      没找到匹配的模型，可以换个关键词试试。
+                    </div>
+                  ) : null}
+                </div>
               </>
             ) : null}
             {draftProvider === "openai" ? (
               <div className="grid gap-3">
+                <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
+                  适合接入兼容 OpenAI 聊天接口的服务，需要填写地址、Key 和模型名。
+                </div>
                 <label className="grid gap-2">
                   <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
                     API 地址
@@ -364,6 +401,9 @@ export function WorkspaceSettingsModal({
             ) : null}
             {draftProvider === "ollama" ? (
               <div className="grid gap-3">
+                <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
+                  适合连接本机或局域网里的 Ollama。保存前请先确认服务已经启动。
+                </div>
                 <label className="grid gap-2">
                   <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
                     Ollama 地址
@@ -388,23 +428,28 @@ export function WorkspaceSettingsModal({
                 </label>
               </div>
             ) : null}
-          </div>
+          </section>
 
-          <div className="rounded-2xl border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.9)] px-4 py-4">
-            <div className="text-[0.96rem] font-semibold text-[var(--color-text-primary)]">
-              清空当前工作区记录
-            </div>
-            <div className="mt-1 font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
-              只会删除这个工作区保存在本机浏览器里的内容，不影响你的模型设置。
+          <section className="grid gap-3 rounded-[24px] border border-[rgba(191,132,104,0.28)] bg-[rgba(255,249,245,0.92)] px-4 py-4">
+            <div className="grid gap-1">
+              <div className="font-sans text-[0.78rem] font-semibold tracking-[0.06em] text-[rgba(143,83,52,0.92)] uppercase">
+                危险操作
+              </div>
+              <div className="text-[0.96rem] font-semibold text-[var(--color-text-primary)]">
+                清空当前工作区记录
+              </div>
+              <div className="font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
+                只会删除这个工作区保存在本机浏览器里的内容，不影响你的模型设置。
+              </div>
             </div>
             <button
-              className="mt-4 cursor-pointer rounded-full border border-[rgba(191,132,104,0.32)] bg-[rgba(255,245,240,0.92)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[rgba(143,83,52,0.96)]"
+              className="mt-1 w-fit cursor-pointer rounded-full border border-[rgba(191,132,104,0.32)] bg-[rgba(255,245,240,0.92)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[rgba(143,83,52,0.96)]"
               type="button"
               onClick={onClear}
             >
               清空当前工作区记录
             </button>
-          </div>
+          </section>
         </div>
 
         <footer className="shrink-0 flex items-center justify-end gap-3 border-t border-[rgba(216,207,193,0.72)] px-5 py-4 sm:px-6">

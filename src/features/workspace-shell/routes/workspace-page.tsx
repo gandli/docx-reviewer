@@ -316,6 +316,7 @@ export function WorkspacePage() {
         ollamaBaseUrl={appSettings.ollamaBaseUrl}
         ollamaModel={appSettings.ollamaModel}
         activeModelId={appSettings.llmProvider === "webllm" ? getLoadedLocalLLMModelId() : undefined}
+        currentModelStatus={localModelDetail}
         providerOptions={providerOptions}
         modelOptions={modelOptions}
         isModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
