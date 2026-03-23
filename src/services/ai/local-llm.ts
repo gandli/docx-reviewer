@@ -654,11 +654,28 @@ function extractOpenAICompatibleReply(payload: OpenAICompatiblePayload) {
     return message.refusal.trim();
   }
 
-  if (typeof message?.reasoning_content === "string" && message.reasoning_content.trim()) {
-    return message.reasoning_content.trim();
+  return "";
+}
+
+function describeOpenAICompatibleReplyIssue(payload: OpenAICompatiblePayload) {
+  if (!Array.isArray(payload.choices) || payload.choices.length === 0) {
+    return "模型接口已连通，但响应里没有返回 choices。";
   }
 
-  return "";
+  const firstChoice = payload.choices[0];
+  if (!firstChoice?.message) {
+    return "模型接口已连通，但响应里没有返回 message。";
+  }
+
+  if (typeof firstChoice.message.reasoning_content === "string" && firstChoice.message.reasoning_content.trim()) {
+    return "模型接口已连通，但只返回了思考内容，没有返回最终正文。";
+  }
+
+  if (Array.isArray(firstChoice.message.content)) {
+    return "模型接口已连通，但 content 数组里没有可读取的正文。";
+  }
+
+  return "模型接口已连通，但返回正文为空或返回格式不兼容。";
 }
 
 async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSettings) {
@@ -686,7 +703,15 @@ async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSe
   const reply = normalizeAssistantMarkdown(extractOpenAICompatibleReply(payload));
 
   if (!reply) {
-    throw new Error("模型接口已连通，但返回正文为空或返回格式不兼容。");
+    console.warn("[llm] openai-compatible provider returned no usable reply", {
+      hasOutputText: typeof payload.output_text === "string" && payload.output_text.trim().length > 0,
+      choicesCount: Array.isArray(payload.choices) ? payload.choices.length : 0,
+      firstChoiceKeys:
+        payload.choices && payload.choices[0] ? Object.keys(payload.choices[0]) : [],
+      firstMessageKeys:
+        payload.choices?.[0]?.message ? Object.keys(payload.choices[0].message ?? {}) : [],
+    });
+    throw new Error(describeOpenAICompatibleReplyIssue(payload));
   }
 
   return reply;

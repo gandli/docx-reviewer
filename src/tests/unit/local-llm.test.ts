@@ -243,4 +243,44 @@ describe("local llm", () => {
       ),
     ).rejects.toThrow("模型接口已连通，但返回正文为空或返回格式不兼容。");
   });
+
+  it("explains when the remote provider only returns reasoning content", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              reasoning_content: "这里是思考过程",
+              content: "",
+            },
+          },
+        ],
+      }),
+    } as Response);
+
+    await expect(
+      runLLMTask(
+        {
+          action: "review",
+          clauseTitle: "付款方式",
+          clauseText: "合同签订后一次性支付全部款项。",
+        },
+        {
+          themeId: "warm",
+          reviewPromptNote: "",
+          llmProvider: "openai",
+          webllmModelId: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+          openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+          openAIApiKey: "glm-key",
+          openAIModel: "glm-4.7-flash",
+          anthropicBaseUrl: "https://api.anthropic.com/v1",
+          anthropicApiKey: "",
+          anthropicModel: "claude-3-5-sonnet-latest",
+          ollamaBaseUrl: "http://127.0.0.1:11434",
+          ollamaModel: "qwen2.5:3b",
+        },
+      ),
+    ).rejects.toThrow("模型接口已连通，但只返回了思考内容，没有返回最终正文。");
+  });
 });
