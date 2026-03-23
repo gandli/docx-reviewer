@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-22)
 Phase: 1 of 6 (Runtime Foundation)
 Plan: 1 of 3 in current phase
 Status: Ready to plan
-Last activity: 2026-03-22 — Project initialized with requirements, roadmap, and research
+Last activity: 2026-03-23 — 设置页扩展到提示词偏好、主题色和本地模型，并明确检索链路技术路线
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -51,6 +51,8 @@ Recent decisions affecting current work:
 - [Phase 0]: 技术栈默认采用当天核验到的最新稳定正式版，不追预发布版本
 - [Phase 0]: 产品明确拆分为“文书生成”和“文书审阅”两条主线
 - [Phase 0]: 两条主线共用同一套本地工作台底座
+- [Phase 0]: 设置页统一承载提示词偏好、主题色和本地模型，并在本地浏览器内持久化
+- [Phase 0]: 检索链路明确采用 PDF 阅读顺序抽取、DOCX 原生解包、句边界切块、MiniLM 嵌入、Voy + MMR 重排
 
 ### Pending Todos
 
@@ -62,6 +64,7 @@ None yet.
 - `.docx` 高保真导出策略需要在 Phase 6 用真实样例验证
 - `.doc` 在纯浏览器内不承诺稳定转换，Phase 2 需要明确“提示转换”用户路径
 - Phase 1/2 现在已有具体目录、schema 和类型设计，后续规划应优先复用，不要重新发明结构
+- `pdfjs-dist` 抽取中文 PDF 时仍需要用真实样例反复验证阅读顺序与字体兼容性
 
 ## Session Continuity
 

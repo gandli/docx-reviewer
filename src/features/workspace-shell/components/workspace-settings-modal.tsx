@@ -111,6 +111,7 @@ export function WorkspaceSettingsModal({
                 return (
                   <label
                     key={option.id}
+                    aria-label={option.label}
                     className={`cursor-pointer rounded-2xl border px-4 py-4 transition ${
                       isSelected
                         ? "border-[rgba(181,142,83,0.72)] bg-[rgba(251,246,233,0.96)] shadow-[0_0_0_3px_rgba(181,142,83,0.12)]"

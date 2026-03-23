@@ -29,8 +29,8 @@
 
 | Format | 读取策略 | 预览策略 | 编辑策略 | v1 结论 |
 |--------|----------|----------|----------|---------|
-| `pdf` | 用 PDF.js 读取页面、文本层和位置信息 | PDF.js 分页预览 | 不直接编辑 PDF；只做定位、批注、生成修订稿 | 支持 |
-| `docx` | 用 Mammoth.js 做语义解析；必要时补 XML 层读取 | 用 `docx-preview` 近似还原 Word 样式 | 编辑结构化稿，不直接改预览 HTML | 主格式 |
+| `pdf` | 用 `pdfjs-dist` 读取页面、文本层和位置信息，并尽量保留阅读顺序 | PDF.js 分页预览 | 不直接编辑 PDF；只做定位、批注、生成修订稿 | 支持 |
+| `docx` | 优先用浏览器原生 `DecompressionStream + XML parse` 提取结构；必要时再补兼容读取 | 用 `docx-preview` 近似还原 Word 样式 | 编辑结构化稿，不直接改预览 HTML | 主格式 |
 | `doc` | 浏览器内不做可靠原生解析 | 无独立预览；提示先转成 `docx` | 不直接编辑 | 受限支持 |
 | `xlsx` | 用 SheetJS 一类表格解析库读取工作表和单元格 | 工作表网格预览 | 作为结构化表格资料或字段来源，不做类 Excel 完整编辑 | 支持 |
 | `xls` | 尽量用同一表格解析库读取；失败则提示另存为 `xlsx` | 工作表网格预览或提示转换 | 不做复杂兼容承诺 | 受限支持 |
@@ -41,28 +41,31 @@
 
 ### 3.1 PDF
 
-- 预览与文本层：`pdf.js`
+- 预览与文本层：`pdfjs-dist`
 - 原因：
   - Mozilla 官方维护
   - 浏览器内分页渲染成熟
   - 支持文本层，便于定位原文和高亮问题位置
+  - 适合作为阅读顺序保留型文本抽取底座
 
 **Use for this project:**
 - 左侧原文分页预览
 - 审阅问题跳转到对应页和对应文本区域
 - 抽取文本与位置信息进入结构化模型
+- 优先整理成接近自然阅读顺序的正文，而不是只保留散乱文本块
 
 ### 3.2 DOCX
 
 - 预览：`docx-preview`
-- 解析：`mammoth`
+- 解析：浏览器原生 `DecompressionStream + XML parse`
 - 原因：
   - `docx-preview` 适合在网页里展示接近 Word 的视觉结构
-  - `mammoth` 更适合把 `.docx` 转成语义化内容，便于理解标题、列表、表格和段落
+  - `.docx` 本质是 zip 包，浏览器可直接原生解包并读取 OOXML
+  - 这样更有利于减少额外依赖，并保留标题、列表、表格和字段结构
 
 **Use for this project:**
 - `docx-preview` 负责“像原文”
-- `mammoth` 负责“可处理”
+- 原生 XML 解析负责“可处理”
 - 两者都不直接作为最终编辑数据源，最终以统一中间表示为准
 
 ### 3.3 TXT / MD
@@ -268,9 +271,9 @@ File Upload
   -> format adapter
   -> normalized blocks
   -> structured document model
-  -> chunking
-  -> embeddings
-  -> local index
+  -> sentence-aware chunking
+  -> embeddings in worker
+  -> local index + rerank metadata
   -> preview + editable draft
 ```
 
@@ -288,9 +291,10 @@ File Upload
 - `SourceRef(page, previewAnchor)`
 
 策略：
-- 用 PDF.js 提取页面文本和位置信息
+- 用 `pdfjs-dist` 提取页面文本和位置信息
 - 把长页拆成段落块
 - 保留页码和块定位，供跳转和高亮
+- 抽取时优先按阅读顺序整理文本，减少跨列或跨块错位
 
 #### DOCX Adapter
 
@@ -306,8 +310,8 @@ File Upload
 
 策略：
 - `docx-preview` 负责预览
-- `mammoth` 负责语义解析
-- 如后续需要更高保真字段提取，再读取 OOXML 原始结构做增强
+- `DecompressionStream + XML parse` 负责语义解析
+- 如后续遇到个别复杂样例，再补充兼容兜底，而不是默认引入更重依赖
 
 #### DOC Adapter
 
@@ -358,6 +362,50 @@ v1 策略：
 策略：
 - 解析标题、列表、引用、表格
 - 同时保留原 Markdown 文本和结构树
+
+### 6.3 Retrieval Preparation
+
+#### Chunking
+
+推荐默认切块策略：
+
+- 按句边界切分，而不是粗暴按固定字符数截断
+- 采用滑动窗口
+- 相邻窗口保持约 `50% overlap`
+- 每个 chunk 保留 `documentId / nodeId / sourceRefs / page / sheet / sectionTitle`
+
+这样做的目的：
+
+- 避免把一句话截断到两个片段里
+- 降低长段落语义丢失
+- 给后续高亮定位保留更稳定的来源边界
+
+#### Embedding
+
+- 嵌入模型：`all-MiniLM-L6-v2`
+- 运行方式：Transformers.js + Worker
+- 原因：
+  - 模型轻，适合浏览器端
+  - 适合作为本地文档检索底座
+  - 放到 Worker 中可避免主线程卡顿
+
+#### Search
+
+- 第一阶段：Voy cosine search
+- 第二阶段：MMR re-ranking
+
+MMR 目标：
+
+- 相关
+- 不重复
+- 尽量覆盖不同来源和不同段落
+
+#### Cache
+
+- 向量写入 IndexedDB
+- 索引元数据写入 IndexedDB
+- 文档刷新后直接复用已建立的向量和索引
+- 仅在文档内容、模型版本或切块策略变化时重建
 
 ## 7. Preview Model
 

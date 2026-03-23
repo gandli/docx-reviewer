@@ -31,17 +31,27 @@
 | `typescript` | 5.9.3 | 类型约束、领域模型和服务边界 | 作为整个前端工程的语言基线 |
 | `zustand` | 5.0.12 | 导入流程、运行时状态和工作台状态 | 作为全局状态容器 |
 | `react-pdf` | 10.4.1 | PDF 原文预览、分页查看和页码跳转 | 作为首选 PDF 预览层 |
-| `pdfjs-dist` | 5.5.207 | PDF 文本层、底层渲染能力 | 作为 `react-pdf` 的底层依赖能力认知 |
+| `pdfjs-dist` | 5.5.207 | PDF 文本层、底层渲染与阅读顺序保留型文本抽取 | 作为 `react-pdf` 的底层依赖与 PDF 抽取主方案 |
 | `voy-search` | 0.6.3 | 浏览器内向量索引与近邻检索 | 适合中小规模本地知识库和离线检索，但要对其不稳定 API 保持隔离 |
 | `dexie` | 4.3.0 | IndexedDB schema、迁移和事务封装 | 作为本地持久化主封装层 |
 | `idb` | 8.0.3 | 少量底层 IndexedDB 封装和工具函数 | 作为补充工具层 |
 | `docx` | 9.6.1 | 生成规范 `.docx` 文件 | 最终导出 Word 时使用，适合自己控制结构输出 |
-| `mammoth` | 1.12.0 | 将现有 `.docx` 转成结构化 HTML/文本以便审阅和分析 | 适合“读旧文档”，不适合作为最终保真导出方案 |
 | `docx-preview` | 0.3.7 | 将 `.docx` 近似渲染到网页 | 作为 DOCX 原文预览层 |
 | `docxtemplater` | 3.68.3 | 基于既有 Word 模板做字段替换和块填充 | 当模板格式必须高度保留时使用，尤其适合固定版式模板 |
 | `xlsx` | 0.18.5 | 解析 `xls/xlsx`，提取工作表、区域和单元格数据 | 作为电子表格导入主方案 |
 | `@tiptap/core` | 3.20.4 | 结构化编辑稿和节点式编辑能力 | 作为编辑器内核 |
 | `zod` | 4.3.6 | 约束任务输入、模板字段和结构化输出 | 需要把“文档类型配置”变成可校验数据时使用 |
+
+### Retrieval Defaults
+
+| Item | Choice | Reason |
+|------|--------|--------|
+| PDF text extraction | `pdfjs-dist` with reading-order preservation | 减少正文顺序错乱 |
+| DOCX extraction | Native `DecompressionStream` + XML parse | 零额外抽取依赖，更贴近 OOXML 原始结构 |
+| Chunking | Sentence-boundary-aware sliding window, `50% overlap` | 兼顾召回质量和定位稳定性 |
+| Embedding model | `all-MiniLM-L6-v2` | 轻量、成熟，适合作为本地检索底座 |
+| Search | Voy cosine search → MMR re-ranking | 既相关又减少重复片段 |
+| Cache | IndexedDB persisted vectors | 刷新后可直接复用，减少重复计算 |
 
 ### Development Tools
 
@@ -59,7 +69,7 @@
 bun add react@19.2.4 zustand@5.0.12 react-pdf@10.4.1 @mlc-ai/web-llm@0.2.82 @huggingface/transformers@3.8.1 voy-search@0.6.3 dexie@4.3.0 idb@8.0.3 zod@4.3.6
 
 # Documents
-bun add docx@9.6.1 mammoth@1.12.0 docx-preview@0.3.7 docxtemplater@3.68.3 xlsx@0.18.5 @tiptap/core@3.20.4 pdfjs-dist@5.5.207
+bun add docx@9.6.1 docx-preview@0.3.7 docxtemplater@3.68.3 xlsx@0.18.5 @tiptap/core@3.20.4 pdfjs-dist@5.5.207
 
 # Dev dependencies
 bun add -d vite@8.0.1 vitest@4.1.0 playwright@1.58.2 typescript@5.9.3
@@ -80,7 +90,8 @@ bun add -d vite@8.0.1 vitest@4.1.0 playwright@1.58.2 typescript@5.9.3
 |-------|-----|-------------|
 | 用纯 WASM 推理承担主生成链路 | 在文档对话和长文本生成场景下性能通常不如 WebGPU 路线 | 优先使用 WebLLM + WebGPU |
 | 直接把所有文档内容拼进单次提示词 | 容易超出上下文、结果不稳定，也无法追溯来源 | 先切分、建索引，再按章节检索增强 |
-| 只用 Mammoth 做“导入 + 导出”双向闭环 | Mammoth 强项是读取语义，不是高保真回写 Word | 读取用 Mammoth，输出用 `docx` 或 `docxtemplater` |
+| 用单纯固定字数切块 | 会把句子截断，降低审阅和检索质量 | 使用按句边界的滑动窗口切块 |
+| 只做相似度 Top-K，不做重排 | 常会召回一堆重复片段 | 在相似度召回后补 MMR 去重和多样化 |
 | 业务逻辑直接耦合 Voy 序列化格式 | Voy 官方仓库明确表示 1.0 前 API 仍可能变化 | 增加向量仓储适配层，隔离底层索引实现 |
 | 以移动端浏览器为首发目标 | WebGPU、内存和文件处理体验都不稳定 | 首发聚焦桌面浏览器 |
 
@@ -110,7 +121,7 @@ bun add -d vite@8.0.1 vitest@4.1.0 playwright@1.58.2 typescript@5.9.3
 - [Transformers.js WebGPU guide](https://huggingface.co/docs/transformers.js/guides/webgpu) — 验证了浏览器端 `device: "webgpu"` 的官方用法
 - [Qwen/Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) — 验证了模型规模、结构化文本能力和上下文说明
 - [tantaraio/voy](https://github.com/tantaraio/voy) — 验证了 Voy 的用途，以及 1.0 前 API 不稳定的事实
-- [Mammoth.js](https://github.com/mwilliamson/mammoth.js) — 验证了其定位是 `.docx` 到 HTML 的语义读取
+- [MDN: DecompressionStream](https://developer.mozilla.org/en-US/docs/Web/API/DecompressionStream) — 验证浏览器原生解压流可用于 zip/gzip 解包能力
 - `npm view react version` / `vite version` / `typescript version` / `zustand version` / `react-pdf version` / `pdfjs-dist version` / `@mlc-ai/web-llm version` / `@huggingface/transformers version` / `voy-search version` / `dexie version` / `idb version` / `docx version` / `mammoth version` / `docx-preview version` / `docxtemplater version` / `xlsx version` / `@tiptap/core version` / `zod version` / `vitest version` / `playwright version` / `bun --version` — 2026-03-22 校验当前稳定版本
 
 ---

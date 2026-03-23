@@ -37,9 +37,10 @@
 | Component | Responsibility | Typical Implementation |
 |-----------|----------------|------------------------|
 | 原文预览器 | 保留用户对原文件样式、分页和位置的感知 | PDF.js / docx preview renderer / spreadsheet grid viewer |
-| 文档解析器 | 把模板、背景资料和待审文档转成统一结构 | `.docx` 读取 + 结构化中间表示 |
-| 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | Transformers.js + Voy + IndexedDB |
+| 文档解析器 | 把模板、背景资料和待审文档转成统一结构 | `pdfjs-dist` + `DecompressionStream/XML` + 结构化中间表示 |
+| 检索编排器 | 切分、嵌入、索引、召回和来源追溯 | 句边界切块 + Transformers.js + Voy + MMR + IndexedDB |
 | LLM 运行时 | 本地对话、生成、结构化输出和流式回复 | WebLLM + WebGPU |
+| 设置中心 | 管理提示词偏好、主题色和本地模型 | Settings modal + localStorage/IndexedDB |
 | 模板引擎 | 定义字段、章节、固定句式、条件段落和待确认项 | 模板 schema + 规则装配器 |
 | 审阅引擎 | 识别文字问题、逻辑问题、事实缺失和条款风险 | 规则 + LLM 混合判定 |
 | 任务编排器 | 组织“生成 / 填充 / 审阅 / 修订”任务输入输出 | 明确的任务类型和结构化 schema |
@@ -112,6 +113,20 @@ const evidence = await retrieval.search(task.query, { sectionId, topK: 8 });
 const result = await llm.runTask({ task, evidence, schema });
 ```
 
+### Pattern 3A: Sentence-aware Sliding Window Chunking
+
+**What:** 切块先按句边界切分，再使用滑动窗口形成带重叠的片段。  
+**When to use:** 正式文书段落较长、跨句信息强相关、需要兼顾召回和定位时。  
+**Trade-offs:** 片段数量会增多，但召回更稳，也更适合后续高亮定位。
+
+**Example:**
+```typescript
+const chunks = chunkBySentenceWindow(text, {
+  maxSentences: 6,
+  overlapRatio: 0.5,
+});
+```
+
 ### Pattern 4: Template Engine + LLM Hybrid Generation
 
 **What:** 初稿生成先走模板字段填充、固定句式和条件段落装配，只在需要自然语言补写时再调用模型。  
@@ -134,6 +149,12 @@ const draft = await generator.compose({
 **When to use:** 合同金额、日期、主体名称等必须准确的场景。  
 **Trade-offs:** 规则维护会增加，但能减少“模型一本正经胡说”的风险。
 
+### Pattern 6: Similarity Search + MMR Re-ranking
+
+**What:** 先用向量相似度召回候选片段，再用 MMR 做去重与多样性重排。  
+**When to use:** 同一份文书里相似措辞较多，容易出现重复证据时。  
+**Trade-offs:** 需要额外一次重排，但结果更适合给生成和审阅任务直接消费。
+
 ## Data Flow
 
 ### Request Flow
@@ -141,9 +162,9 @@ const draft = await generator.compose({
 ```text
 [User uploads template / document]
     ↓
-[Parser] → [Normalizer] → [Chunker] → [IndexedDB + Voy]
+[Parser] → [Normalizer] → [Sentence-aware Chunker] → [Embeddings Worker] → [IndexedDB + Voy]
     ↓
-[Task Orchestrator] → [Retriever] → [LLM / Rule Engine]
+[Task Orchestrator] → [Retriever + MMR] → [LLM / Rule Engine]
     ↓
 [Structured Result] → [Editor / Exporter] → [.docx]
 ```
@@ -158,11 +179,12 @@ const draft = await generator.compose({
 
 ### Key Data Flows
 
-1. **导入流:** 用户上传模板或文档后，系统解析结构、切分内容、生成向量并写入本地库。
+1. **导入流:** 用户上传模板或文档后，系统解析结构、按句边界切分内容、生成向量并写入本地库。
 2. **预览流:** 原文件进入预览器，保留分页和样式供用户核对，但不直接在预览层上修改。
 3. **生成流:** 用户选择模板和资料后，系统先按字段或章节检索背景信息，再执行字段映射、固定句式装配和条件段落填充，仅在需要自然语言补写时调用本地模型，最后把结果写入结构化编辑稿。
 4. **审阅流:** 系统对现有文档提取结构，运行规则检查和语义检查，再生成问题清单与修订建议。
-5. **导出流:** 系统把用户确认后的结构化结果生成 `.docx`，同时写出审阅摘要。
+5. **设置流:** 用户可在设置页统一修改提示词偏好、主题色和本地模型，这些偏好会在当前浏览器持久化并立即生效。
+6. **导出流:** 系统把用户确认后的结构化结果生成 `.docx`，同时写出审阅摘要。
 
 ## Scaling Considerations
 

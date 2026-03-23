@@ -24,11 +24,12 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 1: Runtime Foundation
 **Goal**: 用户首次进入系统时即可完成浏览器能力检测、本地模型准备和离线缓存初始化，为后续所有文档任务提供稳定运行底座
 **Depends on**: Nothing (first phase)
-**Requirements**: [PLAT-01, PLAT-02, PLAT-03]
+**Requirements**: [PLAT-01, PLAT-02, PLAT-03, PLAT-04]
 **Success Criteria** (what must be TRUE):
   1. 用户可看到当前浏览器是否支持 WebGPU、离线缓存和文件导入能力
   2. 系统可在本地初始化模型缓存、配置存储和数据目录
   3. 刷新页面后，已缓存资源仍可被离线复用
+  4. 用户可在设置页统一管理提示词偏好、主题色和本地模型
 **Plans**: 3 plans
 
 Plans:
@@ -39,14 +40,15 @@ Plans:
 ### Phase 2: Document Ingestion
 **Goal**: 用户可导入 `pdf/doc/docx/xls/xlsx/txt/md` 等文件，完成格式分流、原文预览和结构提取，并建立可复用的文档中间表示
 **Depends on**: Phase 1
-**Requirements**: [DOC-00, DOC-01, DOC-01A, DOC-01B, DOC-01C, DOC-01D, DOC-02, DOC-02A, DOC-03, DOC-04, PREV-01, PREV-02, PREV-02A, PREV-03]
+**Requirements**: [DOC-00, DOC-01, DOC-01A, DOC-01B, DOC-01C, DOC-01D, DOC-02, DOC-02A, DOC-02B, DOC-02C, DOC-03, DOC-03A, DOC-04, PREV-01, PREV-02, PREV-02A, PREV-03]
 **Success Criteria** (what must be TRUE):
   1. 用户可导入 `pdf/doc/docx/xls/xlsx/txt/md` 文件并看到对应处理路径和进度
   2. 系统可提取标题、条款、表格和编号结构，并以统一模型保存
-  3. 系统可提取工作表、表头、行列与单元格区域等表格结构
-  4. 用户可查看接近原文样式的 `docx` 预览、`pdf` 的分页预览，以及 `xls/xlsx` 的工作表预览
-  5. 导入后的文档片段可完成切分、嵌入和本地索引入库
-  6. 用户可在同一任务中同时查看原文预览和结构化编辑稿
+  3. `pdf` 文本抽取尽量保持阅读顺序，`.docx` 抽取优先使用原生解包与 XML 解析
+  4. 系统可提取工作表、表头、行列与单元格区域等表格结构
+  5. 用户可查看接近原文样式的 `docx` 预览、`pdf` 的分页预览，以及 `xls/xlsx` 的工作表预览
+  6. 导入后的文档片段可按句边界切块、嵌入和本地索引入库
+  7. 用户可在同一任务中同时查看原文预览和结构化编辑稿
 **Plans**: 5 plans
 
 Plans:
@@ -59,12 +61,13 @@ Plans:
 ### Phase 3: Grounded Knowledge Layer
 **Goal**: 为“文书生成”和“文书审阅”建立共用知识底座，并补齐模板字段映射与规则配置
 **Depends on**: Phase 2
-**Requirements**: [RAG-01, RAG-02, RAG-03, GEN-01A, GEN-01B]
+**Requirements**: [RAG-01, RAG-02, RAG-03, RAG-04, RAG-05, GEN-01A, GEN-01B]
 **Success Criteria** (what must be TRUE):
   1. 任一任务都可按章节、字段或语义检索本地资料
   2. 系统可为生成内容和审阅结论返回对应来源片段
   3. 用户可配置文档类型模板、字段映射和审阅规则包
   4. 模板字段、条件段落和背景资料映射关系可被结构化保存并复用
+  5. 检索链路支持 Voy 相似度搜索与 MMR 重排，并把向量缓存到 IndexedDB
 **Plans**: 3 plans
 
 Plans:

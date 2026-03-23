@@ -16,6 +16,7 @@
 - [ ] **PLAT-01**: 用户可在支持 WebGPU 的现代桌面浏览器中本地加载推理能力，无需连接业务后端
 - [ ] **PLAT-02**: 系统可检测浏览器是否具备 WebGPU、离线缓存和文件处理能力，并给出明确提示
 - [ ] **PLAT-03**: 模型资源、文档索引和工作配置可在本地缓存并在离线状态下复用
+- [ ] **PLAT-04**: 用户可在设置页管理提示词偏好、主题色和本地模型，且这些设置可在当前浏览器内持久化
 
 ### Documents
 
@@ -26,8 +27,11 @@
 - [ ] **DOC-01D**: 用户可导入 `xls` 和 `xlsx` 作为结构化背景资料
 - [ ] **DOC-01C**: 用户可导入 `txt` 和 `md` 资料并直接纳入本地知识库
 - [ ] **DOC-02**: 系统可提取标题、段落、条款、表格和编号等文档结构
+- [ ] **DOC-02B**: `pdf` 文本抽取应尽量保留阅读顺序，避免正文顺序错乱
+- [ ] **DOC-02C**: `.docx` 抽取链路应优先支持浏览器原生解包与 XML 解析，减少额外依赖
 - [ ] **DOC-02A**: 系统可提取工作表、表头、单元格区域和行列结构等表格语义
 - [ ] **DOC-03**: 系统可将文档片段切分、向量化并建立本地检索索引
+- [ ] **DOC-03A**: 切块应按句边界进行滑动窗口分段，并保持约 50% overlap
 - [ ] **DOC-04**: 用户可查看导入结果、解析状态和索引状态
 
 ### Preview
@@ -42,6 +46,8 @@
 - [ ] **RAG-01**: 生成、审阅和修订任务都可按章节、字段或语义检索相关背景资料
 - [ ] **RAG-02**: 每条生成内容或审阅结论都可展示对应的来源片段
 - [ ] **RAG-03**: 用户可配置文档类型模板、字段映射和审阅规则包
+- [ ] **RAG-04**: 系统应使用嵌入向量建立本地检索索引，并在刷新后直接复用缓存
+- [ ] **RAG-05**: 检索召回应先做相似度搜索，再做去重与多样性重排
 
 ### Generation
 
@@ -107,6 +113,7 @@
 | PLAT-01 | Phase 1 | Pending |
 | PLAT-02 | Phase 1 | Pending |
 | PLAT-03 | Phase 1 | Pending |
+| PLAT-04 | Phase 1 | Pending |
 | LINE-01 | Phase 0/3 | Pending |
 | LINE-02 | Phase 0/3 | Pending |
 | LINE-03 | Phase 0/4 | Pending |
@@ -117,8 +124,11 @@
 | DOC-01C | Phase 2 | Pending |
 | DOC-01D | Phase 2 | Pending |
 | DOC-02 | Phase 2 | Pending |
+| DOC-02B | Phase 2 | Pending |
+| DOC-02C | Phase 2 | Pending |
 | DOC-02A | Phase 2 | Pending |
 | DOC-03 | Phase 2 | Pending |
+| DOC-03A | Phase 2 | Pending |
 | DOC-04 | Phase 2 | Pending |
 | PREV-01 | Phase 2 | Pending |
 | PREV-02 | Phase 2 | Pending |
@@ -127,6 +137,8 @@
 | RAG-01 | Phase 3 | Pending |
 | RAG-02 | Phase 3 | Pending |
 | RAG-03 | Phase 3 | Pending |
+| RAG-04 | Phase 3 | Pending |
+| RAG-05 | Phase 3 | Pending |
 | GEN-01 | Phase 4 | Pending |
 | GEN-01A | Phase 3/4 | Pending |
 | GEN-01B | Phase 3/4 | Pending |
@@ -148,8 +160,8 @@
 | OUT-04 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 41 total
-- Mapped to phases: 41
+- v1 requirements: 46 total
+- Mapped to phases: 46
 - Unmapped: 0 ✓
 
 ---
