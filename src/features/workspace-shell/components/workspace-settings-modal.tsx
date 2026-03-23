@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { LLMProviderOption, LocalLLMModelOption } from "@/services/ai/local-llm";
 import type { AppThemeId, LLMProvider } from "@/services/persistence/app-settings";
+import type { WorkspaceTaskType } from "@/features/workspace-context/types/workspace-summary";
 import { themeOptions } from "@/shared/constants/theme";
 
 type WorkspaceSettingsModalProps = {
@@ -9,6 +10,7 @@ type WorkspaceSettingsModalProps = {
   selectedThemeId: AppThemeId;
   reviewPromptNote: string;
   llmProvider: LLMProvider;
+  currentTask: WorkspaceTaskType;
   selectedModelId: string;
   openAIBaseUrl: string;
   openAIApiKey: string;
@@ -56,6 +58,7 @@ export function WorkspaceSettingsModal({
   selectedThemeId,
   reviewPromptNote,
   llmProvider,
+  currentTask,
   selectedModelId,
   openAIBaseUrl,
   openAIApiKey,
@@ -88,6 +91,11 @@ export function WorkspaceSettingsModal({
   const [draftOllamaBaseUrl, setDraftOllamaBaseUrl] = useState(ollamaBaseUrl);
   const [draftOllamaModel, setDraftOllamaModel] = useState(ollamaModel);
   const [modelQuery, setModelQuery] = useState("");
+  const recommendationFocus = currentTask === "generate" ? "generate" : "review";
+  const recommendationSummary =
+    recommendationFocus === "generate"
+      ? "当前任务更偏向文书生成，已优先标出更适合起草初稿的来源和模型。"
+      : "当前任务更偏向文书审阅，已优先标出更适合校阅、改写和润色的来源和模型。";
 
   useEffect(() => {
     if (!isOpen) {
@@ -271,6 +279,9 @@ export function WorkspaceSettingsModal({
                 这里决定右侧助手实际调用哪一种模型来源。
               </p>
             </div>
+            <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-[rgba(255,251,244,0.9)] px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
+              {recommendationSummary}
+            </div>
             <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
               当前状态：{currentModelStatus}
             </div>
@@ -336,12 +347,34 @@ export function WorkspaceSettingsModal({
                     <div className="mt-1 font-sans text-[0.82rem] leading-[1.6] text-[var(--color-text-muted)]">
                       {provider.summary}
                     </div>
-                    <div className="mt-3 grid gap-1 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
-                      <div>
+                    <div className="mt-3 grid gap-2 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
+                      <div
+                        className={`rounded-2xl px-3 py-2 ${
+                          recommendationFocus === "review"
+                            ? "bg-[rgba(251,246,233,0.92)] text-[rgba(122,91,44,0.96)]"
+                            : "bg-[rgba(255,251,244,0.72)]"
+                        }`}
+                      >
                         文书审阅：<span className="font-semibold">{provider.reviewFit}</span>
+                        {recommendationFocus === "review" ? (
+                          <span className="ml-2 rounded-full bg-[rgba(181,142,83,0.18)] px-2 py-0.5 text-[0.7rem] font-semibold text-[rgba(138,106,55,0.96)]">
+                            当前更推荐
+                          </span>
+                        ) : null}
                       </div>
-                      <div>
+                      <div
+                        className={`rounded-2xl px-3 py-2 ${
+                          recommendationFocus === "generate"
+                            ? "bg-[rgba(251,246,233,0.92)] text-[rgba(122,91,44,0.96)]"
+                            : "bg-[rgba(255,251,244,0.72)]"
+                        }`}
+                      >
                         文书生成：<span className="font-semibold">{provider.generateFit}</span>
+                        {recommendationFocus === "generate" ? (
+                          <span className="ml-2 rounded-full bg-[rgba(181,142,83,0.18)] px-2 py-0.5 text-[0.7rem] font-semibold text-[rgba(138,106,55,0.96)]">
+                            当前更推荐
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                   </label>
@@ -396,18 +429,40 @@ export function WorkspaceSettingsModal({
                             <div className="mt-1 font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
                               {model.summary}
                             </div>
-                            <div className="mt-3 grid gap-1 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
-                              <div>
+                            <div className="mt-3 grid gap-2 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
+                              <div className="rounded-2xl bg-[rgba(255,251,244,0.72)] px-3 py-2">
                                 推荐设备档位：<span className="font-semibold">{model.deviceTier}</span>
                               </div>
-                              <div>
+                              <div className="rounded-2xl bg-[rgba(255,251,244,0.72)] px-3 py-2">
                                 显存提示：<span className="font-semibold">{model.vramHint}</span>
                               </div>
-                              <div>
+                              <div
+                                className={`rounded-2xl px-3 py-2 ${
+                                  recommendationFocus === "review"
+                                    ? "bg-[rgba(251,246,233,0.92)] text-[rgba(122,91,44,0.96)]"
+                                    : "bg-[rgba(255,251,244,0.72)]"
+                                }`}
+                              >
                                 文书审阅：<span className="font-semibold">{model.reviewFit}</span>
+                                {recommendationFocus === "review" ? (
+                                  <span className="ml-2 rounded-full bg-[rgba(181,142,83,0.18)] px-2 py-0.5 text-[0.7rem] font-semibold text-[rgba(138,106,55,0.96)]">
+                                    当前更推荐
+                                  </span>
+                                ) : null}
                               </div>
-                              <div>
+                              <div
+                                className={`rounded-2xl px-3 py-2 ${
+                                  recommendationFocus === "generate"
+                                    ? "bg-[rgba(251,246,233,0.92)] text-[rgba(122,91,44,0.96)]"
+                                    : "bg-[rgba(255,251,244,0.72)]"
+                                }`}
+                              >
                                 文书生成：<span className="font-semibold">{model.generateFit}</span>
+                                {recommendationFocus === "generate" ? (
+                                  <span className="ml-2 rounded-full bg-[rgba(181,142,83,0.18)] px-2 py-0.5 text-[0.7rem] font-semibold text-[rgba(138,106,55,0.96)]">
+                                    当前更推荐
+                                  </span>
+                                ) : null}
                               </div>
                             </div>
                           </div>

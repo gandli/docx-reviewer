@@ -517,8 +517,10 @@ describe("workspace shell", () => {
     expect(screen.getByText("工作区设置")).toBeInTheDocument();
     expect(screen.getAllByText("模型服务").length).toBeGreaterThan(0);
     expect(screen.getByText(/当前状态：模型：Qwen3 0.6B · 按需启动/)).toBeInTheDocument();
+    expect(screen.getByText("当前任务更偏向文书审阅，已优先标出更适合校阅、改写和润色的来源和模型。")).toBeInTheDocument();
     expect(screen.getByText("更适合离线审阅")).toBeInTheDocument();
     expect(screen.getByText("适合轻到中等长度生成")).toBeInTheDocument();
+    expect(screen.getAllByText("当前更推荐").length).toBeGreaterThan(0);
 
     fireEvent.change(screen.getByLabelText("搜索本地模型"), {
       target: { value: "1.5B" },
@@ -542,6 +544,32 @@ describe("workspace shell", () => {
       expect(appSettings.llmProvider).toBe("webllm");
       expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
     });
+  });
+
+  it("highlights drafting recommendations when the current task is document generation", async () => {
+    window.localStorage.setItem(
+      "workspace-summary:ws-enterprise",
+      JSON.stringify({
+        ...mockWorkspaceSummary,
+        currentTask: "generate",
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("当前任务更偏向文书生成，已优先标出更适合起草初稿的来源和模型。"),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getAllByText("当前更推荐").length).toBeGreaterThan(0);
+    expect(screen.getByText("更适合长文生成")).toBeInTheDocument();
   });
 
   it("restores a saved workspace summary from local storage", async () => {

@@ -570,6 +570,7 @@ export function WorkspacePage() {
         selectedThemeId={appSettings.themeId}
         reviewPromptNote={appSettings.reviewPromptNote}
         llmProvider={appSettings.llmProvider}
+        currentTask={summary.currentTask}
         selectedModelId={appSettings.webllmModelId}
         openAIBaseUrl={appSettings.openAIBaseUrl}
         openAIApiKey={appSettings.openAIApiKey}
