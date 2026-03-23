@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { LocalLLMModelOption } from "@/services/ai/local-llm";
-import type { AppThemeId } from "@/services/persistence/app-settings";
+import type { LLMProviderOption, LocalLLMModelOption } from "@/services/ai/local-llm";
+import type { AppThemeId, LLMProvider } from "@/services/persistence/app-settings";
 import { themeOptions } from "@/shared/constants/theme";
 
 type WorkspaceSettingsModalProps = {
@@ -8,8 +8,15 @@ type WorkspaceSettingsModalProps = {
   workspaceTitle: string;
   selectedThemeId: AppThemeId;
   reviewPromptNote: string;
+  llmProvider: LLMProvider;
   selectedModelId: string;
+  openAIBaseUrl: string;
+  openAIApiKey: string;
+  openAIModel: string;
+  ollamaBaseUrl: string;
+  ollamaModel: string;
   activeModelId?: string;
+  providerOptions: readonly LLMProviderOption[];
   modelOptions: readonly LocalLLMModelOption[];
   isModelBusy?: boolean;
   isModelSupported?: boolean;
@@ -18,7 +25,13 @@ type WorkspaceSettingsModalProps = {
     workspaceTitle: string;
     themeId: AppThemeId;
     reviewPromptNote: string;
+    llmProvider: LLMProvider;
     modelId: string;
+    openAIBaseUrl: string;
+    openAIApiKey: string;
+    openAIModel: string;
+    ollamaBaseUrl: string;
+    ollamaModel: string;
   }) => void;
   onClear: () => void;
 };
@@ -28,8 +41,15 @@ export function WorkspaceSettingsModal({
   workspaceTitle,
   selectedThemeId,
   reviewPromptNote,
+  llmProvider,
   selectedModelId,
+  openAIBaseUrl,
+  openAIApiKey,
+  openAIModel,
+  ollamaBaseUrl,
+  ollamaModel,
   activeModelId,
+  providerOptions,
   modelOptions,
   isModelBusy = false,
   isModelSupported = true,
@@ -40,7 +60,13 @@ export function WorkspaceSettingsModal({
   const [draftTitle, setDraftTitle] = useState(workspaceTitle);
   const [draftThemeId, setDraftThemeId] = useState<AppThemeId>(selectedThemeId);
   const [draftPromptNote, setDraftPromptNote] = useState(reviewPromptNote);
+  const [draftProvider, setDraftProvider] = useState<LLMProvider>(llmProvider);
   const [draftModelId, setDraftModelId] = useState(selectedModelId);
+  const [draftOpenAIBaseUrl, setDraftOpenAIBaseUrl] = useState(openAIBaseUrl);
+  const [draftOpenAIApiKey, setDraftOpenAIApiKey] = useState(openAIApiKey);
+  const [draftOpenAIModel, setDraftOpenAIModel] = useState(openAIModel);
+  const [draftOllamaBaseUrl, setDraftOllamaBaseUrl] = useState(ollamaBaseUrl);
+  const [draftOllamaModel, setDraftOllamaModel] = useState(ollamaModel);
   const [modelQuery, setModelQuery] = useState("");
 
   useEffect(() => {
@@ -51,9 +77,27 @@ export function WorkspaceSettingsModal({
     setDraftTitle(workspaceTitle);
     setDraftThemeId(selectedThemeId);
     setDraftPromptNote(reviewPromptNote);
+    setDraftProvider(llmProvider);
     setDraftModelId(selectedModelId);
+    setDraftOpenAIBaseUrl(openAIBaseUrl);
+    setDraftOpenAIApiKey(openAIApiKey);
+    setDraftOpenAIModel(openAIModel);
+    setDraftOllamaBaseUrl(ollamaBaseUrl);
+    setDraftOllamaModel(ollamaModel);
     setModelQuery("");
-  }, [isOpen, reviewPromptNote, selectedModelId, selectedThemeId, workspaceTitle]);
+  }, [
+    isOpen,
+    llmProvider,
+    ollamaBaseUrl,
+    ollamaModel,
+    openAIBaseUrl,
+    openAIApiKey,
+    openAIModel,
+    reviewPromptNote,
+    selectedModelId,
+    selectedThemeId,
+    workspaceTitle,
+  ]);
 
   const filteredModels = modelOptions.filter((model) =>
     [model.label, model.summary, model.id, model.deviceTier, model.vramHint, ...model.tags]
@@ -84,7 +128,7 @@ export function WorkspaceSettingsModal({
               工作区设置
             </h2>
             <p className="mt-1 font-sans text-[0.9rem] leading-[1.6] text-[var(--color-text-muted)]">
-              这里可以统一调整当前工作区名称、提示词偏好、主题色和本地模型，并清空这一个工作区在本机浏览器里的保存记录。
+              这里可以统一调整当前工作区名称、提示词偏好、主题色和模型服务，并清空这一个工作区在本机浏览器里的保存记录。
             </p>
           </div>
           <button
@@ -164,8 +208,40 @@ export function WorkspaceSettingsModal({
 
           <div className="grid gap-3">
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
-              本地模型
+              模型服务
             </span>
+            <div className="grid gap-3 md:grid-cols-3">
+              {providerOptions.map((provider) => {
+                const isSelected = draftProvider === provider.id;
+                return (
+                  <label
+                    key={provider.id}
+                    className={`cursor-pointer rounded-2xl border px-4 py-4 transition ${
+                      isSelected
+                        ? "border-[rgba(181,142,83,0.72)] bg-[rgba(251,246,233,0.96)] shadow-[0_0_0_3px_rgba(181,142,83,0.12)]"
+                        : "border-[rgba(216,207,193,0.78)] bg-[rgba(255,252,247,0.86)]"
+                    }`}
+                  >
+                    <input
+                      checked={isSelected}
+                      className="sr-only"
+                      name="llm-provider"
+                      type="radio"
+                      value={provider.id}
+                      onChange={() => setDraftProvider(provider.id)}
+                    />
+                    <div className="text-[0.96rem] font-semibold text-[var(--color-text-primary)]">
+                      {provider.label}
+                    </div>
+                    <div className="mt-1 font-sans text-[0.82rem] leading-[1.6] text-[var(--color-text-muted)]">
+                      {provider.summary}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+            {draftProvider === "webllm" ? (
+              <>
             <input
               aria-label="搜索本地模型"
               className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
@@ -246,6 +322,72 @@ export function WorkspaceSettingsModal({
                 </div>
               ) : null}
             </div>
+              </>
+            ) : null}
+            {draftProvider === "openai" ? (
+              <div className="grid gap-3">
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    API 地址
+                  </span>
+                  <input
+                    aria-label="OpenAI 风格 API 地址"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    value={draftOpenAIBaseUrl}
+                    onChange={(event) => setDraftOpenAIBaseUrl(event.target.value)}
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    API Key
+                  </span>
+                  <input
+                    aria-label="OpenAI 风格 API Key"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    type="password"
+                    value={draftOpenAIApiKey}
+                    onChange={(event) => setDraftOpenAIApiKey(event.target.value)}
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    模型名
+                  </span>
+                  <input
+                    aria-label="OpenAI 风格模型名"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    value={draftOpenAIModel}
+                    onChange={(event) => setDraftOpenAIModel(event.target.value)}
+                  />
+                </label>
+              </div>
+            ) : null}
+            {draftProvider === "ollama" ? (
+              <div className="grid gap-3">
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    Ollama 地址
+                  </span>
+                  <input
+                    aria-label="Ollama 地址"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    value={draftOllamaBaseUrl}
+                    onChange={(event) => setDraftOllamaBaseUrl(event.target.value)}
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    模型名
+                  </span>
+                  <input
+                    aria-label="Ollama 模型名"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    value={draftOllamaModel}
+                    onChange={(event) => setDraftOllamaModel(event.target.value)}
+                  />
+                </label>
+              </div>
+            ) : null}
           </div>
 
           <div className="rounded-2xl border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.9)] px-4 py-4">
@@ -275,17 +417,23 @@ export function WorkspaceSettingsModal({
           </button>
           <button
             className="cursor-pointer rounded-full border-0 bg-[rgba(47,38,29,0.94)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-60"
-            type="button"
-            disabled={isModelBusy}
-            onClick={() =>
-              onSave({
-                workspaceTitle: draftTitle,
-                themeId: draftThemeId,
-                reviewPromptNote: draftPromptNote,
-                modelId: draftModelId,
-              })
-            }
-          >
+              type="button"
+              disabled={isModelBusy}
+              onClick={() =>
+                onSave({
+                  workspaceTitle: draftTitle,
+                  themeId: draftThemeId,
+                  reviewPromptNote: draftPromptNote,
+                  llmProvider: draftProvider,
+                  modelId: draftModelId,
+                  openAIBaseUrl: draftOpenAIBaseUrl,
+                  openAIApiKey: draftOpenAIApiKey,
+                  openAIModel: draftOpenAIModel,
+                  ollamaBaseUrl: draftOllamaBaseUrl,
+                  ollamaModel: draftOllamaModel,
+                })
+              }
+            >
             保存设置
           </button>
         </footer>

@@ -236,22 +236,34 @@ export function WorkspaceLayout({
           isLeftCollapsed || !isDesktop ? "pointer-events-none opacity-0" : "cursor-col-resize"
         }`}
         data-testid="left-resize-handle"
+        title="拖动调整左栏宽度，双击恢复默认"
         onPointerDown={() => {
           if (!isLeftCollapsed && isDesktop) {
             setDragHandle("left");
           }
         }}
+        onDoubleClick={() => {
+          setPanelWidths((current) => ({
+            ...current,
+            left: DEFAULT_LEFT_PANEL_WIDTH,
+          }));
+        }}
       >
         <div
-          className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition ${
+          className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition-colors ${
             dragHandle === "left"
               ? "bg-[rgba(181,142,83,0.88)]"
               : "bg-[rgba(216,207,193,0.16)] group-hover:bg-[rgba(181,142,83,0.42)]"
           }`}
         />
+        <div className="pointer-events-none absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(47,38,29,0.88)] px-2 py-1 font-sans text-[0.72rem] text-[#fffdf9] shadow-[0_10px_24px_rgba(47,38,29,0.16)] group-hover:block">
+          拖动调整左栏宽度
+        </div>
       </div>
       <main
-        className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-0 pt-0 pb-0 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
+        className={`min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-0 pt-0 pb-0 max-[980px]:h-auto max-[980px]:min-h-[55vh] ${
+          dragHandle ? "" : "transition-[width] duration-150 ease-out"
+        }`}
         data-scroll-region="true"
       >
         {summary.activeDocumentMode === "pdf" ? (
@@ -278,19 +290,29 @@ export function WorkspaceLayout({
           isRightCollapsed || !isDesktop ? "pointer-events-none opacity-0" : "cursor-col-resize"
         }`}
         data-testid="right-resize-handle"
+        title="拖动调整右栏宽度，双击恢复默认"
         onPointerDown={() => {
           if (!isRightCollapsed && isDesktop) {
             setDragHandle("right");
           }
         }}
+        onDoubleClick={() => {
+          setPanelWidths((current) => ({
+            ...current,
+            right: DEFAULT_RIGHT_PANEL_WIDTH,
+          }));
+        }}
       >
         <div
-          className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition ${
+          className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition-colors ${
             dragHandle === "right"
               ? "bg-[rgba(181,142,83,0.88)]"
               : "bg-[rgba(216,207,193,0.16)] group-hover:bg-[rgba(181,142,83,0.42)]"
           }`}
         />
+        <div className="pointer-events-none absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(47,38,29,0.88)] px-2 py-1 font-sans text-[0.72rem] text-[#fffdf9] shadow-[0_10px_24px_rgba(47,38,29,0.16)] group-hover:block">
+          拖动调整右栏宽度
+        </div>
       </div>
       <AssistantPanel
         summary={summary}

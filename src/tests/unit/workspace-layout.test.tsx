@@ -17,18 +17,18 @@ const { parseDocxDocumentMock, renderDocxPreviewMock } = vi.hoisted(() => ({
   }),
 }));
 const {
-  ensureLocalLLMMock,
-  runLocalLLMTaskMock,
+  ensureLLMProviderReadyMock,
+  runLLMTaskMock,
   isLocalLLMSupportedMock,
-  getLocalLLMModelIdMock,
+  getProviderModelLabelMock,
+  getProviderStatusSummaryMock,
+  getProviderMissingConfigMessageMock,
+  getAvailableLLMProvidersMock,
   getLoadedLocalLLMModelIdMock,
-  getDefaultLocalLLMModelIdMock,
   getAvailableLocalLLMModelsMock,
-  loadSelectedLocalLLMModelIdMock,
-  saveSelectedLocalLLMModelIdMock,
 } = vi.hoisted(() => ({
-  ensureLocalLLMMock: vi.fn(() => Promise.resolve()),
-  runLocalLLMTaskMock: vi.fn(async ({ action }: { action: string }) => {
+  ensureLLMProviderReadyMock: vi.fn(() => Promise.resolve()),
+  runLLMTaskMock: vi.fn(async ({ action }: { action: string }) => {
     if (action === "review") {
       return [
         "原文：合同签订后一次性支付全部款项。",
@@ -50,9 +50,43 @@ const {
     return "这是本地模型返回的真实回复。";
   }),
   isLocalLLMSupportedMock: vi.fn(() => true),
-  getLocalLLMModelIdMock: vi.fn(() => "Qwen3-0.6B-q4f16_1-MLC"),
+  getProviderModelLabelMock: vi.fn((settings: { llmProvider: string; webllmModelId?: string; openAIModel?: string; ollamaModel?: string }) => {
+    if (settings.llmProvider === "openai") {
+      return settings.openAIModel || "gpt-4.1-mini";
+    }
+    if (settings.llmProvider === "ollama") {
+      return settings.ollamaModel || "qwen2.5:3b";
+    }
+    return settings.webllmModelId === "Qwen2.5-1.5B-Instruct-q4f16_1-MLC" ? "Qwen2.5 1.5B" : "Qwen3 0.6B";
+  }),
+  getProviderStatusSummaryMock: vi.fn((settings: { llmProvider: string; openAIModel?: string; ollamaModel?: string }) => {
+    if (settings.llmProvider === "openai") {
+      return `API：${settings.openAIModel || "gpt-4.1-mini"}`;
+    }
+    if (settings.llmProvider === "ollama") {
+      return `Ollama：${settings.ollamaModel || "qwen2.5:3b"}`;
+    }
+    return "模型：Qwen3 0.6B · 按需启动";
+  }),
+  getProviderMissingConfigMessageMock: vi.fn(() => ""),
+  getAvailableLLMProvidersMock: vi.fn(() => [
+    {
+      id: "webllm",
+      label: "WebLLM 本地模型",
+      summary: "直接在浏览器里运行，适合离线使用。",
+    },
+    {
+      id: "openai",
+      label: "OpenAI 风格 API",
+      summary: "兼容 chat/completions 接口的服务都可接入。",
+    },
+    {
+      id: "ollama",
+      label: "Ollama",
+      summary: "连接本机或局域网里的 Ollama 服务。",
+    },
+  ]),
   getLoadedLocalLLMModelIdMock: vi.fn(() => undefined),
-  getDefaultLocalLLMModelIdMock: vi.fn(() => "Qwen2.5-1.5B-Instruct-q4f16_1-MLC"),
   getAvailableLocalLLMModelsMock: vi.fn(() => [
     {
       id: "Qwen3-0.6B-q4f16_1-MLC",
@@ -71,8 +105,6 @@ const {
       vramHint: "建议显存 4GB 以上",
     },
   ]),
-  loadSelectedLocalLLMModelIdMock: vi.fn(() => "Qwen3-0.6B-q4f16_1-MLC"),
-  saveSelectedLocalLLMModelIdMock: vi.fn(),
 }));
 
 vi.mock("@/services/import/pdf-document", () => ({
@@ -88,15 +120,15 @@ vi.mock("docx-preview", () => ({
 }));
 
 vi.mock("@/services/ai/local-llm", () => ({
-  ensureLocalLLM: ensureLocalLLMMock,
-  runLocalLLMTask: runLocalLLMTaskMock,
+  ensureLLMProviderReady: ensureLLMProviderReadyMock,
+  runLLMTask: runLLMTaskMock,
   isLocalLLMSupported: isLocalLLMSupportedMock,
-  getLocalLLMModelId: getLocalLLMModelIdMock,
+  getProviderModelLabel: getProviderModelLabelMock,
+  getProviderStatusSummary: getProviderStatusSummaryMock,
+  getProviderMissingConfigMessage: getProviderMissingConfigMessageMock,
+  getAvailableLLMProviders: getAvailableLLMProvidersMock,
   getLoadedLocalLLMModelId: getLoadedLocalLLMModelIdMock,
-  getDefaultLocalLLMModelId: getDefaultLocalLLMModelIdMock,
   getAvailableLocalLLMModels: getAvailableLocalLLMModelsMock,
-  loadSelectedLocalLLMModelId: loadSelectedLocalLLMModelIdMock,
-  saveSelectedLocalLLMModelId: saveSelectedLocalLLMModelIdMock,
 }));
 
 vi.mock("react-pdf", async () => {
@@ -158,20 +190,17 @@ describe("workspace shell", () => {
     parsePdfDocumentMock.mockReset();
     parseDocxDocumentMock.mockReset();
     renderDocxPreviewMock.mockClear();
-    ensureLocalLLMMock.mockClear();
-    runLocalLLMTaskMock.mockClear();
+    ensureLLMProviderReadyMock.mockClear();
+    runLLMTaskMock.mockClear();
     isLocalLLMSupportedMock.mockClear();
     isLocalLLMSupportedMock.mockReturnValue(true);
-    getLocalLLMModelIdMock.mockClear();
-    getLocalLLMModelIdMock.mockReturnValue("Qwen3-0.6B-q4f16_1-MLC");
+    getProviderModelLabelMock.mockClear();
+    getProviderStatusSummaryMock.mockClear();
+    getProviderMissingConfigMessageMock.mockClear();
+    getAvailableLLMProvidersMock.mockClear();
     getLoadedLocalLLMModelIdMock.mockClear();
     getLoadedLocalLLMModelIdMock.mockReturnValue(undefined);
-    getDefaultLocalLLMModelIdMock.mockClear();
-    getDefaultLocalLLMModelIdMock.mockReturnValue("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
     getAvailableLocalLLMModelsMock.mockClear();
-    loadSelectedLocalLLMModelIdMock.mockClear();
-    loadSelectedLocalLLMModelIdMock.mockReturnValue("Qwen3-0.6B-q4f16_1-MLC");
-    saveSelectedLocalLLMModelIdMock.mockClear();
     scrollIntoViewMock.mockReset();
     Object.defineProperty(Element.prototype, "scrollIntoView", {
       configurable: true,
@@ -330,6 +359,31 @@ describe("workspace shell", () => {
     expect(screen.getByTestId("workspace-layout").getAttribute("style")).toContain("332px");
   });
 
+  it("double clicks the resize handles to restore default widths", () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const layout = screen.getByTestId("workspace-layout");
+    const leftHandle = screen.getByTestId("left-resize-handle");
+    const rightHandle = screen.getByTestId("right-resize-handle");
+
+    fireEvent.pointerDown(leftHandle, { clientX: 320 });
+    fireEvent.pointerMove(window, { clientX: 380 });
+    fireEvent.pointerUp(window);
+    fireEvent.pointerDown(rightHandle, { clientX: 1120 });
+    fireEvent.pointerMove(window, { clientX: 1060 });
+    fireEvent.pointerUp(window);
+
+    fireEvent.doubleClick(leftHandle);
+    fireEvent.doubleClick(rightHandle);
+
+    expect(layout.getAttribute("style")).toContain("320px");
+    expect(layout.getAttribute("style")).toContain("340px");
+  });
+
   it("renders document content, active clause, and local model status", () => {
     render(
       <MemoryRouter>
@@ -369,10 +423,10 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
-      expect(saveSelectedLocalLLMModelIdMock).toHaveBeenCalledWith(
-        "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
-      );
-      expect(ensureLocalLLMMock).toHaveBeenCalled();
+      const appSettings = JSON.parse(window.localStorage.getItem("app-settings") ?? "{}");
+      expect(appSettings.webllmModelId).toBe("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
+      expect(appSettings.llmProvider).toBe("webllm");
+      expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
     });
   });
 
@@ -438,9 +492,39 @@ describe("workspace shell", () => {
       expect(JSON.parse(window.localStorage.getItem("app-settings") ?? "{}").reviewPromptNote).toBe(
         "审阅时优先指出事实缺失",
       );
-      expect(saveSelectedLocalLLMModelIdMock).toHaveBeenCalledWith(
+      expect(JSON.parse(window.localStorage.getItem("app-settings") ?? "{}").webllmModelId).toBe(
         "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
       );
+    });
+  });
+
+  it("switches to OpenAI style API and persists provider settings", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByText("OpenAI 风格 API").closest("label")!);
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API 地址"), {
+      target: { value: "https://api.example.com/v1" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API Key"), {
+      target: { value: "sk-demo" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
+      target: { value: "qwen-reviewer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
+
+    await waitFor(() => {
+      const appSettings = JSON.parse(window.localStorage.getItem("app-settings") ?? "{}");
+      expect(appSettings.llmProvider).toBe("openai");
+      expect(appSettings.openAIBaseUrl).toBe("https://api.example.com/v1");
+      expect(appSettings.openAIApiKey).toBe("sk-demo");
+      expect(appSettings.openAIModel).toBe("qwen-reviewer");
+      expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
     });
   });
 
@@ -528,12 +612,13 @@ describe("workspace shell", () => {
       ).toHaveValue("");
       expect(screen.getByText("请把语气改得更正式")).toBeInTheDocument();
       expect(screen.getAllByText("这是本地模型返回的真实回复。").length).toBeGreaterThan(0);
-      expect(ensureLocalLLMMock).toHaveBeenCalled();
-      expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
+      expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
+      expect(runLLMTaskMock).toHaveBeenCalledWith(
         expect.objectContaining({
           action: "chat",
           userMessage: "请把语气改得更正式",
         }),
+        expect.any(Object),
       );
     });
   });
@@ -957,12 +1042,13 @@ describe("workspace shell", () => {
         screen.getAllByText((_, element) => element?.textContent?.includes("修改建议") ?? false).length,
       ).toBeGreaterThan(0);
       expect(screen.queryByTestId("pdf-selection-popover")).not.toBeInTheDocument();
-      expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
+      expect(runLLMTaskMock).toHaveBeenCalledWith(
         expect.objectContaining({
           action: "review",
           clauseTitle: "第 1 页",
           clauseText: "付款正文",
         }),
+        expect.any(Object),
       );
     });
   });
@@ -1017,12 +1103,13 @@ describe("workspace shell", () => {
       expect(screen.getAllByText("建议在验收通过并完成票据核验后，按约定节点安排付款。").length).toBeGreaterThan(0);
       expect(screen.queryByTestId("document-selection-popover")).not.toBeInTheDocument();
       expect(removeAllRangesMock).toHaveBeenCalled();
-      expect(runLocalLLMTaskMock).toHaveBeenCalledWith(
+      expect(runLLMTaskMock).toHaveBeenCalledWith(
         expect.objectContaining({
           action: "polish",
           clauseTitle: "付款方式",
           clauseText: "合同签订后一次性支付全部款项。",
         }),
+        expect.any(Object),
       );
     });
   });

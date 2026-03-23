@@ -1,4 +1,5 @@
 import { normalizeAssistantMarkdown } from "@/shared/utils/assistant-message-format";
+import type { AppSettings, LLMProvider } from "@/services/persistence/app-settings";
 
 export type LocalLLMAction = "chat" | "review" | "revise" | "polish";
 
@@ -29,6 +30,30 @@ export type LocalLLMModelOption = {
   deviceTier: string;
   vramHint: string;
 };
+
+export type LLMProviderOption = {
+  id: LLMProvider;
+  label: string;
+  summary: string;
+};
+
+const LLM_PROVIDER_OPTIONS: LLMProviderOption[] = [
+  {
+    id: "webllm",
+    label: "WebLLM 本地模型",
+    summary: "直接在浏览器里运行，适合离线使用。",
+  },
+  {
+    id: "openai",
+    label: "OpenAI 风格 API",
+    summary: "兼容 chat/completions 接口的服务都可接入。",
+  },
+  {
+    id: "ollama",
+    label: "Ollama",
+    summary: "连接本机或局域网里的 Ollama 服务。",
+  },
+];
 
 const LOCAL_MODEL_STORAGE_KEY = "local-llm:selected-model";
 const DEFAULT_LOCAL_MODEL_ID = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
@@ -142,6 +167,10 @@ export function getAvailableLocalLLMModels() {
   return AVAILABLE_LOCAL_MODELS;
 }
 
+export function getAvailableLLMProviders() {
+  return LLM_PROVIDER_OPTIONS;
+}
+
 export function getDefaultLocalLLMModelId() {
   return DEFAULT_LOCAL_MODEL_ID;
 }
@@ -166,6 +195,65 @@ export function saveSelectedLocalLLMModelId(modelId: string) {
 
 export function getLoadedLocalLLMModelId() {
   return loadedModelId;
+}
+
+export function getProviderModelLabel(settings: AppSettings) {
+  if (settings.llmProvider === "webllm") {
+    return (
+      AVAILABLE_LOCAL_MODELS.find((model) => model.id === settings.webllmModelId)?.label ??
+      getLocalLLMModelId(settings.webllmModelId)
+    );
+  }
+
+  if (settings.llmProvider === "openai") {
+    return settings.openAIModel.trim() || "未设置模型";
+  }
+
+  return settings.ollamaModel.trim() || "未设置模型";
+}
+
+export function getProviderStatusSummary(settings: AppSettings) {
+  if (settings.llmProvider === "webllm") {
+    return `模型：${getProviderModelLabel(settings)} · 按需启动`;
+  }
+
+  if (settings.llmProvider === "openai") {
+    return `API：${getProviderModelLabel(settings)}`;
+  }
+
+  return `Ollama：${getProviderModelLabel(settings)}`;
+}
+
+export function getProviderMissingConfigMessage(settings: AppSettings) {
+  if (settings.llmProvider === "webllm") {
+    return "";
+  }
+
+  if (settings.llmProvider === "openai") {
+    if (!settings.openAIBaseUrl.trim()) {
+      return "请先在设置里填写 API 地址。";
+    }
+
+    if (!settings.openAIModel.trim()) {
+      return "请先在设置里填写 API 模型名。";
+    }
+
+    if (!settings.openAIApiKey.trim()) {
+      return "请先在设置里填写 API Key。";
+    }
+
+    return "";
+  }
+
+  if (!settings.ollamaBaseUrl.trim()) {
+    return "请先在设置里填写 Ollama 地址。";
+  }
+
+  if (!settings.ollamaModel.trim()) {
+    return "请先在设置里填写 Ollama 模型名。";
+  }
+
+  return "";
 }
 
 export function getLocalLLMModelId(modelId?: string) {
@@ -216,6 +304,20 @@ export async function ensureLocalLLM(
   }
 
   return loadingPromise;
+}
+
+export async function ensureLLMProviderReady(
+  settings: AppSettings,
+  onProgress?: (progress: LocalLLMProgress) => void,
+) {
+  const missingMessage = getProviderMissingConfigMessage(settings);
+  if (missingMessage) {
+    throw new Error(missingMessage);
+  }
+
+  if (settings.llmProvider === "webllm") {
+    await ensureLocalLLM(settings.webllmModelId, onProgress);
+  }
 }
 
 export function createLocalLLMMessages(request: LocalLLMRequest): LocalLLMMessage[] {
@@ -298,4 +400,93 @@ export async function runLocalLLMTask(
   }
 
   return reply;
+}
+
+async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSettings) {
+  const response = await fetch(`${settings.openAIBaseUrl.replace(/\/$/, "")}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${settings.openAIApiKey}`,
+    },
+    body: JSON.stringify({
+      model: settings.openAIModel,
+      messages: createLocalLLMMessages(request),
+      temperature: request.action === "chat" ? 0.4 : 0.2,
+      top_p: 0.9,
+      max_tokens: request.action === "review" ? 240 : 320,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "外部模型服务调用失败。");
+  }
+
+  const payload = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const reply = normalizeAssistantMarkdown(payload.choices?.[0]?.message?.content?.trim() ?? "");
+
+  if (!reply) {
+    throw new Error("外部模型没有返回可用内容。");
+  }
+
+  return reply;
+}
+
+async function runOllamaTask(request: LocalLLMRequest, settings: AppSettings) {
+  const response = await fetch(`${settings.ollamaBaseUrl.replace(/\/$/, "")}/api/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: settings.ollamaModel,
+      stream: false,
+      messages: createLocalLLMMessages(request),
+      options: {
+        temperature: request.action === "chat" ? 0.4 : 0.2,
+        top_p: 0.9,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Ollama 调用失败。");
+  }
+
+  const payload = (await response.json()) as {
+    message?: { content?: string };
+  };
+  const reply = normalizeAssistantMarkdown(payload.message?.content?.trim() ?? "");
+
+  if (!reply) {
+    throw new Error("Ollama 没有返回可用内容。");
+  }
+
+  return reply;
+}
+
+export async function runLLMTask(
+  request: LocalLLMRequest,
+  settings: AppSettings,
+  onProgress?: (progress: LocalLLMProgress) => void,
+) {
+  if (settings.llmProvider === "webllm") {
+    return runLocalLLMTask(
+      {
+        ...request,
+        modelId: settings.webllmModelId,
+      },
+      onProgress,
+    );
+  }
+
+  if (settings.llmProvider === "openai") {
+    return runOpenAICompatibleTask(request, settings);
+  }
+
+  return runOllamaTask(request, settings);
 }

@@ -6,15 +6,15 @@ import { createBrowserWorkspaceSummaryRepository } from "@/services/persistence/
 import { importDocumentFile } from "@/services/import/import-document";
 import { downloadWorkspaceExport, type WorkspaceExportFormat } from "@/services/export/workspace-export";
 import {
-  ensureLocalLLM,
+  ensureLLMProviderReady,
+  getAvailableLLMProviders,
   getAvailableLocalLLMModels,
-  getLocalLLMModelId,
   getLoadedLocalLLMModelId,
-  getDefaultLocalLLMModelId,
+  getProviderMissingConfigMessage,
+  getProviderModelLabel,
+  getProviderStatusSummary,
   isLocalLLMSupported,
-  loadSelectedLocalLLMModelId,
-  runLocalLLMTask,
-  saveSelectedLocalLLMModelId,
+  runLLMTask,
 } from "@/services/ai/local-llm";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/workspace-settings-modal";
@@ -43,24 +43,23 @@ export function WorkspacePage() {
 
   const workspaceState = useSyncExternalStore(store.subscribe, () => store.getState());
   const summary = workspaceState.summary ?? mockWorkspaceSummary;
+  const providerOptions = useMemo(() => getAvailableLLMProviders(), []);
   const modelOptions = useMemo(() => getAvailableLocalLLMModels(), []);
-  const [selectedModelId, setSelectedModelId] = useState(() => loadSelectedLocalLLMModelId());
   const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [appSettings, setAppSettings] = useState(() => loadAppSettings());
   const selectedModel = useMemo(
     () =>
-      modelOptions.find((model) => model.id === selectedModelId) ??
-      modelOptions.find((model) => model.id === getDefaultLocalLLMModelId()),
-    [modelOptions, selectedModelId],
+      modelOptions.find((model) => model.id === appSettings.webllmModelId) ?? modelOptions[0],
+    [appSettings.webllmModelId, modelOptions],
   );
   const [localModelStatus, setLocalModelStatus] = useState<LocalModelStatus>(() =>
-    isLocalLLMSupported() ? "idle" : "unsupported",
+    appSettings.llmProvider === "webllm" && !isLocalLLMSupported() ? "unsupported" : "idle",
   );
   const [localModelDetail, setLocalModelDetail] = useState(() =>
-    isLocalLLMSupported()
-      ? `模型：${getLocalLLMModelId(selectedModelId)} · 按需启动`
-      : "当前浏览器不支持 WebGPU，本地模型无法运行。",
+    appSettings.llmProvider === "webllm" && !isLocalLLMSupported()
+      ? "当前浏览器不支持 WebGPU，本地模型无法运行。"
+      : getProviderStatusSummary(appSettings),
   );
 
   const updateProgress = (progress: { progress: number; text: string }) => {
@@ -69,6 +68,11 @@ export function WorkspacePage() {
   };
 
   useEffect(() => {
+    if (appSettings.llmProvider !== "webllm") {
+      setLocalModelDetail(getProviderStatusSummary(appSettings));
+      return;
+    }
+
     if (!selectedModel) {
       return;
     }
@@ -89,26 +93,39 @@ export function WorkspacePage() {
       return;
     }
 
-    setLocalModelDetail(`模型：${selectedModel.label} · 按需启动`);
-  }, [localModelStatus, selectedModel]);
+    setLocalModelDetail(getProviderStatusSummary(appSettings));
+  }, [appSettings, localModelStatus, selectedModel]);
 
-  const ensureModelReady = async (modelId = selectedModelId) => {
-    const model =
-      modelOptions.find((candidate) => candidate.id === modelId) ??
-      modelOptions.find((candidate) => candidate.id === getDefaultLocalLLMModelId());
+  const ensureModelReady = async () => {
+    const missingMessage = getProviderMissingConfigMessage(appSettings);
+    if (missingMessage) {
+      setLocalModelStatus("error");
+      setLocalModelDetail(missingMessage);
+      return false;
+    }
 
-    if (!isLocalLLMSupported()) {
+    if (appSettings.llmProvider === "webllm" && !isLocalLLMSupported()) {
       setLocalModelStatus("unsupported");
       setLocalModelDetail("当前浏览器不支持 WebGPU，本地模型无法运行。");
       return false;
     }
 
     try {
-      setLocalModelStatus((current) => (current === "ready" ? current : "loading"));
-      setLocalModelDetail(`正在启动本地模型 ${model?.label ?? getLocalLLMModelId(modelId)}…`);
-      await ensureLocalLLM(modelId, updateProgress);
+      if (appSettings.llmProvider === "webllm") {
+        setLocalModelStatus((current) => (current === "ready" ? current : "loading"));
+        setLocalModelDetail(`正在启动本地模型 ${getProviderModelLabel(appSettings)}…`);
+      } else {
+        setLocalModelStatus("ready");
+        setLocalModelDetail(getProviderStatusSummary(appSettings));
+      }
+
+      await ensureLLMProviderReady(appSettings, updateProgress);
       setLocalModelStatus("ready");
-      setLocalModelDetail(`本地模型已就绪 · ${model?.label ?? getLocalLLMModelId(modelId)}`);
+      setLocalModelDetail(
+        appSettings.llmProvider === "webllm"
+          ? `本地模型已就绪 · ${getProviderModelLabel(appSettings)}`
+          : getProviderStatusSummary(appSettings),
+      );
       return true;
     } catch (error) {
       setLocalModelStatus("error");
@@ -134,21 +151,24 @@ export function WorkspacePage() {
     try {
       setLocalModelStatus("responding");
       setLocalModelDetail("本地模型正在生成回复…");
-      const reply = await runLocalLLMTask({
+      const reply = await runLLMTask({
         action: "chat",
         clauseTitle: currentSummary.activeClauseTitle,
         clauseText: currentSummary.activeClauseText,
         userMessage: message,
-        modelId: selectedModelId,
         customPrompt: appSettings.reviewPromptNote,
-      });
+      }, appSettings);
       store.getState().completeAssistantTurn({
         userMessage: message,
         assistantReply: reply,
         variant: "chat",
       });
       setLocalModelStatus("ready");
-      setLocalModelDetail(`本地模型已就绪 · ${selectedModel?.label ?? getLocalLLMModelId(selectedModelId)}`);
+      setLocalModelDetail(
+        appSettings.llmProvider === "webllm"
+          ? `本地模型已就绪 · ${getProviderModelLabel(appSettings)}`
+          : getProviderStatusSummary(appSettings),
+      );
     } catch (error) {
       setLocalModelStatus("error");
       setLocalModelDetail(error instanceof Error ? error.message : "本地模型回复失败。");
@@ -187,13 +207,12 @@ export function WorkspacePage() {
     try {
       setLocalModelStatus("responding");
       setLocalModelDetail(`本地模型正在处理“${labelMap[payload.intent]}”…`);
-      const reply = await runLocalLLMTask({
+      const reply = await runLLMTask({
         action: payload.intent,
         clauseTitle: payload.contextLabel ?? "已选文本",
         clauseText: payload.text,
-        modelId: selectedModelId,
         customPrompt: appSettings.reviewPromptNote,
-      });
+      }, appSettings);
       store.getState().completeAssistantTurn({
         userMessage: labelMap[payload.intent],
         assistantReply: reply,
@@ -201,7 +220,11 @@ export function WorkspacePage() {
         variant: payload.intent,
       });
       setLocalModelStatus("ready");
-      setLocalModelDetail(`本地模型已就绪 · ${selectedModel?.label ?? getLocalLLMModelId(selectedModelId)}`);
+      setLocalModelDetail(
+        appSettings.llmProvider === "webllm"
+          ? `本地模型已就绪 · ${getProviderModelLabel(appSettings)}`
+          : getProviderStatusSummary(appSettings),
+      );
     } catch (error) {
       setLocalModelStatus("error");
       setLocalModelDetail(error instanceof Error ? error.message : "本地模型处理失败。");
@@ -212,18 +235,29 @@ export function WorkspacePage() {
     workspaceTitle: string;
     themeId: "warm" | "ink" | "forest";
     reviewPromptNote: string;
+    llmProvider: "webllm" | "openai" | "ollama";
     modelId: string;
+    openAIBaseUrl: string;
+    openAIApiKey: string;
+    openAIModel: string;
+    ollamaBaseUrl: string;
+    ollamaModel: string;
   }) => {
     const nextTitle = payload.workspaceTitle.trim() || mockWorkspaceSummary.workspaceTitle;
     const nextAppSettings = {
       themeId: payload.themeId,
       reviewPromptNote: payload.reviewPromptNote.trim(),
+      llmProvider: payload.llmProvider,
+      webllmModelId: payload.modelId,
+      openAIBaseUrl: payload.openAIBaseUrl.trim(),
+      openAIApiKey: payload.openAIApiKey.trim(),
+      openAIModel: payload.openAIModel.trim(),
+      ollamaBaseUrl: payload.ollamaBaseUrl.trim(),
+      ollamaModel: payload.ollamaModel.trim(),
     };
 
     saveAppSettings(nextAppSettings);
     setAppSettings(nextAppSettings);
-    saveSelectedLocalLLMModelId(payload.modelId);
-    setSelectedModelId(payload.modelId);
     store.getState().replaceWorkspace(
       {
         ...summary,
@@ -233,7 +267,7 @@ export function WorkspacePage() {
       workspaceState.previewDocument,
     );
     setIsWorkspaceSettingsOpen(false);
-    void ensureModelReady(payload.modelId);
+    void ensureModelReady();
   };
 
   const handleClearWorkspaceRecords = async () => {
@@ -274,11 +308,18 @@ export function WorkspacePage() {
         workspaceTitle={summary.workspaceTitle}
         selectedThemeId={appSettings.themeId}
         reviewPromptNote={appSettings.reviewPromptNote}
-        selectedModelId={selectedModelId}
-        activeModelId={getLoadedLocalLLMModelId()}
+        llmProvider={appSettings.llmProvider}
+        selectedModelId={appSettings.webllmModelId}
+        openAIBaseUrl={appSettings.openAIBaseUrl}
+        openAIApiKey={appSettings.openAIApiKey}
+        openAIModel={appSettings.openAIModel}
+        ollamaBaseUrl={appSettings.ollamaBaseUrl}
+        ollamaModel={appSettings.ollamaModel}
+        activeModelId={appSettings.llmProvider === "webllm" ? getLoadedLocalLLMModelId() : undefined}
+        providerOptions={providerOptions}
         modelOptions={modelOptions}
         isModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
-        isModelSupported={isLocalLLMSupported()}
+        isModelSupported={appSettings.llmProvider === "webllm" ? isLocalLLMSupported() : true}
         onClose={() => setIsWorkspaceSettingsOpen(false)}
         onSave={handleSaveWorkspaceSettings}
         onClear={() => {
