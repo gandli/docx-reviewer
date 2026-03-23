@@ -307,6 +307,10 @@ export function WorkspacePage() {
 
   useEffect(() => {
     if (appSettings.llmProvider !== "webllm") {
+      if (localModelStatus === "responding" || localModelStatus === "error") {
+        return;
+      }
+
       setLocalModelDetail(getProviderStatusSummary(appSettings));
       return;
     }
