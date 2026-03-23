@@ -573,10 +573,9 @@ describe("workspace shell", () => {
     expect(screen.getByText("工作区设置")).toBeInTheDocument();
     expect(screen.getAllByText("模型服务").length).toBeGreaterThan(0);
     expect(screen.getByText(/当前状态：模型：Qwen3 0.6B · 按需启动/)).toBeInTheDocument();
-    expect(screen.getByText("当前任务更偏向文书审阅，已优先标出更适合校阅、改写和润色的来源和模型。")).toBeInTheDocument();
+    expect(screen.getByText("当前更适合文书审阅")).toBeInTheDocument();
     expect(screen.getByText("更适合离线审阅")).toBeInTheDocument();
-    expect(screen.getByText("适合轻到中等长度生成")).toBeInTheDocument();
-    expect(screen.getAllByText("当前更推荐").length).toBeGreaterThan(0);
+    expect(screen.getByText("适合快速试跑审阅流程")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("搜索本地模型"), {
       target: { value: "1.5B" },
@@ -586,10 +585,9 @@ describe("workspace shell", () => {
     const selectedModelCard = screen.getByText("Qwen2.5 1.5B").closest("label");
     expect(selectedModelCard).not.toBeNull();
     expect(selectedModelCard).toHaveTextContent("Qwen2.5 1.5B");
-    expect(selectedModelCard).toHaveTextContent("推荐设备档位：主流设备");
-    expect(selectedModelCard).toHaveTextContent("显存提示：建议显存 4GB 以上");
-    expect(selectedModelCard).toHaveTextContent("文书审阅：推荐用于正式文书审阅");
-    expect(selectedModelCard).toHaveTextContent("文书生成：适合常规初稿生成");
+    expect(selectedModelCard).toHaveTextContent("主流设备");
+    expect(selectedModelCard).toHaveTextContent("建议显存 4GB 以上");
+    expect(selectedModelCard).toHaveTextContent("推荐用于正式文书审阅");
 
     fireEvent.click(selectedModelCard!);
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
@@ -651,11 +649,8 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "设置" }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("当前任务更偏向文书生成，已优先标出更适合起草初稿的来源和模型。"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("当前更适合文书生成")).toBeInTheDocument();
     });
-    expect(screen.getAllByText("当前更推荐").length).toBeGreaterThan(0);
     expect(screen.getByText("更适合长文生成")).toBeInTheDocument();
   });
 
