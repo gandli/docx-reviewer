@@ -53,6 +53,18 @@ function getProviderSourceLabel(provider: "webllm" | "openai" | "anthropic" | "o
   return "来源：WebLLM";
 }
 
+function getProviderActiveActionLabel(provider: "webllm" | "openai" | "anthropic" | "ollama") {
+  if (provider === "webllm") {
+    return "本地模型";
+  }
+
+  if (provider === "openai" || provider === "anthropic") {
+    return "外部模型";
+  }
+
+  return "Ollama";
+}
+
 function getProviderStatusBadge(params: {
   settings: AppSettings;
   localModelStatus: LocalModelStatus;
@@ -128,6 +140,13 @@ function getProviderHelperText(params: {
     return {
       text: "请换支持 WebGPU 的浏览器或设备。",
       tone: "error" as ProviderHelperTone,
+    };
+  }
+
+  if (params.localModelStatus === "loading" || params.localModelStatus === "responding") {
+    return {
+      text: params.localModelDetail,
+      tone: "neutral" as ProviderHelperTone,
     };
   }
 
@@ -304,6 +323,7 @@ export function WorkspacePage() {
     currentCheckVariant: modelCheckVariant,
     currentCheckStatus: modelCheckStatus,
   });
+  const providerModelLabel = getProviderStatusSummary(appSettings);
 
   useEffect(() => {
     if (appSettings.llmProvider !== "webllm") {
@@ -411,7 +431,7 @@ export function WorkspacePage() {
 
     try {
       setLocalModelStatus("responding");
-      setLocalModelDetail("本地模型正在生成回复…");
+      setLocalModelDetail(`${getProviderActiveActionLabel(appSettings.llmProvider)}正在生成回复…`);
       const reply = await runLLMTask({
         action: "chat",
         clauseTitle: currentSummary.activeClauseTitle,
@@ -471,7 +491,9 @@ export function WorkspacePage() {
 
     try {
       setLocalModelStatus("responding");
-      setLocalModelDetail(`本地模型正在处理“${labelMap[payload.intent]}”…`);
+      setLocalModelDetail(
+        `${getProviderActiveActionLabel(appSettings.llmProvider)}正在处理“${labelMap[payload.intent]}”…`,
+      );
       const reply = await runLLMTask({
         action: payload.intent,
         clauseTitle: payload.contextLabel ?? "已选文本",
@@ -667,7 +689,7 @@ export function WorkspacePage() {
         localModelSourceLabel={getProviderSourceLabel(appSettings.llmProvider)}
         localModelStatusLabel={providerStatusBadge.label}
         localModelStatusTone={providerStatusBadge.tone}
-        localModelLabel={localModelDetail}
+        localModelLabel={providerModelLabel}
         localModelHelperText={providerHelper.text}
         localModelHelperTone={providerHelper.tone}
         isSendBlocked={providerSendGuard.blocked}

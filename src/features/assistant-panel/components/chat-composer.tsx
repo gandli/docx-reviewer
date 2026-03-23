@@ -83,7 +83,7 @@ export function ChatComposer({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           disabled={isInputDisabled}
-          placeholder={isSendBlocked ? sendBlockReason || "请先完成模型设置" : "输入你的要求，或继续处理当前内容"}
+          placeholder={isSendBlocked ? "当前不可发送" : "输入你的要求，或继续处理当前内容"}
         />
         <button
           className="rounded-full border-0 bg-[rgba(47,38,29,0.92)] px-[13px] py-[9px] font-sans text-[0.8rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-70"

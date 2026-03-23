@@ -554,7 +554,7 @@ describe("workspace shell", () => {
       expect(screen.getByText("来源：OpenAI API")).toBeInTheDocument();
       expect(screen.getByText("未配置")).toBeInTheDocument();
       expect(screen.getByText("先在设置里补全 API Key。")).toBeInTheDocument();
-      expect(screen.getByPlaceholderText("先在设置里补全 API Key。")).toBeDisabled();
+      expect(screen.getByPlaceholderText("当前不可发送")).toBeDisabled();
       expect(screen.getByRole("button", { name: "发送" })).toBeDisabled();
     });
   });
@@ -571,7 +571,7 @@ describe("workspace shell", () => {
     expect(screen.getByText("来源：WebLLM")).toBeInTheDocument();
     expect(screen.getByText("不可用")).toBeInTheDocument();
     expect(screen.getByText("请换支持 WebGPU 的浏览器或设备。")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("当前环境不支持本地模型")).toBeDisabled();
+    expect(screen.getByPlaceholderText("当前不可发送")).toBeDisabled();
     expect(screen.getByRole("button", { name: "发送" })).toBeDisabled();
   });
 
@@ -1057,7 +1057,10 @@ describe("workspace shell", () => {
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText("模型接口已连通，但只返回了思考内容，没有返回最终正文。")).toBeDisabled();
+      expect(
+        screen.getAllByText("模型接口已连通，但只返回了思考内容，没有返回最终正文。").length,
+      ).toBeGreaterThan(0);
+      expect(screen.getByPlaceholderText("当前不可发送")).toBeDisabled();
       expect(screen.queryByText("检查地址、API Key 和模型名是否正确。")).not.toBeInTheDocument();
     });
   });
