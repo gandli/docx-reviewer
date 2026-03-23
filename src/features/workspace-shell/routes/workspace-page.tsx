@@ -111,6 +111,7 @@ function formatCheckTime(date: Date) {
 function getProviderHelperText(params: {
   settings: AppSettings;
   localModelStatus: LocalModelStatus;
+  localModelDetail: string;
   currentCheckVariant: "success" | "error" | null;
   currentCheckStatus: string;
   lastSuccessfulCheckAt: string;
@@ -133,27 +134,27 @@ function getProviderHelperText(params: {
   if (params.currentCheckVariant === "error" || params.localModelStatus === "error") {
     if (params.settings.llmProvider === "openai") {
       return {
-        text: "检查地址、API Key 和模型名是否正确。",
+        text: params.currentCheckStatus || params.localModelDetail || "检查地址、API Key 和模型名是否正确。",
         tone: "error" as ProviderHelperTone,
       };
     }
 
     if (params.settings.llmProvider === "ollama") {
       return {
-        text: "确认 Ollama 已启动，地址和模型名可用。",
+        text: params.currentCheckStatus || params.localModelDetail || "确认 Ollama 已启动，地址和模型名可用。",
         tone: "error" as ProviderHelperTone,
       };
     }
 
     if (params.settings.llmProvider === "anthropic") {
       return {
-        text: "检查地址、Key 和模型名是否正确。",
+        text: params.currentCheckStatus || params.localModelDetail || "检查地址、Key 和模型名是否正确。",
         tone: "error" as ProviderHelperTone,
       };
     }
 
     return {
-      text: params.currentCheckStatus || "请重试，或改用支持 WebGPU 的环境。",
+      text: params.currentCheckStatus || params.localModelDetail || "请重试，或改用支持 WebGPU 的环境。",
       tone: "error" as ProviderHelperTone,
     };
   }
@@ -174,6 +175,7 @@ function getProviderHelperText(params: {
 function getProviderSendGuard(params: {
   settings: AppSettings;
   localModelStatus: LocalModelStatus;
+  localModelDetail: string;
   currentCheckVariant: "success" | "error" | null;
   currentCheckStatus: string;
 }) {
@@ -196,34 +198,34 @@ function getProviderSendGuard(params: {
     if (params.settings.llmProvider === "openai") {
       return {
         blocked: true,
-        reason: "请先修正 API 设置",
+        reason: params.currentCheckStatus || params.localModelDetail || "请先修正 API 设置",
       };
     }
 
     if (params.settings.llmProvider === "ollama") {
       return {
         blocked: true,
-        reason: "请先修正 Ollama 设置",
+        reason: params.currentCheckStatus || params.localModelDetail || "请先修正 Ollama 设置",
       };
     }
 
     if (params.settings.llmProvider === "anthropic") {
       return {
         blocked: true,
-        reason: "请先修正 Anthropic 设置",
+        reason: params.currentCheckStatus || params.localModelDetail || "请先修正 Anthropic 设置",
       };
     }
 
     return {
       blocked: true,
-      reason: params.currentCheckStatus || "请先修正本地模型环境",
+      reason: params.currentCheckStatus || params.localModelDetail || "请先修正本地模型环境",
     };
   }
 
   if (params.localModelStatus === "error") {
     return {
       blocked: true,
-      reason: "请先修正当前模型状态",
+      reason: params.currentCheckStatus || params.localModelDetail || "请先修正当前模型状态",
     };
   }
 
@@ -290,6 +292,7 @@ export function WorkspacePage() {
   const providerHelper = getProviderHelperText({
     settings: appSettings,
     localModelStatus,
+    localModelDetail,
     currentCheckVariant: modelCheckVariant,
     currentCheckStatus: modelCheckStatus,
     lastSuccessfulCheckAt,
@@ -297,6 +300,7 @@ export function WorkspacePage() {
   const providerSendGuard = getProviderSendGuard({
     settings: appSettings,
     localModelStatus,
+    localModelDetail,
     currentCheckVariant: modelCheckVariant,
     currentCheckStatus: modelCheckStatus,
   });

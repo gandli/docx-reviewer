@@ -1023,6 +1023,45 @@ describe("workspace shell", () => {
     });
   });
 
+  it("shows the actual remote model error instead of a generic API hint", async () => {
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "openai",
+        webllmModelId: "Qwen3-0.6B-q4f16_1-MLC",
+        openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+        openAIApiKey: "glm-key",
+        openAIModel: "glm-4.7-flash",
+        anthropicBaseUrl: "https://api.anthropic.com/v1",
+        anthropicApiKey: "",
+        anthropicModel: "claude-3-5-sonnet-latest",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+    runLLMTaskMock.mockRejectedValueOnce(
+      new Error("模型接口已连通，但只返回了思考内容，没有返回最终正文。"),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByPlaceholderText("输入你的要求，或继续处理当前内容"), {
+      target: { value: "请继续找问题" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "发送" }));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText("模型接口已连通，但只返回了思考内容，没有返回最终正文。")).toBeDisabled();
+      expect(screen.queryByText("检查地址、API Key 和模型名是否正确。")).not.toBeInTheDocument();
+    });
+  });
+
   it("scrolls to the latest assistant message after sending", async () => {
     render(
       <MemoryRouter>
