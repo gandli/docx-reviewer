@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createLocalLLMMessages,
+  getAvailableLLMProviders,
   getAvailableLocalLLMModels,
   getDefaultLocalLLMModelId,
+  loadReadyLocalLLMModelId,
   loadSelectedLocalLLMModelId,
+  saveReadyLocalLLMModelId,
   saveSelectedLocalLLMModelId,
 } from "@/services/ai/local-llm";
 
@@ -27,10 +30,23 @@ describe("local llm", () => {
     expect(models.every((model) => model.generateFit.length > 0)).toBe(true);
   });
 
+  it("provides provider options including Anthropic style api", () => {
+    const providers = getAvailableLLMProviders();
+
+    expect(providers.some((provider) => provider.id === "anthropic")).toBe(true);
+    expect(providers.find((provider) => provider.id === "anthropic")?.label).toContain("Anthropic");
+  });
+
   it("persists and restores selected model id", () => {
     saveSelectedLocalLLMModelId("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
 
     expect(loadSelectedLocalLLMModelId()).toBe("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
+  });
+
+  it("persists and restores ready local model id", () => {
+    saveReadyLocalLLMModelId("Qwen3-0.6B-q4f16_1-MLC");
+
+    expect(loadReadyLocalLLMModelId()).toBe("Qwen3-0.6B-q4f16_1-MLC");
   });
 
   it("builds document review prompts for finding issues", () => {

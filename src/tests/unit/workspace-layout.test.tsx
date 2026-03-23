@@ -17,8 +17,11 @@ const { parseDocxDocumentMock, renderDocxPreviewMock } = vi.hoisted(() => ({
   }),
 }));
 const {
+  clearReadyLocalLLMModelIdMock,
   ensureLLMProviderReadyMock,
+  loadReadyLocalLLMModelIdMock,
   runLLMTaskMock,
+  saveReadyLocalLLMModelIdMock,
   validateLLMProviderConnectionMock,
   isLocalLLMSupportedMock,
   getProviderModelLabelMock,
@@ -28,7 +31,9 @@ const {
   getLoadedLocalLLMModelIdMock,
   getAvailableLocalLLMModelsMock,
 } = vi.hoisted(() => ({
+  clearReadyLocalLLMModelIdMock: vi.fn(),
   ensureLLMProviderReadyMock: vi.fn(() => Promise.resolve()),
+  loadReadyLocalLLMModelIdMock: vi.fn(() => ""),
   runLLMTaskMock: vi.fn(async ({ action }: { action: string }) => {
     if (action === "review") {
       return [
@@ -50,9 +55,13 @@ const {
 
     return "这是本地模型返回的真实回复。";
   }),
-  validateLLMProviderConnectionMock: vi.fn(async (settings: { llmProvider: string; openAIModel?: string; ollamaModel?: string; webllmModelId?: string }) => {
+  saveReadyLocalLLMModelIdMock: vi.fn(),
+  validateLLMProviderConnectionMock: vi.fn(async (settings: { llmProvider: string; openAIModel?: string; anthropicModel?: string; ollamaModel?: string; webllmModelId?: string }) => {
     if (settings.llmProvider === "openai") {
       return { ok: true, message: `接口可用，可继续使用 ${settings.openAIModel || "gpt-4.1-mini"}。` };
+    }
+    if (settings.llmProvider === "anthropic") {
+      return { ok: true, message: `接口可用，可继续使用 ${settings.anthropicModel || "claude-reviewer"}。` };
     }
     if (settings.llmProvider === "ollama") {
       return { ok: true, message: `Ollama 可用，可继续使用 ${settings.ollamaModel || "qwen2.5:3b"}。` };
@@ -60,18 +69,24 @@ const {
     return { ok: true, message: `当前设备可用，可加载 ${settings.webllmModelId === "Qwen2.5-1.5B-Instruct-q4f16_1-MLC" ? "Qwen2.5 1.5B" : "Qwen3 0.6B"}。` };
   }),
   isLocalLLMSupportedMock: vi.fn(() => true),
-  getProviderModelLabelMock: vi.fn((settings: { llmProvider: string; webllmModelId?: string; openAIModel?: string; ollamaModel?: string }) => {
+  getProviderModelLabelMock: vi.fn((settings: { llmProvider: string; webllmModelId?: string; openAIModel?: string; anthropicModel?: string; ollamaModel?: string }) => {
     if (settings.llmProvider === "openai") {
       return settings.openAIModel || "gpt-4.1-mini";
+    }
+    if (settings.llmProvider === "anthropic") {
+      return settings.anthropicModel || "claude-reviewer";
     }
     if (settings.llmProvider === "ollama") {
       return settings.ollamaModel || "qwen2.5:3b";
     }
     return settings.webllmModelId === "Qwen2.5-1.5B-Instruct-q4f16_1-MLC" ? "Qwen2.5 1.5B" : "Qwen3 0.6B";
   }),
-  getProviderStatusSummaryMock: vi.fn((settings: { llmProvider: string; openAIModel?: string; ollamaModel?: string }) => {
+  getProviderStatusSummaryMock: vi.fn((settings: { llmProvider: string; openAIModel?: string; anthropicModel?: string; ollamaModel?: string }) => {
     if (settings.llmProvider === "openai") {
       return `API：${settings.openAIModel || "gpt-4.1-mini"}`;
+    }
+    if (settings.llmProvider === "anthropic") {
+      return `Anthropic：${settings.anthropicModel || "claude-reviewer"}`;
     }
     if (settings.llmProvider === "ollama") {
       return `Ollama：${settings.ollamaModel || "qwen2.5:3b"}`;
@@ -93,6 +108,13 @@ const {
       summary: "兼容 chat/completions 接口的服务都可接入。",
       reviewFit: "适合接入更强的远端审阅模型",
       generateFit: "更适合长文生成",
+    },
+    {
+      id: "anthropic",
+      label: "Anthropic 风格 API",
+      summary: "兼容 messages 接口的服务都可接入。",
+      reviewFit: "适合严谨审阅和长上下文判断",
+      generateFit: "适合结构化长文生成",
     },
     {
       id: "ollama",
@@ -141,7 +163,10 @@ vi.mock("docx-preview", () => ({
 
 vi.mock("@/services/ai/local-llm", () => ({
   ensureLLMProviderReady: ensureLLMProviderReadyMock,
+  clearReadyLocalLLMModelId: clearReadyLocalLLMModelIdMock,
   runLLMTask: runLLMTaskMock,
+  loadReadyLocalLLMModelId: loadReadyLocalLLMModelIdMock,
+  saveReadyLocalLLMModelId: saveReadyLocalLLMModelIdMock,
   validateLLMProviderConnection: validateLLMProviderConnectionMock,
   isLocalLLMSupported: isLocalLLMSupportedMock,
   getProviderModelLabel: getProviderModelLabelMock,
@@ -211,8 +236,12 @@ describe("workspace shell", () => {
     parsePdfDocumentMock.mockReset();
     parseDocxDocumentMock.mockReset();
     renderDocxPreviewMock.mockClear();
+    clearReadyLocalLLMModelIdMock.mockClear();
     ensureLLMProviderReadyMock.mockClear();
+    loadReadyLocalLLMModelIdMock.mockClear();
+    loadReadyLocalLLMModelIdMock.mockReturnValue("");
     runLLMTaskMock.mockClear();
+    saveReadyLocalLLMModelIdMock.mockClear();
     validateLLMProviderConnectionMock.mockClear();
     isLocalLLMSupportedMock.mockClear();
     isLocalLLMSupportedMock.mockReturnValue(true);
@@ -448,6 +477,33 @@ describe("workspace shell", () => {
     });
   });
 
+  it("shows the anthropic model source in the assistant panel", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByText("Anthropic 风格 API").closest("label")!);
+    fireEvent.change(screen.getByLabelText("Anthropic 风格 API 地址"), {
+      target: { value: "https://anthropic.example.com/v1" },
+    });
+    fireEvent.change(screen.getByLabelText("Anthropic 风格 API Key"), {
+      target: { value: "anthropic-key" },
+    });
+    fireEvent.change(screen.getByLabelText("Anthropic 风格模型名"), {
+      target: { value: "claude-reviewer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("来源：Anthropic API")).toBeInTheDocument();
+      expect(screen.getByText("已连接")).toBeInTheDocument();
+      expect(screen.getByText("Anthropic：claude-reviewer")).toBeInTheDocument();
+    });
+  });
+
   it("shows unconfigured status when the selected provider is missing required fields", async () => {
     getProviderMissingConfigMessageMock.mockImplementation(
       (settings: { llmProvider: string; openAIBaseUrl?: string; openAIApiKey?: string; openAIModel?: string }) => {
@@ -542,6 +598,37 @@ describe("workspace shell", () => {
       const appSettings = JSON.parse(window.localStorage.getItem("app-settings") ?? "{}");
       expect(appSettings.webllmModelId).toBe("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
       expect(appSettings.llmProvider).toBe("webllm");
+      expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
+    });
+  });
+
+  it("auto restores a previously ready local model without asking the user to reload it", async () => {
+    loadReadyLocalLLMModelIdMock.mockReturnValue("Qwen2.5-1.5B-Instruct-q4f16_1-MLC");
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "webllm",
+        webllmModelId: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+        openAIBaseUrl: "https://api.openai.com/v1",
+        openAIApiKey: "",
+        openAIModel: "gpt-4.1-mini",
+        anthropicBaseUrl: "https://api.anthropic.com/v1",
+        anthropicApiKey: "",
+        anthropicModel: "claude-3-5-sonnet-latest",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
       expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
     });
   });
@@ -667,6 +754,22 @@ describe("workspace shell", () => {
       expect(appSettings.openAIApiKey).toBe("sk-demo");
       expect(appSettings.openAIModel).toBe("qwen-reviewer");
       expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
+    });
+  });
+
+  it("exports model config from settings", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByRole("button", { name: "导出配置" }));
+
+    await waitFor(() => {
+      expect(createObjectURLMock).toHaveBeenCalled();
+      expect(anchorClickMock).toHaveBeenCalled();
     });
   });
 

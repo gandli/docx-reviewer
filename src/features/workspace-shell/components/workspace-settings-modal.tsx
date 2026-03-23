@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import type { LLMProviderOption, LocalLLMModelOption } from "@/services/ai/local-llm";
 import type { AppThemeId, LLMProvider } from "@/services/persistence/app-settings";
 import type { WorkspaceTaskType } from "@/features/workspace-context/types/workspace-summary";
@@ -15,6 +15,9 @@ type WorkspaceSettingsModalProps = {
   openAIBaseUrl: string;
   openAIApiKey: string;
   openAIModel: string;
+  anthropicBaseUrl: string;
+  anthropicApiKey: string;
+  anthropicModel: string;
   ollamaBaseUrl: string;
   ollamaModel: string;
   activeModelId?: string;
@@ -34,6 +37,9 @@ type WorkspaceSettingsModalProps = {
     openAIBaseUrl: string;
     openAIApiKey: string;
     openAIModel: string;
+    anthropicBaseUrl: string;
+    anthropicApiKey: string;
+    anthropicModel: string;
     ollamaBaseUrl: string;
     ollamaModel: string;
   }) => void;
@@ -46,9 +52,14 @@ type WorkspaceSettingsModalProps = {
     openAIBaseUrl: string;
     openAIApiKey: string;
     openAIModel: string;
+    anthropicBaseUrl: string;
+    anthropicApiKey: string;
+    anthropicModel: string;
     ollamaBaseUrl: string;
     ollamaModel: string;
   }) => void;
+  onExportModelConfig: () => void;
+  onImportModelConfig: (file: File) => void;
   onClear: () => void;
 };
 
@@ -63,6 +74,9 @@ export function WorkspaceSettingsModal({
   openAIBaseUrl,
   openAIApiKey,
   openAIModel,
+  anthropicBaseUrl,
+  anthropicApiKey,
+  anthropicModel,
   ollamaBaseUrl,
   ollamaModel,
   activeModelId,
@@ -78,6 +92,8 @@ export function WorkspaceSettingsModal({
   onClearCheckStatus,
   onCheckConnection,
   onSave,
+  onExportModelConfig,
+  onImportModelConfig,
   onClear,
 }: WorkspaceSettingsModalProps) {
   const [draftTitle, setDraftTitle] = useState(workspaceTitle);
@@ -88,9 +104,13 @@ export function WorkspaceSettingsModal({
   const [draftOpenAIBaseUrl, setDraftOpenAIBaseUrl] = useState(openAIBaseUrl);
   const [draftOpenAIApiKey, setDraftOpenAIApiKey] = useState(openAIApiKey);
   const [draftOpenAIModel, setDraftOpenAIModel] = useState(openAIModel);
+  const [draftAnthropicBaseUrl, setDraftAnthropicBaseUrl] = useState(anthropicBaseUrl);
+  const [draftAnthropicApiKey, setDraftAnthropicApiKey] = useState(anthropicApiKey);
+  const [draftAnthropicModel, setDraftAnthropicModel] = useState(anthropicModel);
   const [draftOllamaBaseUrl, setDraftOllamaBaseUrl] = useState(ollamaBaseUrl);
   const [draftOllamaModel, setDraftOllamaModel] = useState(ollamaModel);
   const [modelQuery, setModelQuery] = useState("");
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const recommendationFocus = currentTask === "generate" ? "generate" : "review";
   const recommendationSummary =
     recommendationFocus === "generate"
@@ -110,6 +130,9 @@ export function WorkspaceSettingsModal({
     setDraftOpenAIBaseUrl(openAIBaseUrl);
     setDraftOpenAIApiKey(openAIApiKey);
     setDraftOpenAIModel(openAIModel);
+    setDraftAnthropicBaseUrl(anthropicBaseUrl);
+    setDraftAnthropicApiKey(anthropicApiKey);
+    setDraftAnthropicModel(anthropicModel);
     setDraftOllamaBaseUrl(ollamaBaseUrl);
     setDraftOllamaModel(ollamaModel);
     setModelQuery("");
@@ -121,6 +144,9 @@ export function WorkspaceSettingsModal({
     openAIBaseUrl,
     openAIApiKey,
     openAIModel,
+    anthropicBaseUrl,
+    anthropicApiKey,
+    anthropicModel,
     reviewPromptNote,
     selectedModelId,
     selectedThemeId,
@@ -139,6 +165,9 @@ export function WorkspaceSettingsModal({
     draftOpenAIBaseUrl,
     draftOpenAIApiKey,
     draftOpenAIModel,
+    draftAnthropicBaseUrl,
+    draftAnthropicApiKey,
+    draftAnthropicModel,
     draftOllamaBaseUrl,
     draftOllamaModel,
     isOpen,
@@ -151,6 +180,16 @@ export function WorkspaceSettingsModal({
       .toLowerCase()
       .includes(modelQuery.trim().toLowerCase()),
   );
+
+  const handleImportFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    onImportModelConfig(file);
+    event.target.value = "";
+  };
 
   if (!isOpen) {
     return null;
@@ -297,6 +336,9 @@ export function WorkspaceSettingsModal({
                     openAIBaseUrl: draftOpenAIBaseUrl,
                     openAIApiKey: draftOpenAIApiKey,
                     openAIModel: draftOpenAIModel,
+                    anthropicBaseUrl: draftAnthropicBaseUrl,
+                    anthropicApiKey: draftAnthropicApiKey,
+                    anthropicModel: draftAnthropicModel,
                     ollamaBaseUrl: draftOllamaBaseUrl,
                     ollamaModel: draftOllamaModel,
                   })
@@ -304,6 +346,27 @@ export function WorkspaceSettingsModal({
               >
                 {isCheckingConnection ? "检查中…" : "检查连接"}
               </button>
+              <button
+                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
+                type="button"
+                onClick={onExportModelConfig}
+              >
+                导出配置
+              </button>
+              <button
+                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
+                type="button"
+                onClick={() => importInputRef.current?.click()}
+              >
+                导入配置
+              </button>
+              <input
+                ref={importInputRef}
+                className="hidden"
+                type="file"
+                accept="application/json"
+                onChange={handleImportFileChange}
+              />
               {currentCheckStatus ? (
                 <div
                   className={`rounded-2xl px-3 py-2 font-sans text-[0.83rem] leading-[1.6] ${
@@ -537,6 +600,47 @@ export function WorkspaceSettingsModal({
                 </label>
               </div>
             ) : null}
+            {draftProvider === "anthropic" ? (
+              <div className="grid gap-3">
+                <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
+                  适合接入兼容 Anthropic messages 接口的服务，需要填写地址、Key 和模型名。
+                </div>
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    Anthropic 地址
+                  </span>
+                  <input
+                    aria-label="Anthropic 风格 API 地址"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    value={draftAnthropicBaseUrl}
+                    onChange={(event) => setDraftAnthropicBaseUrl(event.target.value)}
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    Anthropic Key
+                  </span>
+                  <input
+                    aria-label="Anthropic 风格 API Key"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    type="password"
+                    value={draftAnthropicApiKey}
+                    onChange={(event) => setDraftAnthropicApiKey(event.target.value)}
+                  />
+                </label>
+                <label className="grid gap-2">
+                  <span className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                    模型名
+                  </span>
+                  <input
+                    aria-label="Anthropic 风格模型名"
+                    className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+                    value={draftAnthropicModel}
+                    onChange={(event) => setDraftAnthropicModel(event.target.value)}
+                  />
+                </label>
+              </div>
+            ) : null}
             {draftProvider === "ollama" ? (
               <div className="grid gap-3">
                 <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
@@ -612,6 +716,9 @@ export function WorkspaceSettingsModal({
                   openAIBaseUrl: draftOpenAIBaseUrl,
                   openAIApiKey: draftOpenAIApiKey,
                   openAIModel: draftOpenAIModel,
+                  anthropicBaseUrl: draftAnthropicBaseUrl,
+                  anthropicApiKey: draftAnthropicApiKey,
+                  anthropicModel: draftAnthropicModel,
                   ollamaBaseUrl: draftOllamaBaseUrl,
                   ollamaModel: draftOllamaModel,
                 })

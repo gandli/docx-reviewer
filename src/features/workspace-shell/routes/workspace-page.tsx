@@ -6,6 +6,7 @@ import { createBrowserWorkspaceSummaryRepository } from "@/services/persistence/
 import { importDocumentFile } from "@/services/import/import-document";
 import { downloadWorkspaceExport, type WorkspaceExportFormat } from "@/services/export/workspace-export";
 import {
+  clearReadyLocalLLMModelId,
   ensureLLMProviderReady,
   getAvailableLLMProviders,
   getAvailableLocalLLMModels,
@@ -14,7 +15,9 @@ import {
   getProviderModelLabel,
   getProviderStatusSummary,
   isLocalLLMSupported,
+  loadReadyLocalLLMModelId,
   runLLMTask,
+  saveReadyLocalLLMModelId,
   validateLLMProviderConnection,
 } from "@/services/ai/local-llm";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
@@ -22,19 +25,25 @@ import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/wo
 import { WorkspaceExportModal } from "@/features/workspace-shell/components/workspace-export-modal";
 import {
   type AppSettings,
+  createExportedModelServiceConfig,
+  getDefaultAppSettings,
   loadAppSettings,
+  parseImportedModelServiceConfig,
   saveAppSettings,
 } from "@/services/persistence/app-settings";
-
 type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "responding" | "error";
 
 type ProviderStatusTone = "neutral" | "success" | "warning" | "error";
 
 type ProviderHelperTone = ProviderStatusTone;
 
-function getProviderSourceLabel(provider: "webllm" | "openai" | "ollama") {
+function getProviderSourceLabel(provider: "webllm" | "openai" | "anthropic" | "ollama") {
   if (provider === "openai") {
     return "来源：OpenAI API";
+  }
+
+  if (provider === "anthropic") {
+    return "来源：Anthropic API";
   }
 
   if (provider === "ollama") {
@@ -136,6 +145,13 @@ function getProviderHelperText(params: {
       };
     }
 
+    if (params.settings.llmProvider === "anthropic") {
+      return {
+        text: "检查地址、Key 和模型名是否正确。",
+        tone: "error" as ProviderHelperTone,
+      };
+    }
+
     return {
       text: params.currentCheckStatus || "请重试，或改用支持 WebGPU 的环境。",
       tone: "error" as ProviderHelperTone,
@@ -188,6 +204,13 @@ function getProviderSendGuard(params: {
       return {
         blocked: true,
         reason: "请先修正 Ollama 设置",
+      };
+    }
+
+    if (params.settings.llmProvider === "anthropic") {
+      return {
+        blocked: true,
+        reason: "请先修正 Anthropic 设置",
       };
     }
 
@@ -247,6 +270,10 @@ export function WorkspacePage() {
   const [localModelDetail, setLocalModelDetail] = useState(() =>
     appSettings.llmProvider === "webllm" && !isLocalLLMSupported()
       ? "当前浏览器不支持 WebGPU，本地模型无法运行。"
+      : appSettings.llmProvider === "webllm" &&
+          loadReadyLocalLLMModelId() === appSettings.webllmModelId &&
+          isLocalLLMSupported()
+        ? `模型：${getProviderModelLabel(appSettings)} · 自动恢复中`
       : getProviderStatusSummary(appSettings),
   );
 
@@ -328,6 +355,9 @@ export function WorkspacePage() {
 
       await ensureLLMProviderReady(appSettings, updateProgress);
       setLocalModelStatus("ready");
+      if (appSettings.llmProvider === "webllm") {
+        saveReadyLocalLLMModelId(appSettings.webllmModelId);
+      }
       setLocalModelDetail(
         appSettings.llmProvider === "webllm"
           ? `本地模型已就绪 · ${getProviderModelLabel(appSettings)}`
@@ -340,6 +370,22 @@ export function WorkspacePage() {
       return false;
     }
   };
+
+  useEffect(() => {
+    if (appSettings.llmProvider !== "webllm") {
+      return;
+    }
+
+    if (localModelStatus !== "idle") {
+      return;
+    }
+
+    if (loadReadyLocalLLMModelId() !== appSettings.webllmModelId) {
+      return;
+    }
+
+    void ensureModelReady();
+  }, [appSettings.llmProvider, appSettings.webllmModelId, localModelStatus]);
 
   const handleImportDocument = async (file: File) => {
     const importedDocument = await importDocumentFile(file);
@@ -451,6 +497,9 @@ export function WorkspacePage() {
     openAIBaseUrl: string;
     openAIApiKey: string;
     openAIModel: string;
+    anthropicBaseUrl: string;
+    anthropicApiKey: string;
+    anthropicModel: string;
     ollamaBaseUrl: string;
     ollamaModel: string;
   }) => {
@@ -463,9 +512,16 @@ export function WorkspacePage() {
       openAIBaseUrl: payload.openAIBaseUrl.trim(),
       openAIApiKey: payload.openAIApiKey.trim(),
       openAIModel: payload.openAIModel.trim(),
+      anthropicBaseUrl: payload.anthropicBaseUrl.trim(),
+      anthropicApiKey: payload.anthropicApiKey.trim(),
+      anthropicModel: payload.anthropicModel.trim(),
       ollamaBaseUrl: payload.ollamaBaseUrl.trim(),
       ollamaModel: payload.ollamaModel.trim(),
     };
+
+    if (nextAppSettings.webllmModelId !== loadReadyLocalLLMModelId()) {
+      clearReadyLocalLLMModelId();
+    }
 
     saveAppSettings(nextAppSettings);
     setAppSettings(nextAppSettings);
@@ -488,11 +544,14 @@ export function WorkspacePage() {
   }, []);
 
   const handleCheckModelConnection = async (payload: {
-    llmProvider: "webllm" | "openai" | "ollama";
+    llmProvider: "webllm" | "openai" | "anthropic" | "ollama";
     modelId: string;
     openAIBaseUrl: string;
     openAIApiKey: string;
     openAIModel: string;
+    anthropicBaseUrl: string;
+    anthropicApiKey: string;
+    anthropicModel: string;
     ollamaBaseUrl: string;
     ollamaModel: string;
   }) => {
@@ -508,12 +567,18 @@ export function WorkspacePage() {
         openAIBaseUrl: payload.openAIBaseUrl.trim(),
         openAIApiKey: payload.openAIApiKey.trim(),
         openAIModel: payload.openAIModel.trim(),
+        anthropicBaseUrl: payload.anthropicBaseUrl.trim(),
+        anthropicApiKey: payload.anthropicApiKey.trim(),
+        anthropicModel: payload.anthropicModel.trim(),
         ollamaBaseUrl: payload.ollamaBaseUrl.trim(),
         ollamaModel: payload.ollamaModel.trim(),
       });
       setModelCheckStatus(result.message);
       setModelCheckVariant("success");
       setLastSuccessfulCheckAt(formatCheckTime(new Date()));
+      if (payload.llmProvider === "webllm") {
+        saveReadyLocalLLMModelId(payload.modelId);
+      }
     } catch (error) {
       setModelCheckStatus(error instanceof Error ? error.message : "连接检查失败。");
       setModelCheckVariant("error");
@@ -534,6 +599,43 @@ export function WorkspacePage() {
   const handleExportWorkspace = (format: WorkspaceExportFormat) => {
     downloadWorkspaceExport(summary, format);
     setIsExportModalOpen(false);
+  };
+
+  const handleExportModelConfig = () => {
+    const readyWebllmModelId = loadReadyLocalLLMModelId();
+    const config = createExportedModelServiceConfig(appSettings, readyWebllmModelId);
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: "application/json" });
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "model-service-config.json";
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleImportModelConfig = async (file: File) => {
+    try {
+      const content = await file.text();
+      const imported = parseImportedModelServiceConfig(content, {
+        ...getDefaultAppSettings(),
+        ...appSettings,
+      });
+
+      if (imported.readyWebllmModelId) {
+        saveReadyLocalLLMModelId(imported.readyWebllmModelId);
+      } else {
+        clearReadyLocalLLMModelId();
+      }
+
+      saveAppSettings(imported.settings);
+      setAppSettings(imported.settings);
+      setModelCheckStatus("已导入模型配置。");
+      setModelCheckVariant("success");
+      setLastSuccessfulCheckAt("");
+    } catch (error) {
+      setModelCheckStatus(error instanceof Error ? error.message : "导入模型配置失败。");
+      setModelCheckVariant("error");
+    }
   };
 
   return (
@@ -575,6 +677,9 @@ export function WorkspacePage() {
         openAIBaseUrl={appSettings.openAIBaseUrl}
         openAIApiKey={appSettings.openAIApiKey}
         openAIModel={appSettings.openAIModel}
+        anthropicBaseUrl={appSettings.anthropicBaseUrl}
+        anthropicApiKey={appSettings.anthropicApiKey}
+        anthropicModel={appSettings.anthropicModel}
         ollamaBaseUrl={appSettings.ollamaBaseUrl}
         ollamaModel={appSettings.ollamaModel}
         activeModelId={appSettings.llmProvider === "webllm" ? getLoadedLocalLLMModelId() : undefined}
@@ -590,6 +695,10 @@ export function WorkspacePage() {
         onClearCheckStatus={handleClearModelCheckStatus}
         onCheckConnection={handleCheckModelConnection}
         onSave={handleSaveWorkspaceSettings}
+        onExportModelConfig={handleExportModelConfig}
+        onImportModelConfig={(file) => {
+          void handleImportModelConfig(file);
+        }}
         onClear={() => {
           void handleClearWorkspaceRecords();
         }}

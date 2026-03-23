@@ -57,6 +57,13 @@ const LLM_PROVIDER_OPTIONS: LLMProviderOption[] = [
     generateFit: "更适合长文生成",
   },
   {
+    id: "anthropic",
+    label: "Anthropic 风格 API",
+    summary: "兼容 messages 接口的服务都可接入。",
+    reviewFit: "适合严谨审阅和长上下文判断",
+    generateFit: "适合结构化长文生成",
+  },
+  {
     id: "ollama",
     label: "Ollama",
     summary: "连接本机或局域网里的 Ollama 服务。",
@@ -66,6 +73,7 @@ const LLM_PROVIDER_OPTIONS: LLMProviderOption[] = [
 ];
 
 const LOCAL_MODEL_STORAGE_KEY = "local-llm:selected-model";
+const READY_LOCAL_MODEL_STORAGE_KEY = "local-llm:ready-model";
 const DEFAULT_LOCAL_MODEL_ID = "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
 const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
   {
@@ -227,6 +235,31 @@ export function saveSelectedLocalLLMModelId(modelId: string) {
   window.localStorage.setItem(LOCAL_MODEL_STORAGE_KEY, modelId);
 }
 
+export function loadReadyLocalLLMModelId() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const modelId = window.localStorage.getItem(READY_LOCAL_MODEL_STORAGE_KEY);
+  return typeof modelId === "string" ? modelId : "";
+}
+
+export function saveReadyLocalLLMModelId(modelId: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(READY_LOCAL_MODEL_STORAGE_KEY, modelId);
+}
+
+export function clearReadyLocalLLMModelId() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem(READY_LOCAL_MODEL_STORAGE_KEY);
+}
+
 export function getLoadedLocalLLMModelId() {
   return loadedModelId;
 }
@@ -243,6 +276,10 @@ export function getProviderModelLabel(settings: AppSettings) {
     return settings.openAIModel.trim() || "未设置模型";
   }
 
+  if (settings.llmProvider === "anthropic") {
+    return settings.anthropicModel.trim() || "未设置模型";
+  }
+
   return settings.ollamaModel.trim() || "未设置模型";
 }
 
@@ -253,6 +290,10 @@ export function getProviderStatusSummary(settings: AppSettings) {
 
   if (settings.llmProvider === "openai") {
     return `API：${getProviderModelLabel(settings)}`;
+  }
+
+  if (settings.llmProvider === "anthropic") {
+    return `Anthropic：${getProviderModelLabel(settings)}`;
   }
 
   return `Ollama：${getProviderModelLabel(settings)}`;
@@ -274,6 +315,22 @@ export function getProviderMissingConfigMessage(settings: AppSettings) {
 
     if (!settings.openAIApiKey.trim()) {
       return "请先在设置里填写 API Key。";
+    }
+
+    return "";
+  }
+
+  if (settings.llmProvider === "anthropic") {
+    if (!settings.anthropicBaseUrl.trim()) {
+      return "请先在设置里填写 Anthropic 地址。";
+    }
+
+    if (!settings.anthropicModel.trim()) {
+      return "请先在设置里填写 Anthropic 模型名。";
+    }
+
+    if (!settings.anthropicApiKey.trim()) {
+      return "请先在设置里填写 Anthropic Key。";
     }
 
     return "";
@@ -325,6 +382,26 @@ export async function validateLLMProviderConnection(settings: AppSettings) {
     };
   }
 
+  if (settings.llmProvider === "anthropic") {
+    const response = await fetch(`${settings.anthropicBaseUrl.replace(/\/$/, "")}/models`, {
+      headers: {
+        "x-api-key": settings.anthropicApiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Anthropic 风格 API 连接失败。");
+    }
+
+    return {
+      ok: true,
+      message: `接口可用，可继续使用 ${settings.anthropicModel}。`,
+    };
+  }
+
   const response = await fetch(`${settings.ollamaBaseUrl.replace(/\/$/, "")}/api/tags`);
   if (!response.ok) {
     const text = await response.text();
@@ -355,6 +432,7 @@ export async function ensureLocalLLM(
 
   if (cachedEngine && loadedModelId === modelId) {
     onProgress?.({ progress: 1, text: "本地模型已就绪" });
+    saveReadyLocalLLMModelId(modelId);
     return cachedEngine;
   }
 
@@ -362,6 +440,7 @@ export async function ensureLocalLLM(
     cachedEngine = undefined;
     loadingPromise = undefined;
     loadedModelId = undefined;
+    clearReadyLocalLLMModelId();
   }
 
   if (!loadingPromise) {
@@ -377,9 +456,11 @@ export async function ensureLocalLLM(
       });
       cachedEngine = engine;
       loadedModelId = modelId;
+      saveReadyLocalLLMModelId(modelId);
       return engine;
     })().catch((error) => {
       loadingPromise = undefined;
+      clearReadyLocalLLMModelId();
       throw error;
     });
   }
@@ -516,6 +597,57 @@ async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSe
   return reply;
 }
 
+async function runAnthropicCompatibleTask(request: LocalLLMRequest, settings: AppSettings) {
+  const messages = createLocalLLMMessages(request);
+  const system = messages.find((message) => message.role === "system")?.content ?? "";
+  const conversation = messages
+    .filter((message) => message.role !== "system")
+    .map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
+  const response = await fetch(`${settings.anthropicBaseUrl.replace(/\/$/, "")}/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": settings.anthropicApiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model: settings.anthropicModel,
+      system,
+      messages: conversation,
+      temperature: request.action === "chat" ? 0.4 : 0.2,
+      top_p: 0.9,
+      max_tokens: request.action === "review" ? 240 : 320,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Anthropic 风格 API 调用失败。");
+  }
+
+  const payload = (await response.json()) as {
+    content?: Array<{ type?: string; text?: string }>;
+  };
+  const reply = normalizeAssistantMarkdown(
+    payload.content
+      ?.filter((block) => block.type === "text" && typeof block.text === "string")
+      .map((block) => block.text?.trim() ?? "")
+      .filter(Boolean)
+      .join("\n\n") ?? "",
+  );
+
+  if (!reply) {
+    throw new Error("Anthropic 风格 API 没有返回可用内容。");
+  }
+
+  return reply;
+}
+
 async function runOllamaTask(request: LocalLLMRequest, settings: AppSettings) {
   const response = await fetch(`${settings.ollamaBaseUrl.replace(/\/$/, "")}/api/chat`, {
     method: "POST",
@@ -567,6 +699,10 @@ export async function runLLMTask(
 
   if (settings.llmProvider === "openai") {
     return runOpenAICompatibleTask(request, settings);
+  }
+
+  if (settings.llmProvider === "anthropic") {
+    return runAnthropicCompatibleTask(request, settings);
   }
 
   return runOllamaTask(request, settings);
