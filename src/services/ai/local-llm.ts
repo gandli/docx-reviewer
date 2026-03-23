@@ -28,7 +28,10 @@ type OpenAICompatibleMessageContentPart =
       type?: string;
       text?: string;
       content?: string;
+      value?: string;
+      output_text?: string;
       parts?: OpenAICompatibleMessageContentPart[];
+      items?: OpenAICompatibleMessageContentPart[];
     };
 
 type OpenAICompatiblePayload = {
@@ -607,32 +610,44 @@ export async function runLocalLLMTask(
   return reply;
 }
 
+function collectOpenAICompatibleText(value: unknown, seen = new WeakSet<object>()): string[] {
+  if (typeof value === "string") {
+    const normalized = value.trim();
+    return normalized ? [normalized] : [];
+  }
+
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+
+  if (seen.has(value as object)) {
+    return [];
+  }
+
+  seen.add(value as object);
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectOpenAICompatibleText(item, seen));
+  }
+
+  const record = value as Record<string, unknown>;
+  const preferredFields = ["text", "content", "value", "output_text", "parts", "items"];
+  const results = preferredFields.flatMap((field) => collectOpenAICompatibleText(record[field], seen));
+
+  if (results.length > 0) {
+    return results;
+  }
+
+  return Object.entries(record)
+    .filter(([key]) => key !== "type" && key !== "role" && key !== "reasoning_content" && key !== "refusal")
+    .flatMap(([, fieldValue]) => collectOpenAICompatibleText(fieldValue, seen));
+}
+
 function extractOpenAICompatibleContentPart(content?: OpenAICompatibleMessageContentPart): string {
-  if (typeof content === "string") {
-    return content.trim();
-  }
-
-  if (!content || typeof content !== "object") {
-    return "";
-  }
-
-  if (typeof content.text === "string" && content.text.trim()) {
-    return content.text.trim();
-  }
-
-  if (typeof content.content === "string" && content.content.trim()) {
-    return content.content.trim();
-  }
-
-  if (Array.isArray(content.parts)) {
-    return content.parts
-      .map((part) => extractOpenAICompatibleContentPart(part))
-      .filter(Boolean)
-      .join("\n\n")
-      .trim();
-  }
-
-  return "";
+  return collectOpenAICompatibleText(content)
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
 }
 
 function extractOpenAICompatibleMessageText(
@@ -725,6 +740,10 @@ async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSe
         payload.choices && payload.choices[0] ? Object.keys(payload.choices[0]) : [],
       firstMessageKeys:
         payload.choices?.[0]?.message ? Object.keys(payload.choices[0].message ?? {}) : [],
+      contentType: Array.isArray(payload.choices?.[0]?.message?.content)
+        ? "array"
+        : typeof payload.choices?.[0]?.message?.content,
+      contentPreview: JSON.stringify(payload.choices?.[0]?.message?.content ?? null)?.slice(0, 400),
     });
     throw new Error(describeOpenAICompatibleReplyIssue(payload));
   }
