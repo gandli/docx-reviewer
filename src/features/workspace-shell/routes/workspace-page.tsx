@@ -30,6 +30,8 @@ type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "respondi
 
 type ProviderStatusTone = "neutral" | "success" | "warning" | "error";
 
+type ProviderHelperTone = ProviderStatusTone;
+
 function getProviderSourceLabel(provider: "webllm" | "openai" | "ollama") {
   if (provider === "openai") {
     return "来源：OpenAI API";
@@ -89,6 +91,70 @@ function getProviderStatusBadge(params: {
   };
 }
 
+function formatCheckTime(date: Date) {
+  return new Intl.DateTimeFormat("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function getProviderHelperText(params: {
+  settings: AppSettings;
+  localModelStatus: LocalModelStatus;
+  currentCheckVariant: "success" | "error" | null;
+  currentCheckStatus: string;
+  lastSuccessfulCheckAt: string;
+}) {
+  const missingMessage = getProviderMissingConfigMessage(params.settings);
+  if (missingMessage) {
+    return {
+      text: missingMessage.replace("请先在设置里填写", "先在设置里补全"),
+      tone: "warning" as ProviderHelperTone,
+    };
+  }
+
+  if (params.localModelStatus === "unsupported") {
+    return {
+      text: "请换支持 WebGPU 的浏览器或设备。",
+      tone: "error" as ProviderHelperTone,
+    };
+  }
+
+  if (params.currentCheckVariant === "error" || params.localModelStatus === "error") {
+    if (params.settings.llmProvider === "openai") {
+      return {
+        text: "检查地址、API Key 和模型名是否正确。",
+        tone: "error" as ProviderHelperTone,
+      };
+    }
+
+    if (params.settings.llmProvider === "ollama") {
+      return {
+        text: "确认 Ollama 已启动，地址和模型名可用。",
+        tone: "error" as ProviderHelperTone,
+      };
+    }
+
+    return {
+      text: params.currentCheckStatus || "请重试，或改用支持 WebGPU 的环境。",
+      tone: "error" as ProviderHelperTone,
+    };
+  }
+
+  if (params.currentCheckVariant === "success" && params.lastSuccessfulCheckAt) {
+    return {
+      text: `最近检查：${params.lastSuccessfulCheckAt}`,
+      tone: "success" as ProviderHelperTone,
+    };
+  }
+
+  return {
+    text: "",
+    tone: "neutral" as ProviderHelperTone,
+  };
+}
+
 export function WorkspacePage() {
   const { workspaceId = mockWorkspaceSummary.workspaceId } = useParams();
   const repository = useMemo(
@@ -113,6 +179,7 @@ export function WorkspacePage() {
   const [appSettings, setAppSettings] = useState(() => loadAppSettings());
   const [modelCheckStatus, setModelCheckStatus] = useState("");
   const [modelCheckVariant, setModelCheckVariant] = useState<"success" | "error" | null>(null);
+  const [lastSuccessfulCheckAt, setLastSuccessfulCheckAt] = useState("");
   const [isCheckingConnection, setIsCheckingConnection] = useState(false);
   const selectedModel = useMemo(
     () =>
@@ -137,6 +204,13 @@ export function WorkspacePage() {
     settings: appSettings,
     localModelStatus,
     currentCheckVariant: modelCheckVariant,
+  });
+  const providerHelper = getProviderHelperText({
+    settings: appSettings,
+    localModelStatus,
+    currentCheckVariant: modelCheckVariant,
+    currentCheckStatus: modelCheckStatus,
+    lastSuccessfulCheckAt,
   });
 
   useEffect(() => {
@@ -330,6 +404,7 @@ export function WorkspacePage() {
 
     saveAppSettings(nextAppSettings);
     setAppSettings(nextAppSettings);
+    setLastSuccessfulCheckAt("");
     store.getState().replaceWorkspace(
       {
         ...summary,
@@ -373,6 +448,7 @@ export function WorkspacePage() {
       });
       setModelCheckStatus(result.message);
       setModelCheckVariant("success");
+      setLastSuccessfulCheckAt(formatCheckTime(new Date()));
     } catch (error) {
       setModelCheckStatus(error instanceof Error ? error.message : "连接检查失败。");
       setModelCheckVariant("error");
@@ -415,6 +491,8 @@ export function WorkspacePage() {
         localModelStatusLabel={providerStatusBadge.label}
         localModelStatusTone={providerStatusBadge.tone}
         localModelLabel={localModelDetail}
+        localModelHelperText={providerHelper.text}
+        localModelHelperTone={providerHelper.tone}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
       />
       <WorkspaceSettingsModal

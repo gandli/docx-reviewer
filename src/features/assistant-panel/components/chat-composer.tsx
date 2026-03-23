@@ -8,6 +8,8 @@ type ChatComposerProps = {
   localModelStatusLabel: string;
   localModelStatusTone?: ModelStatusTone;
   localModelLabel: string;
+  localModelHelperText?: string;
+  localModelHelperTone?: ModelStatusTone;
   isBusy?: boolean;
 };
 
@@ -17,6 +19,8 @@ export function ChatComposer({
   localModelStatusLabel,
   localModelStatusTone = "neutral",
   localModelLabel,
+  localModelHelperText,
+  localModelHelperTone = "neutral",
   isBusy = false,
 }: ChatComposerProps) {
   const [draft, setDraft] = useState("");
@@ -39,17 +43,30 @@ export function ChatComposer({
         : localModelStatusTone === "error"
           ? "border-[rgba(185,97,97,0.26)] bg-[rgba(251,236,236,0.92)] text-[rgba(131,56,56,0.96)]"
           : "border-[rgba(216,207,193,0.82)] bg-[rgba(255,251,244,0.82)] text-[var(--color-text-muted)]";
+  const helperToneClassName =
+    localModelHelperTone === "success"
+      ? "text-[rgba(53,92,62,0.96)]"
+      : localModelHelperTone === "warning"
+        ? "text-[rgba(118,87,40,0.96)]"
+        : localModelHelperTone === "error"
+          ? "text-[rgba(131,56,56,0.96)]"
+          : "text-[var(--color-text-muted)]";
 
   return (
     <form className="grid gap-2" onSubmit={handleSubmit}>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
-        <span>{localModelSourceLabel}</span>
-        <span
-          className={`inline-flex items-center rounded-full border px-2 py-[3px] text-[0.72rem] font-semibold ${statusToneClassName}`}
-        >
-          {localModelStatusLabel}
-        </span>
-        <span>{localModelLabel}</span>
+      <div className="grid gap-1 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>{localModelSourceLabel}</span>
+          <span
+            className={`inline-flex items-center rounded-full border px-2 py-[3px] text-[0.72rem] font-semibold ${statusToneClassName}`}
+          >
+            {localModelStatusLabel}
+          </span>
+          <span>{localModelLabel}</span>
+        </div>
+        {localModelHelperText ? (
+          <div className={`text-[0.72rem] ${helperToneClassName}`}>{localModelHelperText}</div>
+        ) : null}
       </div>
       <div className="flex items-center gap-[10px] rounded-[18px] border border-[rgba(216,207,193,0.88)] bg-[rgba(255,252,247,0.9)] px-3 py-3 pl-[14px]">
         <input

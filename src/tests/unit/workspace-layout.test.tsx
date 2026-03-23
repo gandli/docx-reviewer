@@ -473,6 +473,7 @@ describe("workspace shell", () => {
     await waitFor(() => {
       expect(screen.getByText("来源：OpenAI API")).toBeInTheDocument();
       expect(screen.getByText("未配置")).toBeInTheDocument();
+      expect(screen.getByText("先在设置里补全 API Key。")).toBeInTheDocument();
     });
   });
 
@@ -639,6 +640,7 @@ describe("workspace shell", () => {
         }),
       );
       expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
+      expect(screen.getByText(/最近检查：/)).toBeInTheDocument();
     });
   });
 

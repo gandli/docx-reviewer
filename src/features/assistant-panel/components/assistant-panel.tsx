@@ -12,6 +12,8 @@ type AssistantPanelProps = {
   localModelStatusLabel: string;
   localModelStatusTone?: "neutral" | "success" | "warning" | "error";
   localModelLabel: string;
+  localModelHelperText?: string;
+  localModelHelperTone?: "neutral" | "success" | "warning" | "error";
   isLocalModelBusy?: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -26,6 +28,8 @@ export function AssistantPanel({
   localModelStatusLabel,
   localModelStatusTone = "neutral",
   localModelLabel,
+  localModelHelperText,
+  localModelHelperTone = "neutral",
   isLocalModelBusy = false,
   isCollapsed = false,
   onToggleCollapse,
@@ -56,6 +60,8 @@ export function AssistantPanel({
               localModelStatusLabel={localModelStatusLabel}
               localModelStatusTone={localModelStatusTone}
               localModelLabel={localModelLabel}
+              localModelHelperText={localModelHelperText}
+              localModelHelperTone={localModelHelperTone}
               isBusy={isLocalModelBusy}
             />
           </div>
