@@ -28,13 +28,14 @@ type OpenAICompatibleMessageContentPart =
       type?: string;
       text?: string;
       content?: string;
+      parts?: OpenAICompatibleMessageContentPart[];
     };
 
 type OpenAICompatiblePayload = {
   output_text?: string;
   choices?: Array<{
     message?: {
-      content?: string | OpenAICompatibleMessageContentPart[];
+      content?: string | OpenAICompatibleMessageContentPart | OpenAICompatibleMessageContentPart[];
       reasoning_content?: string;
       refusal?: string;
     };
@@ -606,36 +607,50 @@ export async function runLocalLLMTask(
   return reply;
 }
 
+function extractOpenAICompatibleContentPart(content?: OpenAICompatibleMessageContentPart): string {
+  if (typeof content === "string") {
+    return content.trim();
+  }
+
+  if (!content || typeof content !== "object") {
+    return "";
+  }
+
+  if (typeof content.text === "string" && content.text.trim()) {
+    return content.text.trim();
+  }
+
+  if (typeof content.content === "string" && content.content.trim()) {
+    return content.content.trim();
+  }
+
+  if (Array.isArray(content.parts)) {
+    return content.parts
+      .map((part) => extractOpenAICompatibleContentPart(part))
+      .filter(Boolean)
+      .join("\n\n")
+      .trim();
+  }
+
+  return "";
+}
+
 function extractOpenAICompatibleMessageText(
-  content?: string | OpenAICompatibleMessageContentPart[],
+  content?: string | OpenAICompatibleMessageContentPart | OpenAICompatibleMessageContentPart[],
 ) {
   if (typeof content === "string") {
     return content.trim();
   }
 
-  if (!Array.isArray(content)) {
-    return "";
+  if (Array.isArray(content)) {
+    return content
+      .map((part) => extractOpenAICompatibleContentPart(part))
+      .filter(Boolean)
+      .join("\n\n")
+      .trim();
   }
 
-  return content
-    .map((part) => {
-      if (typeof part === "string") {
-        return part.trim();
-      }
-
-      if (typeof part?.text === "string") {
-        return part.text.trim();
-      }
-
-      if (typeof part?.content === "string") {
-        return part.content.trim();
-      }
-
-      return "";
-    })
-    .filter(Boolean)
-    .join("\n\n")
-    .trim();
+  return extractOpenAICompatibleContentPart(content);
 }
 
 function extractOpenAICompatibleReply(payload: OpenAICompatiblePayload) {
