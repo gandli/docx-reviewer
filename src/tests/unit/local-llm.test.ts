@@ -34,6 +34,7 @@ describe("local llm", () => {
       action: "review",
       clauseTitle: "付款方式",
       clauseText: "合同签订后一次性支付全部款项。",
+      customPrompt: "审阅时优先指出事实缺失。",
     });
 
     expect(messages[0]?.content).toContain("商务文档审阅助手");
@@ -53,6 +54,7 @@ describe("local llm", () => {
     expect(messages[0]?.content).toContain("### 问题 1");
     expect(messages[0]?.content).toContain("- 原文：");
     expect(messages[0]?.content).toContain("- 修改建议：");
+    expect(messages[0]?.content).toContain("审阅时优先指出事实缺失");
     expect(messages[1]?.content).toContain("请审阅下面这段");
   });
 

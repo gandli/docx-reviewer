@@ -360,6 +360,13 @@ describe("workspace shell", () => {
     fireEvent.change(screen.getByLabelText("工作区名称"), {
       target: { value: "法务文档台" },
     });
+    fireEvent.change(screen.getByLabelText("提示词偏好"), {
+      target: { value: "审阅时优先指出事实缺失" },
+    });
+    fireEvent.click(screen.getByLabelText("冷灰墨"));
+    fireEvent.change(screen.getByLabelText("本地模型"), {
+      target: { value: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
@@ -368,6 +375,13 @@ describe("workspace shell", () => {
         JSON.parse(window.localStorage.getItem("workspace-state:ws-enterprise") ?? "{}").summary
           .workspaceTitle,
       ).toBe("法务文档台");
+      expect(JSON.parse(window.localStorage.getItem("app-settings") ?? "{}").themeId).toBe("ink");
+      expect(JSON.parse(window.localStorage.getItem("app-settings") ?? "{}").reviewPromptNote).toBe(
+        "审阅时优先指出事实缺失",
+      );
+      expect(saveSelectedLocalLLMModelIdMock).toHaveBeenCalledWith(
+        "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+      );
     });
   });
 

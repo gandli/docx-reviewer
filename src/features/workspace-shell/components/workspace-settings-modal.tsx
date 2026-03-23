@@ -1,21 +1,40 @@
 import { useEffect, useState } from "react";
+import type { LocalLLMModelOption } from "@/services/ai/local-llm";
+import type { AppThemeId } from "@/services/persistence/app-settings";
+import { themeOptions } from "@/shared/constants/theme";
 
 type WorkspaceSettingsModalProps = {
   isOpen: boolean;
   workspaceTitle: string;
+  selectedThemeId: AppThemeId;
+  reviewPromptNote: string;
+  selectedModelId: string;
+  modelOptions: readonly LocalLLMModelOption[];
   onClose: () => void;
-  onSave: (workspaceTitle: string) => void;
+  onSave: (payload: {
+    workspaceTitle: string;
+    themeId: AppThemeId;
+    reviewPromptNote: string;
+    modelId: string;
+  }) => void;
   onClear: () => void;
 };
 
 export function WorkspaceSettingsModal({
   isOpen,
   workspaceTitle,
+  selectedThemeId,
+  reviewPromptNote,
+  selectedModelId,
+  modelOptions,
   onClose,
   onSave,
   onClear,
 }: WorkspaceSettingsModalProps) {
   const [draftTitle, setDraftTitle] = useState(workspaceTitle);
+  const [draftThemeId, setDraftThemeId] = useState<AppThemeId>(selectedThemeId);
+  const [draftPromptNote, setDraftPromptNote] = useState(reviewPromptNote);
+  const [draftModelId, setDraftModelId] = useState(selectedModelId);
 
   useEffect(() => {
     if (!isOpen) {
@@ -23,7 +42,10 @@ export function WorkspaceSettingsModal({
     }
 
     setDraftTitle(workspaceTitle);
-  }, [isOpen, workspaceTitle]);
+    setDraftThemeId(selectedThemeId);
+    setDraftPromptNote(reviewPromptNote);
+    setDraftModelId(selectedModelId);
+  }, [isOpen, reviewPromptNote, selectedModelId, selectedThemeId, workspaceTitle]);
 
   if (!isOpen) {
     return null;
@@ -41,7 +63,7 @@ export function WorkspaceSettingsModal({
               工作区设置
             </h2>
             <p className="mt-1 font-sans text-[0.9rem] leading-[1.6] text-[var(--color-text-muted)]">
-              这里可以调整当前工作区名称，或清空这一个工作区在本机浏览器里的保存记录。
+              这里可以统一调整当前工作区名称、提示词偏好、主题色和本地模型，并清空这一个工作区在本机浏览器里的保存记录。
             </p>
           </div>
           <button
@@ -65,6 +87,73 @@ export function WorkspaceSettingsModal({
               onChange={(event) => setDraftTitle(event.target.value)}
             />
           </label>
+
+          <div className="grid gap-2">
+            <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
+              提示词偏好
+            </span>
+            <textarea
+              aria-label="提示词偏好"
+              className="min-h-28 w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] leading-[1.7] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+              placeholder="例如：审阅时更严格关注事实完整性；改写时保持更正式的机关文风。"
+              value={draftPromptNote}
+              onChange={(event) => setDraftPromptNote(event.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-3">
+            <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
+              主题色
+            </span>
+            <div className="grid gap-3 md:grid-cols-3">
+              {themeOptions.map((option) => {
+                const isSelected = draftThemeId === option.id;
+                return (
+                  <label
+                    key={option.id}
+                    className={`cursor-pointer rounded-2xl border px-4 py-4 transition ${
+                      isSelected
+                        ? "border-[rgba(181,142,83,0.72)] bg-[rgba(251,246,233,0.96)] shadow-[0_0_0_3px_rgba(181,142,83,0.12)]"
+                        : "border-[rgba(216,207,193,0.78)] bg-[rgba(255,252,247,0.86)]"
+                    }`}
+                  >
+                    <input
+                      checked={isSelected}
+                      className="sr-only"
+                      name="theme-id"
+                      type="radio"
+                      value={option.id}
+                      onChange={() => setDraftThemeId(option.id)}
+                    />
+                    <div className="text-[0.96rem] font-semibold text-[var(--color-text-primary)]">
+                      {option.label}
+                    </div>
+                    <div className="mt-1 font-sans text-[0.82rem] leading-[1.6] text-[var(--color-text-muted)]">
+                      {option.summary}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid gap-2">
+            <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
+              本地模型
+            </span>
+            <select
+              aria-label="本地模型"
+              className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
+              value={draftModelId}
+              onChange={(event) => setDraftModelId(event.target.value)}
+            >
+              {modelOptions.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.label} · {model.summary}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="rounded-2xl border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.9)] px-4 py-4">
             <div className="text-[0.96rem] font-semibold text-[var(--color-text-primary)]">
@@ -94,7 +183,14 @@ export function WorkspaceSettingsModal({
           <button
             className="cursor-pointer rounded-full border-0 bg-[rgba(47,38,29,0.94)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[#fffdf9]"
             type="button"
-            onClick={() => onSave(draftTitle)}
+            onClick={() =>
+              onSave({
+                workspaceTitle: draftTitle,
+                themeId: draftThemeId,
+                reviewPromptNote: draftPromptNote,
+                modelId: draftModelId,
+              })
+            }
           >
             保存设置
           </button>

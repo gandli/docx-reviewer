@@ -20,6 +20,10 @@ import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 import { LocalModelSettingsModal } from "@/features/assistant-panel/components/local-model-settings-modal";
 import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/workspace-settings-modal";
 import { WorkspaceExportModal } from "@/features/workspace-shell/components/workspace-export-modal";
+import {
+  loadAppSettings,
+  saveAppSettings,
+} from "@/services/persistence/app-settings";
 
 type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "responding" | "error";
 
@@ -45,6 +49,7 @@ export function WorkspacePage() {
   const [isModelSettingsOpen, setIsModelSettingsOpen] = useState(false);
   const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [appSettings, setAppSettings] = useState(() => loadAppSettings());
   const selectedModel = useMemo(
     () =>
       modelOptions.find((model) => model.id === selectedModelId) ??
@@ -137,6 +142,7 @@ export function WorkspacePage() {
         clauseText: currentSummary.activeClauseText,
         userMessage: message,
         modelId: selectedModelId,
+        customPrompt: appSettings.reviewPromptNote,
       });
       store.getState().completeAssistantTurn({
         userMessage: message,
@@ -188,6 +194,7 @@ export function WorkspacePage() {
         clauseTitle: payload.contextLabel ?? "已选文本",
         clauseText: payload.text,
         modelId: selectedModelId,
+        customPrompt: appSettings.reviewPromptNote,
       });
       store.getState().completeAssistantTurn({
         userMessage: labelMap[payload.intent],
@@ -210,8 +217,22 @@ export function WorkspacePage() {
     await ensureModelReady(modelId);
   };
 
-  const handleSaveWorkspaceSettings = (workspaceTitle: string) => {
-    const nextTitle = workspaceTitle.trim() || mockWorkspaceSummary.workspaceTitle;
+  const handleSaveWorkspaceSettings = (payload: {
+    workspaceTitle: string;
+    themeId: "warm" | "ink" | "forest";
+    reviewPromptNote: string;
+    modelId: string;
+  }) => {
+    const nextTitle = payload.workspaceTitle.trim() || mockWorkspaceSummary.workspaceTitle;
+    const nextAppSettings = {
+      themeId: payload.themeId,
+      reviewPromptNote: payload.reviewPromptNote.trim(),
+    };
+
+    saveAppSettings(nextAppSettings);
+    setAppSettings(nextAppSettings);
+    saveSelectedLocalLLMModelId(payload.modelId);
+    setSelectedModelId(payload.modelId);
     store.getState().replaceWorkspace(
       {
         ...summary,
@@ -263,6 +284,10 @@ export function WorkspacePage() {
       <WorkspaceSettingsModal
         isOpen={isWorkspaceSettingsOpen}
         workspaceTitle={summary.workspaceTitle}
+        selectedThemeId={appSettings.themeId}
+        reviewPromptNote={appSettings.reviewPromptNote}
+        selectedModelId={selectedModelId}
+        modelOptions={modelOptions}
         onClose={() => setIsWorkspaceSettingsOpen(false)}
         onSave={handleSaveWorkspaceSettings}
         onClear={() => {
