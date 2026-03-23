@@ -22,6 +22,25 @@ type LocalLLMMessage = {
   content: string;
 };
 
+type OpenAICompatibleMessageContentPart =
+  | string
+  | {
+      type?: string;
+      text?: string;
+      content?: string;
+    };
+
+type OpenAICompatiblePayload = {
+  output_text?: string;
+  choices?: Array<{
+    message?: {
+      content?: string | OpenAICompatibleMessageContentPart[];
+      reasoning_content?: string;
+      refusal?: string;
+    };
+  }>;
+};
+
 export type LocalLLMModelOption = {
   id: string;
   label: string;
@@ -587,6 +606,61 @@ export async function runLocalLLMTask(
   return reply;
 }
 
+function extractOpenAICompatibleMessageText(
+  content?: string | OpenAICompatibleMessageContentPart[],
+) {
+  if (typeof content === "string") {
+    return content.trim();
+  }
+
+  if (!Array.isArray(content)) {
+    return "";
+  }
+
+  return content
+    .map((part) => {
+      if (typeof part === "string") {
+        return part.trim();
+      }
+
+      if (typeof part?.text === "string") {
+        return part.text.trim();
+      }
+
+      if (typeof part?.content === "string") {
+        return part.content.trim();
+      }
+
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
+}
+
+function extractOpenAICompatibleReply(payload: OpenAICompatiblePayload) {
+  if (typeof payload.output_text === "string" && payload.output_text.trim()) {
+    return payload.output_text.trim();
+  }
+
+  const firstChoice = payload.choices?.[0];
+  const message = firstChoice?.message;
+  const contentText = extractOpenAICompatibleMessageText(message?.content);
+  if (contentText) {
+    return contentText;
+  }
+
+  if (typeof message?.refusal === "string" && message.refusal.trim()) {
+    return message.refusal.trim();
+  }
+
+  if (typeof message?.reasoning_content === "string" && message.reasoning_content.trim()) {
+    return message.reasoning_content.trim();
+  }
+
+  return "";
+}
+
 async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSettings) {
   const response = await fetch(`${settings.openAIBaseUrl.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
@@ -608,13 +682,11 @@ async function runOpenAICompatibleTask(request: LocalLLMRequest, settings: AppSe
     throw new Error(text || "外部模型服务调用失败。");
   }
 
-  const payload = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const reply = normalizeAssistantMarkdown(payload.choices?.[0]?.message?.content?.trim() ?? "");
+  const payload = (await response.json()) as OpenAICompatiblePayload;
+  const reply = normalizeAssistantMarkdown(extractOpenAICompatibleReply(payload));
 
   if (!reply) {
-    throw new Error("外部模型没有返回可用内容。");
+    throw new Error("模型接口已连通，但返回正文为空或返回格式不兼容。");
   }
 
   return reply;

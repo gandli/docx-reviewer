@@ -6,6 +6,7 @@ import {
   getDefaultLocalLLMModelId,
   loadReadyLocalLLMModelId,
   loadSelectedLocalLLMModelId,
+  runLLMTask,
   saveReadyLocalLLMModelId,
   saveSelectedLocalLLMModelId,
   validateLLMProviderConnection,
@@ -158,5 +159,88 @@ describe("local llm", () => {
         }),
       }),
     );
+  });
+
+  it("accepts openai-compatible responses whose message content is an array", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: [
+                {
+                  type: "text",
+                  text: "## 审阅结论\n- 问题说明：付款条件缺少验收前提。",
+                },
+              ],
+            },
+          },
+        ],
+      }),
+    } as Response);
+
+    await expect(
+      runLLMTask(
+        {
+          action: "review",
+          clauseTitle: "付款方式",
+          clauseText: "合同签订后一次性支付全部款项。",
+        },
+        {
+          themeId: "warm",
+          reviewPromptNote: "",
+          llmProvider: "openai",
+          webllmModelId: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+          openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+          openAIApiKey: "glm-key",
+          openAIModel: "glm-4.7-flash",
+          anthropicBaseUrl: "https://api.anthropic.com/v1",
+          anthropicApiKey: "",
+          anthropicModel: "claude-3-5-sonnet-latest",
+          ollamaBaseUrl: "http://127.0.0.1:11434",
+          ollamaModel: "qwen2.5:3b",
+        },
+      ),
+    ).resolves.toContain("付款条件缺少验收前提");
+  });
+
+  it("gives a precise error when the remote provider returns no final content", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content: "",
+            },
+          },
+        ],
+      }),
+    } as Response);
+
+    await expect(
+      runLLMTask(
+        {
+          action: "review",
+          clauseTitle: "付款方式",
+          clauseText: "合同签订后一次性支付全部款项。",
+        },
+        {
+          themeId: "warm",
+          reviewPromptNote: "",
+          llmProvider: "openai",
+          webllmModelId: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
+          openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+          openAIApiKey: "glm-key",
+          openAIModel: "glm-4.7-flash",
+          anthropicBaseUrl: "https://api.anthropic.com/v1",
+          anthropicApiKey: "",
+          anthropicModel: "claude-3-5-sonnet-latest",
+          ollamaBaseUrl: "http://127.0.0.1:11434",
+          ollamaModel: "qwen2.5:3b",
+        },
+      ),
+    ).rejects.toThrow("模型接口已连通，但返回正文为空或返回格式不兼容。");
   });
 });
