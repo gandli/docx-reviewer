@@ -802,8 +802,41 @@ describe("workspace shell", () => {
           openAIModel: "qwen-reviewer",
         }),
       );
+      expect(screen.getByText("测试结果：成功")).toBeInTheDocument();
       expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
       expect(screen.getByText(/最近检查：/)).toBeInTheDocument();
+    });
+  });
+
+  it("shows failed test result when provider check fails", async () => {
+    validateLLMProviderConnectionMock.mockRejectedValueOnce(new Error("Header中未收到Authorization参数，无法进行身份验证。"));
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByText("OpenAI 风格 API").closest("label")!);
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API 地址"), {
+      target: { value: "https://open.bigmodel.cn/api/paas/v4" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API Key"), {
+      target: { value: "glm-key" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
+      target: { value: "glm-4.7-flash" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    const settingsDialog = screen.getByText("工作区设置").closest("section")!;
+
+    await waitFor(() => {
+      expect(screen.getByText("测试结果：失败")).toBeInTheDocument();
+      expect(
+        within(settingsDialog).getByText("Header中未收到Authorization参数，无法进行身份验证。"),
+      ).toBeInTheDocument();
     });
   });
 

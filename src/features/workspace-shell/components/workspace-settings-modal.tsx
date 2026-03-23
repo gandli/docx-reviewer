@@ -418,7 +418,7 @@ export function WorkspaceSettingsModal({
               />
               {currentCheckStatus ? (
                 <div
-                  className={`rounded-2xl px-3 py-2 font-sans text-[0.83rem] leading-[1.6] ${
+                  className={`grid gap-1 rounded-2xl px-3 py-2 font-sans text-[0.83rem] leading-[1.6] ${
                     currentCheckVariant === "success"
                       ? "bg-[rgba(232,245,236,0.88)] text-[rgba(41,104,58,0.96)]"
                       : currentCheckVariant === "error"
@@ -426,7 +426,15 @@ export function WorkspaceSettingsModal({
                         : "bg-[rgba(255,251,244,0.78)] text-[var(--color-text-secondary)]"
                   }`}
                 >
-                  {currentCheckStatus}
+                  <div className="font-semibold">
+                    测试结果：
+                    {currentCheckVariant === "success"
+                      ? "成功"
+                      : currentCheckVariant === "error"
+                        ? "失败"
+                        : "未完成"}
+                  </div>
+                  <div>{currentCheckStatus}</div>
                 </div>
               ) : null}
             </div>
