@@ -23,6 +23,8 @@ describe("local llm", () => {
     expect(models.some((model) => model.id === "Llama-3.2-3B-Instruct-q4f16_1-MLC")).toBe(true);
     expect(models.every((model) => model.deviceTier.length > 0)).toBe(true);
     expect(models.every((model) => model.vramHint.length > 0)).toBe(true);
+    expect(models.every((model) => model.reviewFit.length > 0)).toBe(true);
+    expect(models.every((model) => model.generateFit.length > 0)).toBe(true);
   });
 
   it("persists and restores selected model id", () => {

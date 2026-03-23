@@ -336,6 +336,14 @@ export function WorkspaceSettingsModal({
                     <div className="mt-1 font-sans text-[0.82rem] leading-[1.6] text-[var(--color-text-muted)]">
                       {provider.summary}
                     </div>
+                    <div className="mt-3 grid gap-1 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
+                      <div>
+                        文书审阅：<span className="font-semibold">{provider.reviewFit}</span>
+                      </div>
+                      <div>
+                        文书生成：<span className="font-semibold">{provider.generateFit}</span>
+                      </div>
+                    </div>
                   </label>
                 );
               })}
@@ -394,6 +402,12 @@ export function WorkspaceSettingsModal({
                               </div>
                               <div>
                                 显存提示：<span className="font-semibold">{model.vramHint}</span>
+                              </div>
+                              <div>
+                                文书审阅：<span className="font-semibold">{model.reviewFit}</span>
+                              </div>
+                              <div>
+                                文书生成：<span className="font-semibold">{model.generateFit}</span>
                               </div>
                             </div>
                           </div>

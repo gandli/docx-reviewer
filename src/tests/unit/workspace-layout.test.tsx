@@ -84,16 +84,22 @@ const {
       id: "webllm",
       label: "WebLLM 本地模型",
       summary: "直接在浏览器里运行，适合离线使用。",
+      reviewFit: "更适合离线审阅",
+      generateFit: "适合轻到中等长度生成",
     },
     {
       id: "openai",
       label: "OpenAI 风格 API",
       summary: "兼容 chat/completions 接口的服务都可接入。",
+      reviewFit: "适合接入更强的远端审阅模型",
+      generateFit: "更适合长文生成",
     },
     {
       id: "ollama",
       label: "Ollama",
       summary: "连接本机或局域网里的 Ollama 服务。",
+      reviewFit: "适合本机或内网审阅",
+      generateFit: "适合自托管生成",
     },
   ]),
   getLoadedLocalLLMModelIdMock: vi.fn(() => undefined),
@@ -105,6 +111,8 @@ const {
       tags: ["中文", "轻量"],
       deviceTier: "入门设备",
       vramHint: "建议显存 2GB 以上",
+      reviewFit: "适合快速试跑审阅流程",
+      generateFit: "适合轻量生成",
     },
     {
       id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
@@ -113,6 +121,8 @@ const {
       tags: ["中文", "审阅"],
       deviceTier: "主流设备",
       vramHint: "建议显存 4GB 以上",
+      reviewFit: "推荐用于正式文书审阅",
+      generateFit: "适合常规初稿生成",
     },
   ]),
 }));
@@ -507,6 +517,8 @@ describe("workspace shell", () => {
     expect(screen.getByText("工作区设置")).toBeInTheDocument();
     expect(screen.getAllByText("模型服务").length).toBeGreaterThan(0);
     expect(screen.getByText(/当前状态：模型：Qwen3 0.6B · 按需启动/)).toBeInTheDocument();
+    expect(screen.getByText("更适合离线审阅")).toBeInTheDocument();
+    expect(screen.getByText("适合轻到中等长度生成")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("搜索本地模型"), {
       target: { value: "1.5B" },
@@ -518,6 +530,8 @@ describe("workspace shell", () => {
     expect(selectedModelCard).toHaveTextContent("Qwen2.5 1.5B");
     expect(selectedModelCard).toHaveTextContent("推荐设备档位：主流设备");
     expect(selectedModelCard).toHaveTextContent("显存提示：建议显存 4GB 以上");
+    expect(selectedModelCard).toHaveTextContent("文书审阅：推荐用于正式文书审阅");
+    expect(selectedModelCard).toHaveTextContent("文书生成：适合常规初稿生成");
 
     fireEvent.click(selectedModelCard!);
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));

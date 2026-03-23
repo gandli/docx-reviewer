@@ -29,12 +29,16 @@ export type LocalLLMModelOption = {
   tags: string[];
   deviceTier: string;
   vramHint: string;
+  reviewFit: string;
+  generateFit: string;
 };
 
 export type LLMProviderOption = {
   id: LLMProvider;
   label: string;
   summary: string;
+  reviewFit: string;
+  generateFit: string;
 };
 
 const LLM_PROVIDER_OPTIONS: LLMProviderOption[] = [
@@ -42,16 +46,22 @@ const LLM_PROVIDER_OPTIONS: LLMProviderOption[] = [
     id: "webllm",
     label: "WebLLM 本地模型",
     summary: "直接在浏览器里运行，适合离线使用。",
+    reviewFit: "更适合离线审阅",
+    generateFit: "适合轻到中等长度生成",
   },
   {
     id: "openai",
     label: "OpenAI 风格 API",
     summary: "兼容 chat/completions 接口的服务都可接入。",
+    reviewFit: "适合接入更强的远端审阅模型",
+    generateFit: "更适合长文生成",
   },
   {
     id: "ollama",
     label: "Ollama",
     summary: "连接本机或局域网里的 Ollama 服务。",
+    reviewFit: "适合本机或内网审阅",
+    generateFit: "适合自托管生成",
   },
 ];
 
@@ -65,6 +75,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["轻量", "快速", "入门"],
     deviceTier: "入门设备",
     vramHint: "建议显存 2GB 以上",
+    reviewFit: "适合快速找明显问题",
+    generateFit: "只适合短文本起草",
   },
   {
     id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
@@ -73,6 +85,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["中文", "轻量", "快速"],
     deviceTier: "入门设备",
     vramHint: "建议显存 2GB 以上",
+    reviewFit: "适合轻量中文审阅",
+    generateFit: "适合短文本生成",
   },
   {
     id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
@@ -81,6 +95,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["推荐", "中文", "审阅"],
     deviceTier: "主流设备",
     vramHint: "建议显存 4GB 以上",
+    reviewFit: "推荐用于正式文书审阅",
+    generateFit: "适合常规初稿生成",
   },
   {
     id: "Qwen3-0.6B-q4f16_1-MLC",
@@ -89,6 +105,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["轻量", "快速"],
     deviceTier: "入门设备",
     vramHint: "建议显存 2GB 以上",
+    reviewFit: "适合快速试跑审阅流程",
+    generateFit: "适合轻量生成",
   },
   {
     id: "Qwen3-1.7B-q4f16_1-MLC",
@@ -97,6 +115,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["平衡", "中文"],
     deviceTier: "主流设备",
     vramHint: "建议显存 4GB 以上",
+    reviewFit: "适合连续审阅和改写",
+    generateFit: "适合较长内容生成",
   },
   {
     id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
@@ -105,6 +125,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["中文", "增强", "审阅"],
     deviceTier: "增强设备",
     vramHint: "建议显存 6GB 以上",
+    reviewFit: "更适合复杂文书审阅",
+    generateFit: "更适合严谨初稿生成",
   },
   {
     id: "Qwen3-4B-q4f16_1-MLC",
@@ -113,6 +135,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["增强", "中文", "长文"],
     deviceTier: "增强设备",
     vramHint: "建议显存 8GB 以上",
+    reviewFit: "适合长文审阅",
+    generateFit: "推荐用于长文生成",
   },
   {
     id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
@@ -121,6 +145,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["通用", "轻量", "备选"],
     deviceTier: "入门设备",
     vramHint: "建议显存 3GB 以上",
+    reviewFit: "适合作为轻量备选审阅",
+    generateFit: "适合作为轻量备选生成",
   },
   {
     id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
@@ -129,6 +155,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["通用", "平衡", "备选"],
     deviceTier: "增强设备",
     vramHint: "建议显存 6GB 以上",
+    reviewFit: "适合通用审阅对比",
+    generateFit: "适合通用生成对比",
   },
   {
     id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
@@ -137,6 +165,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["英文", "通用"],
     deviceTier: "主流设备",
     vramHint: "建议显存 4GB 以上",
+    reviewFit: "适合英文或通用审阅",
+    generateFit: "适合英文或通用生成",
   },
   {
     id: "gemma-2-2b-it-q4f16_1-MLC",
@@ -145,6 +175,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["备选", "克制"],
     deviceTier: "主流设备",
     vramHint: "建议显存 4GB 以上",
+    reviewFit: "适合克制风格审阅",
+    generateFit: "适合克制风格生成",
   },
   {
     id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
@@ -153,6 +185,8 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     tags: ["轻量", "平衡", "低资源"],
     deviceTier: "主流设备",
     vramHint: "建议显存 4GB 以上",
+    reviewFit: "适合低资源连续审阅",
+    generateFit: "适合低资源长文生成",
   },
 ];
 
