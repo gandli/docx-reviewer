@@ -73,7 +73,7 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.activeDocumentTitle).toBe("付款规范");
     expect(store.getState().summary?.documentBlocks[0]?.text).toBe("付款规范");
     expect(store.getState().summary?.recentEvidenceRefs[0]).toBe("导入文件 · 付款规范.md");
-    expect(store.getState().summary?.latestConclusion).toBe("可以直接选中内容开始处理，或在右侧输入你的要求。");
+    expect(store.getState().summary?.latestConclusion).toBe("可直接选中内容处理，或输入要求。");
     expect(store.getState().summary?.assistantMessages).toHaveLength(0);
   });
 
@@ -139,7 +139,7 @@ describe("workspace context store", () => {
     expect(store.getState().summary?.activeClauseTitle).toBe("已选文本");
     expect(store.getState().summary?.activeClauseText).toBe("验收通过后方可申请付款。");
     expect(store.getState().summary?.activeSelectionBlockId).toBe("paragraph-2");
-    expect(store.getState().summary?.latestConclusion).toContain("已切换到你刚刚选中的内容");
+    expect(store.getState().summary?.latestConclusion).toBe("已切换到选中内容，可继续处理。");
   });
 
   it("switches to review mode when selecting text with the review action", () => {

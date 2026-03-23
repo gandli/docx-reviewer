@@ -34,7 +34,7 @@ export function ChatComposer({
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           disabled={isBusy}
-          placeholder="继续输入你的要求，或让助手基于当前条款继续处理"
+          placeholder="输入你的要求，或继续处理当前内容"
         />
         <button
           className="rounded-full border-0 bg-[rgba(47,38,29,0.92)] px-[13px] py-[9px] font-sans text-[0.8rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-70"

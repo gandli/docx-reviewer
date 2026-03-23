@@ -19,7 +19,7 @@ export function AssistantContextHeader({
         </div>
         <div className="inline-flex min-w-0 items-center gap-3">
           <div className="inline-flex min-w-0 items-center gap-2 font-sans text-[0.8rem] text-[var(--color-text-secondary)]">
-            <span className="text-[var(--color-text-muted)]">当前上下文</span>
+            <span className="text-[var(--color-text-muted)]">上下文</span>
             <span className="truncate font-semibold text-[var(--color-text-primary)]">
               {summary.activeClauseTitle}
             </span>

@@ -149,6 +149,11 @@ describe("workspace shell", () => {
 
   beforeEach(() => {
     window.localStorage.clear();
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      writable: true,
+      value: 1440,
+    });
     vi.restoreAllMocks();
     parsePdfDocumentMock.mockReset();
     parseDocxDocumentMock.mockReset();
@@ -232,7 +237,7 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.getByText("文档")).toBeInTheDocument();
     expect(screen.getByText("2 分钟前")).toBeInTheDocument();
-    expect(screen.getByText("当前上下文")).toBeInTheDocument();
+    expect(screen.getByText("上下文")).toBeInTheDocument();
     expect(screen.getAllByText("付款方式").length).toBeGreaterThan(0);
   });
 
@@ -279,6 +284,52 @@ describe("workspace shell", () => {
     expect(screen.getByText("Assistant")).toBeInTheDocument();
   });
 
+  it("resizes both side panels by dragging and persists widths locally", () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const layout = screen.getByTestId("workspace-layout");
+    const leftHandle = screen.getByTestId("left-resize-handle");
+    const rightHandle = screen.getByTestId("right-resize-handle");
+
+    fireEvent.pointerDown(leftHandle, { clientX: 320 });
+    fireEvent.pointerMove(window, { clientX: 360 });
+    fireEvent.pointerUp(window);
+
+    fireEvent.pointerDown(rightHandle, { clientX: 1120 });
+    fireEvent.pointerMove(window, { clientX: 1080 });
+    fireEvent.pointerUp(window);
+
+    expect(layout.getAttribute("style")).toContain("360px");
+    expect(layout.getAttribute("style")).toContain("360px");
+    expect(JSON.parse(window.localStorage.getItem("workspace-panel-widths") ?? "{}")).toEqual({
+      left: 360,
+      right: 360,
+    });
+  });
+
+  it("restores saved side panel widths after reload", () => {
+    window.localStorage.setItem(
+      "workspace-panel-widths",
+      JSON.stringify({
+        left: 352,
+        right: 332,
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId("workspace-layout").getAttribute("style")).toContain("352px");
+    expect(screen.getByTestId("workspace-layout").getAttribute("style")).toContain("332px");
+  });
+
   it("renders document content, active clause, and local model status", () => {
     render(
       <MemoryRouter>
@@ -288,7 +339,7 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
     expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
-    expect(screen.getByText(/尚未加载/)).toBeInTheDocument();
+    expect(screen.getByText(/按需启动/)).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
 
@@ -466,14 +517,14 @@ describe("workspace shell", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"), {
+    fireEvent.change(screen.getByPlaceholderText("输入你的要求，或继续处理当前内容"), {
       target: { value: "请把语气改得更正式" },
     });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
 
     await waitFor(() => {
       expect(
-        screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"),
+        screen.getByPlaceholderText("输入你的要求，或继续处理当前内容"),
       ).toHaveValue("");
       expect(screen.getByText("请把语气改得更正式")).toBeInTheDocument();
       expect(screen.getAllByText("这是本地模型返回的真实回复。").length).toBeGreaterThan(0);
@@ -496,7 +547,7 @@ describe("workspace shell", () => {
 
     scrollIntoViewMock.mockClear();
 
-    fireEvent.change(screen.getByPlaceholderText("继续输入你的要求，或让助手基于当前条款继续处理"), {
+    fireEvent.change(screen.getByPlaceholderText("输入你的要求，或继续处理当前内容"), {
       target: { value: "继续补充付款触发条件" },
     });
     fireEvent.click(screen.getByRole("button", { name: "发送" }));
@@ -531,7 +582,7 @@ describe("workspace shell", () => {
       expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
       expect(screen.getAllByText("所有报销申请应附完整票据。").length).toBeGreaterThan(0);
       expect(screen.getByText("导入文件 · 差旅报销制度.md")).toBeInTheDocument();
-      expect(screen.getByText("可以直接选中内容开始处理，或在右侧输入你的要求。")).toBeInTheDocument();
+      expect(screen.getByText("可直接选中内容处理，或输入要求。")).toBeInTheDocument();
       expect(screen.getByTestId("document-canvas")).toHaveClass("bg-white");
     });
 
@@ -825,7 +876,7 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(within(screen.getByTestId("assistant-panel")).getByText("第 2 页")).toBeInTheDocument();
-      expect(screen.getByText("已切换到你刚刚选中的内容，可以继续围绕这段文字处理。")).toBeInTheDocument();
+      expect(screen.getByText("已切换到选中内容，可继续处理。")).toBeInTheDocument();
     });
   });
 

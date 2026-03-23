@@ -153,7 +153,7 @@ export function DocxDocumentCanvas({
         ) : (
           <div
             ref={containerRef}
-            className="docx-preview-host flex w-full max-w-full justify-center overflow-x-auto overflow-y-hidden"
+            className="docx-preview-host w-full max-w-full overflow-x-auto overflow-y-hidden"
             data-testid="docx-preview-host"
           />
         )}

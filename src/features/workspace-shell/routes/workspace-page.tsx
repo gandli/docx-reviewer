@@ -59,7 +59,7 @@ export function WorkspacePage() {
   );
   const [localModelDetail, setLocalModelDetail] = useState(() =>
     isLocalLLMSupported()
-      ? `当前模型：${getLocalLLMModelId(selectedModelId)}，尚未加载。需要时会自动启动。`
+      ? `模型：${getLocalLLMModelId(selectedModelId)} · 按需启动`
       : "当前浏览器不支持 WebGPU，本地模型无法运行。",
   );
 
@@ -89,7 +89,7 @@ export function WorkspacePage() {
       return;
     }
 
-    setLocalModelDetail(`当前模型：${selectedModel.label}，尚未加载。需要时会自动启动。`);
+    setLocalModelDetail(`模型：${selectedModel.label} · 按需启动`);
   }, [localModelStatus, selectedModel]);
 
   const ensureModelReady = async (modelId = selectedModelId) => {

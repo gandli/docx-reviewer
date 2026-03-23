@@ -1,11 +1,73 @@
 import type { WorkspaceSummary } from "@/features/workspace-context/types/workspace-summary";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { WorkspaceSidebar } from "@/features/workspace-shell/components/workspace-sidebar";
 import { DocumentCanvas } from "@/features/editor-draft/components/document-canvas";
 import { PdfDocumentCanvas } from "@/features/editor-draft/components/pdf-document-canvas";
 import { DocxDocumentCanvas } from "@/features/editor-draft/components/docx-document-canvas";
 import { AssistantPanel } from "@/features/assistant-panel/components/assistant-panel";
 import type { WorkspacePreviewDocument } from "@/features/workspace-context/types/workspace-summary";
+
+const DESKTOP_BREAKPOINT = 981;
+const COLLAPSED_PANEL_WIDTH = 72;
+const RESIZE_HANDLE_WIDTH = 10;
+const DEFAULT_LEFT_PANEL_WIDTH = 320;
+const DEFAULT_RIGHT_PANEL_WIDTH = 340;
+const MIN_LEFT_PANEL_WIDTH = 248;
+const MAX_LEFT_PANEL_WIDTH = 440;
+const MIN_RIGHT_PANEL_WIDTH = 280;
+const MAX_RIGHT_PANEL_WIDTH = 460;
+const MIN_CENTER_PANEL_WIDTH = 420;
+const PANEL_LAYOUT_STORAGE_KEY = "workspace-panel-widths";
+
+type DragHandle = "left" | "right" | null;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function loadStoredPanelWidths() {
+  if (typeof window === "undefined") {
+    return {
+      left: DEFAULT_LEFT_PANEL_WIDTH,
+      right: DEFAULT_RIGHT_PANEL_WIDTH,
+    };
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(PANEL_LAYOUT_STORAGE_KEY);
+    if (!rawValue) {
+      return {
+        left: DEFAULT_LEFT_PANEL_WIDTH,
+        right: DEFAULT_RIGHT_PANEL_WIDTH,
+      };
+    }
+
+    const parsed = JSON.parse(rawValue) as { left?: number; right?: number };
+    return {
+      left:
+        typeof parsed.left === "number" && Number.isFinite(parsed.left)
+          ? parsed.left
+          : DEFAULT_LEFT_PANEL_WIDTH,
+      right:
+        typeof parsed.right === "number" && Number.isFinite(parsed.right)
+          ? parsed.right
+          : DEFAULT_RIGHT_PANEL_WIDTH,
+    };
+  } catch {
+    return {
+      left: DEFAULT_LEFT_PANEL_WIDTH,
+      right: DEFAULT_RIGHT_PANEL_WIDTH,
+    };
+  }
+}
+
+function getDesktopViewportWidth() {
+  if (typeof window === "undefined") {
+    return 1440;
+  }
+
+  return window.innerWidth;
+}
 
 type WorkspaceLayoutProps = {
   summary: WorkspaceSummary;
@@ -41,16 +103,125 @@ export function WorkspaceLayout({
 }: WorkspaceLayoutProps) {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-  const desktopGridColumns = isLeftCollapsed
-    ? isRightCollapsed
-      ? "lg:grid-cols-[72px_minmax(0,1fr)_72px]"
-      : "lg:grid-cols-[72px_minmax(0,1fr)_24%]"
-    : isRightCollapsed
-      ? "lg:grid-cols-[22%_minmax(0,1fr)_72px]"
-      : "lg:grid-cols-[22%_54%_24%]";
+  const [panelWidths, setPanelWidths] = useState(loadStoredPanelWidths);
+  const [dragHandle, setDragHandle] = useState<DragHandle>(null);
+  const [isDesktop, setIsDesktop] = useState(() => getDesktopViewportWidth() >= DESKTOP_BREAKPOINT);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const nextIsDesktop = getDesktopViewportWidth() >= DESKTOP_BREAKPOINT;
+      setIsDesktop(nextIsDesktop);
+
+      if (!nextIsDesktop) {
+        return;
+      }
+
+      setPanelWidths((current) => {
+        const maxLeft = Math.min(
+          MAX_LEFT_PANEL_WIDTH,
+          getDesktopViewportWidth() - current.right - MIN_CENTER_PANEL_WIDTH - RESIZE_HANDLE_WIDTH * 2,
+        );
+        const nextLeft = clamp(current.left, MIN_LEFT_PANEL_WIDTH, Math.max(MIN_LEFT_PANEL_WIDTH, maxLeft));
+        const maxRight = Math.min(
+          MAX_RIGHT_PANEL_WIDTH,
+          getDesktopViewportWidth() - nextLeft - MIN_CENTER_PANEL_WIDTH - RESIZE_HANDLE_WIDTH * 2,
+        );
+        const nextRight = clamp(
+          current.right,
+          MIN_RIGHT_PANEL_WIDTH,
+          Math.max(MIN_RIGHT_PANEL_WIDTH, maxRight),
+        );
+
+        if (nextLeft === current.left && nextRight === current.right) {
+          return current;
+        }
+
+        return {
+          left: nextLeft,
+          right: nextRight,
+        };
+      });
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.localStorage.setItem(PANEL_LAYOUT_STORAGE_KEY, JSON.stringify(panelWidths));
+  }, [panelWidths]);
+
+  useEffect(() => {
+    if (!dragHandle || !isDesktop) {
+      return;
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      setPanelWidths((current) => {
+        const viewportWidth = getDesktopViewportWidth();
+
+        if (dragHandle === "left") {
+          const maxLeft = Math.min(
+            MAX_LEFT_PANEL_WIDTH,
+            viewportWidth - current.right - MIN_CENTER_PANEL_WIDTH - RESIZE_HANDLE_WIDTH * 2,
+          );
+
+          return {
+            ...current,
+            left: clamp(event.clientX, MIN_LEFT_PANEL_WIDTH, Math.max(MIN_LEFT_PANEL_WIDTH, maxLeft)),
+          };
+        }
+
+        const maxRight = Math.min(
+          MAX_RIGHT_PANEL_WIDTH,
+          viewportWidth - current.left - MIN_CENTER_PANEL_WIDTH - RESIZE_HANDLE_WIDTH * 2,
+        );
+
+        return {
+          ...current,
+          right: clamp(
+            viewportWidth - event.clientX,
+            MIN_RIGHT_PANEL_WIDTH,
+            Math.max(MIN_RIGHT_PANEL_WIDTH, maxRight),
+          ),
+        };
+      });
+    };
+
+    const handlePointerUp = () => {
+      setDragHandle(null);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [dragHandle, isDesktop]);
+
+  const desktopGridTemplateColumns = useMemo(() => {
+    const leftColumnWidth = isLeftCollapsed ? COLLAPSED_PANEL_WIDTH : panelWidths.left;
+    const rightColumnWidth = isRightCollapsed ? COLLAPSED_PANEL_WIDTH : panelWidths.right;
+    const leftHandleWidth = isLeftCollapsed ? 0 : RESIZE_HANDLE_WIDTH;
+    const rightHandleWidth = isRightCollapsed ? 0 : RESIZE_HANDLE_WIDTH;
+
+    return `${leftColumnWidth}px ${leftHandleWidth}px minmax(0, 1fr) ${rightHandleWidth}px ${rightColumnWidth}px`;
+  }, [isLeftCollapsed, isRightCollapsed, panelWidths.left, panelWidths.right]);
 
   return (
-    <div className={`grid h-screen overflow-hidden bg-[var(--color-surface-app)] max-[1180px]:grid-cols-[24%_52%_24%] max-[980px]:grid-cols-1 ${desktopGridColumns}`}>
+    <div
+      className="grid h-screen overflow-hidden bg-[var(--color-surface-app)] max-[980px]:grid-cols-1"
+      data-testid="workspace-layout"
+      style={isDesktop ? { gridTemplateColumns: desktopGridTemplateColumns } : undefined}
+    >
       <WorkspaceSidebar
         summary={summary}
         onImportDocument={onImportDocument}
@@ -59,6 +230,26 @@ export function WorkspaceLayout({
         isCollapsed={isLeftCollapsed}
         onToggleCollapse={() => setIsLeftCollapsed((current) => !current)}
       />
+      <div
+        aria-hidden={isLeftCollapsed || !isDesktop}
+        className={`group relative max-[980px]:hidden ${
+          isLeftCollapsed || !isDesktop ? "pointer-events-none opacity-0" : "cursor-col-resize"
+        }`}
+        data-testid="left-resize-handle"
+        onPointerDown={() => {
+          if (!isLeftCollapsed && isDesktop) {
+            setDragHandle("left");
+          }
+        }}
+      >
+        <div
+          className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition ${
+            dragHandle === "left"
+              ? "bg-[rgba(181,142,83,0.88)]"
+              : "bg-[rgba(216,207,193,0.16)] group-hover:bg-[rgba(181,142,83,0.42)]"
+          }`}
+        />
+      </div>
       <main
         className="min-w-0 overflow-x-hidden overflow-y-auto bg-[var(--color-surface-app)] px-0 pt-0 pb-0 max-[980px]:h-auto max-[980px]:min-h-[55vh]"
         data-scroll-region="true"
@@ -81,6 +272,26 @@ export function WorkspaceLayout({
           <DocumentCanvas summary={summary} onSelectText={onSelectText} />
         )}
       </main>
+      <div
+        aria-hidden={isRightCollapsed || !isDesktop}
+        className={`group relative max-[980px]:hidden ${
+          isRightCollapsed || !isDesktop ? "pointer-events-none opacity-0" : "cursor-col-resize"
+        }`}
+        data-testid="right-resize-handle"
+        onPointerDown={() => {
+          if (!isRightCollapsed && isDesktop) {
+            setDragHandle("right");
+          }
+        }}
+      >
+        <div
+          className={`absolute inset-y-0 left-1/2 w-px -translate-x-1/2 transition ${
+            dragHandle === "right"
+              ? "bg-[rgba(181,142,83,0.88)]"
+              : "bg-[rgba(216,207,193,0.16)] group-hover:bg-[rgba(181,142,83,0.42)]"
+          }`}
+        />
+      </div>
       <AssistantPanel
         summary={summary}
         onApplySuggestion={onApplySuggestion}

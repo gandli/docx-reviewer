@@ -111,12 +111,12 @@ export function createWorkspaceContextStore(
                     currentTask: "optimize" as const,
                     latestConclusion: "已定位到你选中的内容，接下来我会帮你润色表达。",
                     nextAction: "开始润色表达",
-                  }
-                : {
-                    currentTask: state.summary.currentTask,
-                    latestConclusion: "已切换到你刚刚选中的内容，可以继续围绕这段文字处理。",
-                    nextAction: "继续处理选中文本",
-                  };
+                }
+              : {
+                  currentTask: state.summary.currentTask,
+                  latestConclusion: "已切换到选中内容，可继续处理。",
+                  nextAction: "继续处理选中文本",
+                };
 
         return persist(
           {
@@ -236,7 +236,7 @@ export function createWorkspaceContextStore(
           return state;
         }
 
-        const importedReply = "可以直接选中内容开始处理，或在右侧输入你的要求。";
+        const importedReply = "可直接选中内容处理，或输入要求。";
         const isPdfDocument = document.mode === "pdf";
         const defaultActiveBlockId =
           document.blocks.find((block) => block.kind === "paragraph")?.id ?? document.blocks[0]?.id;

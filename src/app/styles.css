@@ -64,6 +64,11 @@ textarea {
 
 .docx-preview-host .docx-preview-surface {
   background: transparent;
+  display: flex;
+  flex-flow: column nowrap;
+  flex-shrink: 0;
+  margin: 0 auto;
+  max-width: none;
 }
 
 .docx-preview-host style {
