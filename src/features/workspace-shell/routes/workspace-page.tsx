@@ -27,6 +27,18 @@ import {
 
 type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "responding" | "error";
 
+function getProviderSourceLabel(provider: "webllm" | "openai" | "ollama") {
+  if (provider === "openai") {
+    return "来源：OpenAI API";
+  }
+
+  if (provider === "ollama") {
+    return "来源：Ollama";
+  }
+
+  return "来源：WebLLM";
+}
+
 export function WorkspacePage() {
   const { workspaceId = mockWorkspaceSummary.workspaceId } = useParams();
   const repository = useMemo(
@@ -343,6 +355,7 @@ export function WorkspacePage() {
         onImportDocument={handleImportDocument}
         onExport={() => setIsExportModalOpen(true)}
         onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
+        localModelSourceLabel={getProviderSourceLabel(appSettings.llmProvider)}
         localModelLabel={localModelDetail}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
       />

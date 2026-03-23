@@ -405,8 +405,35 @@ describe("workspace shell", () => {
     expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
     expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
     expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
+    expect(screen.getByText("来源：WebLLM")).toBeInTheDocument();
     expect(screen.getByText(/按需启动/)).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
+  });
+
+  it("shows the selected model source in the assistant panel", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByText("OpenAI 风格 API").closest("label")!);
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API 地址"), {
+      target: { value: "https://api.example.com/v1" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API Key"), {
+      target: { value: "sk-demo" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
+      target: { value: "qwen-reviewer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("来源：OpenAI API")).toBeInTheDocument();
+      expect(screen.getByText("API：qwen-reviewer")).toBeInTheDocument();
+    });
   });
 
   it("opens workspace settings, filters models, and persists selected model", async () => {

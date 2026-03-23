@@ -84,6 +84,7 @@ type WorkspaceLayoutProps = {
   onImportDocument: (file: File) => void | Promise<void>;
   onExport: () => void;
   onOpenSettings: () => void;
+  localModelSourceLabel: string;
   localModelLabel: string;
   isLocalModelBusy?: boolean;
 };
@@ -98,6 +99,7 @@ export function WorkspaceLayout({
   onImportDocument,
   onExport,
   onOpenSettings,
+  localModelSourceLabel,
   localModelLabel,
   isLocalModelBusy,
 }: WorkspaceLayoutProps) {
@@ -319,6 +321,7 @@ export function WorkspaceLayout({
         onApplySuggestion={onApplySuggestion}
         onJumpToSelection={onJumpToSelection}
         onSendMessage={onSendMessage}
+        localModelSourceLabel={localModelSourceLabel}
         localModelLabel={localModelLabel}
         isLocalModelBusy={isLocalModelBusy}
         isCollapsed={isRightCollapsed}

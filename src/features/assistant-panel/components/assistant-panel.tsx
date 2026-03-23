@@ -8,6 +8,7 @@ type AssistantPanelProps = {
   onApplySuggestion: () => void;
   onJumpToSelection: () => void;
   onSendMessage: (message: string) => void;
+  localModelSourceLabel: string;
   localModelLabel: string;
   isLocalModelBusy?: boolean;
   isCollapsed?: boolean;
@@ -19,6 +20,7 @@ export function AssistantPanel({
   onApplySuggestion,
   onJumpToSelection,
   onSendMessage,
+  localModelSourceLabel,
   localModelLabel,
   isLocalModelBusy = false,
   isCollapsed = false,
@@ -46,6 +48,7 @@ export function AssistantPanel({
           <div className="grid gap-[10px] border-t border-[rgba(216,207,193,0.78)] pt-[14px]">
             <ChatComposer
               onSendMessage={onSendMessage}
+              localModelSourceLabel={localModelSourceLabel}
               localModelLabel={localModelLabel}
               isBusy={isLocalModelBusy}
             />

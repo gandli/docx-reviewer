@@ -2,12 +2,14 @@ import { useState, type FormEvent } from "react";
 
 type ChatComposerProps = {
   onSendMessage: (message: string) => void;
+  localModelSourceLabel: string;
   localModelLabel: string;
   isBusy?: boolean;
 };
 
 export function ChatComposer({
   onSendMessage,
+  localModelSourceLabel,
   localModelLabel,
   isBusy = false,
 }: ChatComposerProps) {
@@ -25,7 +27,8 @@ export function ChatComposer({
 
   return (
     <form className="grid gap-2" onSubmit={handleSubmit}>
-      <div className="flex items-center gap-3 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
+        <span>{localModelSourceLabel}</span>
         <span>{localModelLabel}</span>
       </div>
       <div className="flex items-center gap-[10px] rounded-[18px] border border-[rgba(216,207,193,0.88)] bg-[rgba(255,252,247,0.9)] px-3 py-3 pl-[14px]">
