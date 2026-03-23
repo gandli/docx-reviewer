@@ -1,6 +1,8 @@
 import {
   createExportedModelServiceConfig,
+  getAppSettingsSnapshot,
   getDefaultAppSettings,
+  saveAppSettings,
   parseImportedModelServiceConfig,
 } from "@/services/persistence/app-settings";
 
@@ -28,5 +30,20 @@ describe("app settings", () => {
     expect(() =>
       parseImportedModelServiceConfig("{not-json}", getDefaultAppSettings()),
     ).toThrow("导入文件不是有效的 JSON 配置。");
+  });
+
+  it("returns a stable snapshot when settings have not changed", () => {
+    const settings = {
+      ...getDefaultAppSettings(),
+      llmProvider: "openai" as const,
+      openAIApiKey: "sk-demo",
+    };
+
+    saveAppSettings(settings);
+
+    const firstSnapshot = getAppSettingsSnapshot();
+    const secondSnapshot = getAppSettingsSnapshot();
+
+    expect(firstSnapshot).toBe(secondSnapshot);
   });
 });

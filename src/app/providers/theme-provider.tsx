@@ -1,7 +1,7 @@
 import { useSyncExternalStore, type PropsWithChildren } from "react";
 import {
   getDefaultAppSettings,
-  loadAppSettings,
+  getAppSettingsSnapshot,
   subscribeAppSettings,
 } from "@/services/persistence/app-settings";
 import { getThemeTokens, getThemeVariables } from "@/shared/constants/theme";
@@ -9,7 +9,7 @@ import { getThemeTokens, getThemeVariables } from "@/shared/constants/theme";
 export function ThemeProvider({ children }: PropsWithChildren) {
   const appSettings = useSyncExternalStore(
     subscribeAppSettings,
-    loadAppSettings,
+    getAppSettingsSnapshot,
     getDefaultAppSettings,
   );
   const themeTokens = getThemeTokens(appSettings.themeId);

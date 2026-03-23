@@ -33,6 +33,8 @@ export type ExportedModelServiceConfig = {
 
 const APP_SETTINGS_STORAGE_KEY = "app-settings";
 const APP_SETTINGS_EVENT = "app-settings-updated";
+let cachedAppSettingsRaw = "";
+let cachedAppSettingsSnapshot: AppSettings | undefined;
 
 const DEFAULT_APP_SETTINGS: AppSettings = {
   themeId: "warm",
@@ -123,12 +125,31 @@ export function loadAppSettings(): AppSettings {
   }
 }
 
+export function getAppSettingsSnapshot(): AppSettings {
+  if (typeof window === "undefined") {
+    return DEFAULT_APP_SETTINGS;
+  }
+
+  const raw = window.localStorage.getItem(APP_SETTINGS_STORAGE_KEY) ?? "";
+  if (cachedAppSettingsSnapshot && cachedAppSettingsRaw === raw) {
+    return cachedAppSettingsSnapshot;
+  }
+
+  const nextSnapshot = loadAppSettings();
+  cachedAppSettingsRaw = raw;
+  cachedAppSettingsSnapshot = nextSnapshot;
+  return nextSnapshot;
+}
+
 export function saveAppSettings(settings: AppSettings) {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.localStorage.setItem(APP_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+  const raw = JSON.stringify(settings);
+  cachedAppSettingsRaw = raw;
+  cachedAppSettingsSnapshot = settings;
+  window.localStorage.setItem(APP_SETTINGS_STORAGE_KEY, raw);
   window.dispatchEvent(new CustomEvent(APP_SETTINGS_EVENT, { detail: settings }));
 }
 
