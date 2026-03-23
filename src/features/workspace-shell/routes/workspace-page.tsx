@@ -15,6 +15,7 @@ import {
   getProviderStatusSummary,
   isLocalLLMSupported,
   runLLMTask,
+  validateLLMProviderConnection,
 } from "@/services/ai/local-llm";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/workspace-settings-modal";
@@ -48,6 +49,8 @@ export function WorkspacePage() {
   const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [appSettings, setAppSettings] = useState(() => loadAppSettings());
+  const [modelCheckStatus, setModelCheckStatus] = useState("");
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false);
   const selectedModel = useMemo(
     () =>
       modelOptions.find((model) => model.id === appSettings.webllmModelId) ?? modelOptions[0],
@@ -270,6 +273,37 @@ export function WorkspacePage() {
     void ensureModelReady();
   };
 
+  const handleCheckModelConnection = async (payload: {
+    llmProvider: "webllm" | "openai" | "ollama";
+    modelId: string;
+    openAIBaseUrl: string;
+    openAIApiKey: string;
+    openAIModel: string;
+    ollamaBaseUrl: string;
+    ollamaModel: string;
+  }) => {
+    setIsCheckingConnection(true);
+    setModelCheckStatus("");
+
+    try {
+      const result = await validateLLMProviderConnection({
+        ...appSettings,
+        llmProvider: payload.llmProvider,
+        webllmModelId: payload.modelId,
+        openAIBaseUrl: payload.openAIBaseUrl.trim(),
+        openAIApiKey: payload.openAIApiKey.trim(),
+        openAIModel: payload.openAIModel.trim(),
+        ollamaBaseUrl: payload.ollamaBaseUrl.trim(),
+        ollamaModel: payload.ollamaModel.trim(),
+      });
+      setModelCheckStatus(result.message);
+    } catch (error) {
+      setModelCheckStatus(error instanceof Error ? error.message : "连接检查失败。");
+    } finally {
+      setIsCheckingConnection(false);
+    }
+  };
+
   const handleClearWorkspaceRecords = async () => {
     await repository.clear(workspaceId);
     store.setState({
@@ -317,11 +351,14 @@ export function WorkspacePage() {
         ollamaModel={appSettings.ollamaModel}
         activeModelId={appSettings.llmProvider === "webllm" ? getLoadedLocalLLMModelId() : undefined}
         currentModelStatus={localModelDetail}
+        currentCheckStatus={modelCheckStatus}
+        isCheckingConnection={isCheckingConnection}
         providerOptions={providerOptions}
         modelOptions={modelOptions}
         isModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
         isModelSupported={appSettings.llmProvider === "webllm" ? isLocalLLMSupported() : true}
         onClose={() => setIsWorkspaceSettingsOpen(false)}
+        onCheckConnection={handleCheckModelConnection}
         onSave={handleSaveWorkspaceSettings}
         onClear={() => {
           void handleClearWorkspaceRecords();

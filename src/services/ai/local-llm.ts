@@ -256,6 +256,53 @@ export function getProviderMissingConfigMessage(settings: AppSettings) {
   return "";
 }
 
+export async function validateLLMProviderConnection(settings: AppSettings) {
+  const missingMessage = getProviderMissingConfigMessage(settings);
+  if (missingMessage) {
+    throw new Error(missingMessage);
+  }
+
+  if (settings.llmProvider === "webllm") {
+    if (!isLocalLLMSupported()) {
+      throw new Error("当前浏览器不支持 WebGPU，无法启用本地模型。");
+    }
+
+    return {
+      ok: true,
+      message: `当前设备可用，可加载 ${getProviderModelLabel(settings)}。`,
+    };
+  }
+
+  if (settings.llmProvider === "openai") {
+    const response = await fetch(`${settings.openAIBaseUrl.replace(/\/$/, "")}/models`, {
+      headers: {
+        Authorization: `Bearer ${settings.openAIApiKey}`,
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "OpenAI 风格 API 连接失败。");
+    }
+
+    return {
+      ok: true,
+      message: `接口可用，可继续使用 ${settings.openAIModel}。`,
+    };
+  }
+
+  const response = await fetch(`${settings.ollamaBaseUrl.replace(/\/$/, "")}/api/tags`);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "Ollama 连接失败。");
+  }
+
+  return {
+    ok: true,
+    message: `Ollama 可用，可继续使用 ${settings.ollamaModel}。`,
+  };
+}
+
 export function getLocalLLMModelId(modelId?: string) {
   return modelId ?? loadedModelId ?? loadSelectedLocalLLMModelId();
 }

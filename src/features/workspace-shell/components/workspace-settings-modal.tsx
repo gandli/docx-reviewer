@@ -17,11 +17,22 @@ type WorkspaceSettingsModalProps = {
   ollamaModel: string;
   activeModelId?: string;
   currentModelStatus: string;
+  currentCheckStatus?: string;
+  isCheckingConnection?: boolean;
   providerOptions: readonly LLMProviderOption[];
   modelOptions: readonly LocalLLMModelOption[];
   isModelBusy?: boolean;
   isModelSupported?: boolean;
   onClose: () => void;
+  onCheckConnection: (payload: {
+    llmProvider: LLMProvider;
+    modelId: string;
+    openAIBaseUrl: string;
+    openAIApiKey: string;
+    openAIModel: string;
+    ollamaBaseUrl: string;
+    ollamaModel: string;
+  }) => void;
   onSave: (payload: {
     workspaceTitle: string;
     themeId: AppThemeId;
@@ -51,11 +62,14 @@ export function WorkspaceSettingsModal({
   ollamaModel,
   activeModelId,
   currentModelStatus,
+  currentCheckStatus = "",
+  isCheckingConnection = false,
   providerOptions,
   modelOptions,
   isModelBusy = false,
   isModelSupported = true,
   onClose,
+  onCheckConnection,
   onSave,
   onClear,
 }: WorkspaceSettingsModalProps) {
@@ -237,6 +251,31 @@ export function WorkspaceSettingsModal({
             </div>
             <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
               当前状态：{currentModelStatus}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                disabled={isCheckingConnection}
+                onClick={() =>
+                  onCheckConnection({
+                    llmProvider: draftProvider,
+                    modelId: draftModelId,
+                    openAIBaseUrl: draftOpenAIBaseUrl,
+                    openAIApiKey: draftOpenAIApiKey,
+                    openAIModel: draftOpenAIModel,
+                    ollamaBaseUrl: draftOllamaBaseUrl,
+                    ollamaModel: draftOllamaModel,
+                  })
+                }
+              >
+                {isCheckingConnection ? "检查中…" : "检查连接"}
+              </button>
+              {currentCheckStatus ? (
+                <div className="font-sans text-[0.83rem] leading-[1.6] text-[var(--color-text-secondary)]">
+                  {currentCheckStatus}
+                </div>
+              ) : null}
             </div>
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
               模型服务

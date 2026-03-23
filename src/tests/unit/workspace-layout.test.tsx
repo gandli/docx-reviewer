@@ -19,6 +19,7 @@ const { parseDocxDocumentMock, renderDocxPreviewMock } = vi.hoisted(() => ({
 const {
   ensureLLMProviderReadyMock,
   runLLMTaskMock,
+  validateLLMProviderConnectionMock,
   isLocalLLMSupportedMock,
   getProviderModelLabelMock,
   getProviderStatusSummaryMock,
@@ -48,6 +49,15 @@ const {
     }
 
     return "这是本地模型返回的真实回复。";
+  }),
+  validateLLMProviderConnectionMock: vi.fn(async (settings: { llmProvider: string; openAIModel?: string; ollamaModel?: string; webllmModelId?: string }) => {
+    if (settings.llmProvider === "openai") {
+      return { ok: true, message: `接口可用，可继续使用 ${settings.openAIModel || "gpt-4.1-mini"}。` };
+    }
+    if (settings.llmProvider === "ollama") {
+      return { ok: true, message: `Ollama 可用，可继续使用 ${settings.ollamaModel || "qwen2.5:3b"}。` };
+    }
+    return { ok: true, message: `当前设备可用，可加载 ${settings.webllmModelId === "Qwen2.5-1.5B-Instruct-q4f16_1-MLC" ? "Qwen2.5 1.5B" : "Qwen3 0.6B"}。` };
   }),
   isLocalLLMSupportedMock: vi.fn(() => true),
   getProviderModelLabelMock: vi.fn((settings: { llmProvider: string; webllmModelId?: string; openAIModel?: string; ollamaModel?: string }) => {
@@ -122,6 +132,7 @@ vi.mock("docx-preview", () => ({
 vi.mock("@/services/ai/local-llm", () => ({
   ensureLLMProviderReady: ensureLLMProviderReadyMock,
   runLLMTask: runLLMTaskMock,
+  validateLLMProviderConnection: validateLLMProviderConnectionMock,
   isLocalLLMSupported: isLocalLLMSupportedMock,
   getProviderModelLabel: getProviderModelLabelMock,
   getProviderStatusSummary: getProviderStatusSummaryMock,
@@ -192,6 +203,7 @@ describe("workspace shell", () => {
     renderDocxPreviewMock.mockClear();
     ensureLLMProviderReadyMock.mockClear();
     runLLMTaskMock.mockClear();
+    validateLLMProviderConnectionMock.mockClear();
     isLocalLLMSupportedMock.mockClear();
     isLocalLLMSupportedMock.mockReturnValue(true);
     getProviderModelLabelMock.mockClear();
@@ -527,6 +539,39 @@ describe("workspace shell", () => {
       expect(appSettings.openAIApiKey).toBe("sk-demo");
       expect(appSettings.openAIModel).toBe("qwen-reviewer");
       expect(ensureLLMProviderReadyMock).toHaveBeenCalled();
+    });
+  });
+
+  it("checks the selected model provider directly in settings", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByText("OpenAI 风格 API").closest("label")!);
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API 地址"), {
+      target: { value: "https://api.example.com/v1" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格 API Key"), {
+      target: { value: "sk-demo" },
+    });
+    fireEvent.change(screen.getByLabelText("OpenAI 风格模型名"), {
+      target: { value: "qwen-reviewer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "检查连接" }));
+
+    await waitFor(() => {
+      expect(validateLLMProviderConnectionMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          llmProvider: "openai",
+          openAIBaseUrl: "https://api.example.com/v1",
+          openAIApiKey: "sk-demo",
+          openAIModel: "qwen-reviewer",
+        }),
+      );
+      expect(screen.getByText("接口可用，可继续使用 qwen-reviewer。")).toBeInTheDocument();
     });
   });
 
