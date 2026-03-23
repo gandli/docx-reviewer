@@ -807,6 +807,23 @@ describe("workspace shell", () => {
     });
   });
 
+  it("applies the zhipu glm preset in settings", () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    fireEvent.click(screen.getByRole("button", { name: "智谱 GLM" }));
+
+    expect(screen.getByText("OpenAI 风格 API").closest("label")?.querySelector("input")).toBeChecked();
+    expect(screen.getByLabelText("OpenAI 风格 API 地址")).toHaveValue(
+      "https://open.bigmodel.cn/api/paas/v4",
+    );
+    expect(screen.getByLabelText("OpenAI 风格模型名")).toHaveValue("glm-4.7-flash");
+  });
+
   it("clears old connection result after model settings change", async () => {
     render(
       <MemoryRouter>

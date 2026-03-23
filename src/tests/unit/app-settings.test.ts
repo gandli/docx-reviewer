@@ -2,6 +2,7 @@ import {
   createExportedModelServiceConfig,
   getAppSettingsSnapshot,
   getDefaultAppSettings,
+  getModelServicePresets,
   saveAppSettings,
   parseImportedModelServiceConfig,
 } from "@/services/persistence/app-settings";
@@ -45,5 +46,16 @@ describe("app settings", () => {
     const secondSnapshot = getAppSettingsSnapshot();
 
     expect(firstSnapshot).toBe(secondSnapshot);
+  });
+
+  it("provides built-in model service presets including zhipu glm", () => {
+    const presets = getModelServicePresets();
+
+    expect(presets.some((preset) => preset.id === "zhipu-glm")).toBe(true);
+    expect(presets.find((preset) => preset.id === "zhipu-glm")).toMatchObject({
+      provider: "openai",
+      openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+      openAIModel: "glm-4.7-flash",
+    });
   });
 });

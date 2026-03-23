@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import type { LLMProviderOption, LocalLLMModelOption } from "@/services/ai/local-llm";
-import type { AppThemeId, LLMProvider } from "@/services/persistence/app-settings";
+import type {
+  AppThemeId,
+  LLMProvider,
+  ModelServicePreset,
+} from "@/services/persistence/app-settings";
 import type { WorkspaceTaskType } from "@/features/workspace-context/types/workspace-summary";
 import { themeOptions } from "@/shared/constants/theme";
 
@@ -27,6 +31,7 @@ type WorkspaceSettingsModalProps = {
   isCheckingConnection?: boolean;
   providerOptions: readonly LLMProviderOption[];
   modelOptions: readonly LocalLLMModelOption[];
+  modelServicePresets: readonly ModelServicePreset[];
   isModelBusy?: boolean;
   isModelSupported?: boolean;
   onClose: () => void;
@@ -95,6 +100,7 @@ export function WorkspaceSettingsModal({
   onExportModelConfig,
   onImportModelConfig,
   onClear,
+  modelServicePresets,
 }: WorkspaceSettingsModalProps) {
   const [draftTitle, setDraftTitle] = useState(workspaceTitle);
   const [draftThemeId, setDraftThemeId] = useState<AppThemeId>(selectedThemeId);
@@ -189,6 +195,29 @@ export function WorkspaceSettingsModal({
 
     onImportModelConfig(file);
     event.target.value = "";
+  };
+
+  const handleApplyPreset = (preset: ModelServicePreset) => {
+    setDraftProvider(preset.provider);
+
+    if (preset.openAIBaseUrl) {
+      setDraftOpenAIBaseUrl(preset.openAIBaseUrl);
+    }
+    if (preset.openAIModel) {
+      setDraftOpenAIModel(preset.openAIModel);
+    }
+    if (preset.anthropicBaseUrl) {
+      setDraftAnthropicBaseUrl(preset.anthropicBaseUrl);
+    }
+    if (preset.anthropicModel) {
+      setDraftAnthropicModel(preset.anthropicModel);
+    }
+    if (preset.ollamaBaseUrl) {
+      setDraftOllamaBaseUrl(preset.ollamaBaseUrl);
+    }
+    if (preset.ollamaModel) {
+      setDraftOllamaModel(preset.ollamaModel);
+    }
   };
 
   if (!isOpen) {
@@ -320,6 +349,26 @@ export function WorkspaceSettingsModal({
             </div>
             <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-[rgba(255,251,244,0.9)] px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
               {recommendationSummary}
+            </div>
+            <div className="grid gap-2">
+              <div className="font-sans text-[0.84rem] font-semibold text-[var(--color-text-secondary)]">
+                服务预设
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {modelServicePresets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-3 py-2 font-sans text-[0.8rem] text-[var(--color-text-secondary)]"
+                    type="button"
+                    onClick={() => handleApplyPreset(preset)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="font-sans text-[0.78rem] leading-[1.6] text-[var(--color-text-muted)]">
+                可一键填入常用服务地址和默认模型，例如智谱 GLM、DeepSeek、OpenAI、Anthropic 和 Ollama。
+              </div>
             </div>
             <div className="rounded-2xl border border-[rgba(216,207,193,0.72)] bg-white/70 px-4 py-3 font-sans text-[0.84rem] leading-[1.6] text-[var(--color-text-secondary)]">
               当前状态：{currentModelStatus}

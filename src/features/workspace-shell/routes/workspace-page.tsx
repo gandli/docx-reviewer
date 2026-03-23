@@ -27,6 +27,7 @@ import {
   type AppSettings,
   createExportedModelServiceConfig,
   getDefaultAppSettings,
+  getModelServicePresets,
   loadAppSettings,
   parseImportedModelServiceConfig,
   saveAppSettings,
@@ -252,6 +253,7 @@ export function WorkspacePage() {
   const summary = workspaceState.summary ?? mockWorkspaceSummary;
   const providerOptions = useMemo(() => getAvailableLLMProviders(), []);
   const modelOptions = useMemo(() => getAvailableLocalLLMModels(), []);
+  const modelServicePresets = useMemo(() => getModelServicePresets(), []);
   const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [appSettings, setAppSettings] = useState(() => loadAppSettings());
@@ -689,6 +691,7 @@ export function WorkspacePage() {
         isCheckingConnection={isCheckingConnection}
         providerOptions={providerOptions}
         modelOptions={modelOptions}
+        modelServicePresets={modelServicePresets}
         isModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
         isModelSupported={appSettings.llmProvider === "webllm" ? isLocalLLMSupported() : true}
         onClose={() => setIsWorkspaceSettingsOpen(false)}

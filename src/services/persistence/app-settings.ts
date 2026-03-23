@@ -31,6 +31,19 @@ export type ExportedModelServiceConfig = {
   readyWebllmModelId: string;
 };
 
+export type ModelServicePreset = {
+  id: string;
+  label: string;
+  provider: LLMProvider;
+  summary: string;
+  openAIBaseUrl?: string;
+  openAIModel?: string;
+  anthropicBaseUrl?: string;
+  anthropicModel?: string;
+  ollamaBaseUrl?: string;
+  ollamaModel?: string;
+};
+
 const APP_SETTINGS_STORAGE_KEY = "app-settings";
 const APP_SETTINGS_EVENT = "app-settings-updated";
 let cachedAppSettingsRaw = "";
@@ -51,8 +64,55 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
   ollamaModel: "qwen2.5:3b",
 };
 
+const MODEL_SERVICE_PRESETS: ModelServicePreset[] = [
+  {
+    id: "zhipu-glm",
+    label: "智谱 GLM",
+    provider: "openai",
+    summary: "适合接智谱兼容接口，自动填好 GLM 的常用地址和模型。",
+    openAIBaseUrl: "https://open.bigmodel.cn/api/paas/v4",
+    openAIModel: "glm-4.7-flash",
+  },
+  {
+    id: "deepseek",
+    label: "DeepSeek",
+    provider: "openai",
+    summary: "适合接 DeepSeek 官方兼容接口。",
+    openAIBaseUrl: "https://api.deepseek.com/v1",
+    openAIModel: "deepseek-chat",
+  },
+  {
+    id: "openai",
+    label: "OpenAI",
+    provider: "openai",
+    summary: "OpenAI 官方接口预设。",
+    openAIBaseUrl: "https://api.openai.com/v1",
+    openAIModel: "gpt-4.1-mini",
+  },
+  {
+    id: "anthropic",
+    label: "Anthropic",
+    provider: "anthropic",
+    summary: "Anthropic 官方 messages 接口预设。",
+    anthropicBaseUrl: "https://api.anthropic.com/v1",
+    anthropicModel: "claude-3-5-sonnet-latest",
+  },
+  {
+    id: "ollama-local",
+    label: "Ollama 本机",
+    provider: "ollama",
+    summary: "本机 Ollama 常用默认地址。",
+    ollamaBaseUrl: "http://127.0.0.1:11434",
+    ollamaModel: "qwen2.5:3b",
+  },
+];
+
 export function getDefaultAppSettings(): AppSettings {
   return DEFAULT_APP_SETTINGS;
+}
+
+export function getModelServicePresets() {
+  return MODEL_SERVICE_PRESETS;
 }
 
 export function loadAppSettings(): AppSettings {
