@@ -406,6 +406,7 @@ describe("workspace shell", () => {
     expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
     expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
     expect(screen.getByText("来源：WebLLM")).toBeInTheDocument();
+    expect(screen.getByText("待连接")).toBeInTheDocument();
     expect(screen.getByText(/按需启动/)).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
@@ -432,7 +433,46 @@ describe("workspace shell", () => {
 
     await waitFor(() => {
       expect(screen.getByText("来源：OpenAI API")).toBeInTheDocument();
+      expect(screen.getByText("已连接")).toBeInTheDocument();
       expect(screen.getByText("API：qwen-reviewer")).toBeInTheDocument();
+    });
+  });
+
+  it("shows unconfigured status when the selected provider is missing required fields", async () => {
+    getProviderMissingConfigMessageMock.mockImplementation(
+      (settings: { llmProvider: string; openAIBaseUrl?: string; openAIApiKey?: string; openAIModel?: string }) => {
+        if (settings.llmProvider === "openai" && !settings.openAIApiKey?.trim()) {
+          return "请先在设置里填写 API Key。";
+        }
+
+        return "";
+      },
+    );
+
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "openai",
+        webllmModelId: "Qwen3-0.6B-q4f16_1-MLC",
+        openAIBaseUrl: "https://api.example.com/v1",
+        openAIApiKey: "",
+        openAIModel: "qwen-reviewer",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("来源：OpenAI API")).toBeInTheDocument();
+      expect(screen.getByText("未配置")).toBeInTheDocument();
     });
   });
 

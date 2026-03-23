@@ -21,11 +21,14 @@ import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
 import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/workspace-settings-modal";
 import { WorkspaceExportModal } from "@/features/workspace-shell/components/workspace-export-modal";
 import {
+  type AppSettings,
   loadAppSettings,
   saveAppSettings,
 } from "@/services/persistence/app-settings";
 
 type LocalModelStatus = "unsupported" | "idle" | "loading" | "ready" | "responding" | "error";
+
+type ProviderStatusTone = "neutral" | "success" | "warning" | "error";
 
 function getProviderSourceLabel(provider: "webllm" | "openai" | "ollama") {
   if (provider === "openai") {
@@ -37,6 +40,53 @@ function getProviderSourceLabel(provider: "webllm" | "openai" | "ollama") {
   }
 
   return "来源：WebLLM";
+}
+
+function getProviderStatusBadge(params: {
+  settings: AppSettings;
+  localModelStatus: LocalModelStatus;
+  currentCheckVariant: "success" | "error" | null;
+}) {
+  const missingMessage = getProviderMissingConfigMessage(params.settings);
+  if (params.currentCheckVariant === "error" || params.localModelStatus === "error") {
+    return {
+      label: "检查失败",
+      tone: "error" as ProviderStatusTone,
+    };
+  }
+
+  if (params.localModelStatus === "unsupported") {
+    return {
+      label: "不可用",
+      tone: "error" as ProviderStatusTone,
+    };
+  }
+
+  if (missingMessage) {
+    return {
+      label: "未配置",
+      tone: "warning" as ProviderStatusTone,
+    };
+  }
+
+  if (params.currentCheckVariant === "success" || params.localModelStatus === "ready") {
+    return {
+      label: "已连接",
+      tone: "success" as ProviderStatusTone,
+    };
+  }
+
+  if (params.localModelStatus === "loading" || params.localModelStatus === "responding") {
+    return {
+      label: "连接中",
+      tone: "neutral" as ProviderStatusTone,
+    };
+  }
+
+  return {
+    label: "待连接",
+    tone: "neutral" as ProviderStatusTone,
+  };
 }
 
 export function WorkspacePage() {
@@ -82,6 +132,12 @@ export function WorkspacePage() {
     setLocalModelStatus("loading");
     setLocalModelDetail(`本地模型加载中 ${Math.round(progress.progress * 100)}% · ${progress.text}`);
   };
+
+  const providerStatusBadge = getProviderStatusBadge({
+    settings: appSettings,
+    localModelStatus,
+    currentCheckVariant: modelCheckVariant,
+  });
 
   useEffect(() => {
     if (appSettings.llmProvider !== "webllm") {
@@ -356,6 +412,8 @@ export function WorkspacePage() {
         onExport={() => setIsExportModalOpen(true)}
         onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
         localModelSourceLabel={getProviderSourceLabel(appSettings.llmProvider)}
+        localModelStatusLabel={providerStatusBadge.label}
+        localModelStatusTone={providerStatusBadge.tone}
         localModelLabel={localModelDetail}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
       />

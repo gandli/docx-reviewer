@@ -85,6 +85,8 @@ type WorkspaceLayoutProps = {
   onExport: () => void;
   onOpenSettings: () => void;
   localModelSourceLabel: string;
+  localModelStatusLabel: string;
+  localModelStatusTone?: "neutral" | "success" | "warning" | "error";
   localModelLabel: string;
   isLocalModelBusy?: boolean;
 };
@@ -100,6 +102,8 @@ export function WorkspaceLayout({
   onExport,
   onOpenSettings,
   localModelSourceLabel,
+  localModelStatusLabel,
+  localModelStatusTone,
   localModelLabel,
   isLocalModelBusy,
 }: WorkspaceLayoutProps) {
@@ -322,6 +326,8 @@ export function WorkspaceLayout({
         onJumpToSelection={onJumpToSelection}
         onSendMessage={onSendMessage}
         localModelSourceLabel={localModelSourceLabel}
+        localModelStatusLabel={localModelStatusLabel}
+        localModelStatusTone={localModelStatusTone}
         localModelLabel={localModelLabel}
         isLocalModelBusy={isLocalModelBusy}
         isCollapsed={isRightCollapsed}

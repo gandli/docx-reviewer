@@ -1,8 +1,12 @@
 import { useState, type FormEvent } from "react";
 
+type ModelStatusTone = "neutral" | "success" | "warning" | "error";
+
 type ChatComposerProps = {
   onSendMessage: (message: string) => void;
   localModelSourceLabel: string;
+  localModelStatusLabel: string;
+  localModelStatusTone?: ModelStatusTone;
   localModelLabel: string;
   isBusy?: boolean;
 };
@@ -10,6 +14,8 @@ type ChatComposerProps = {
 export function ChatComposer({
   onSendMessage,
   localModelSourceLabel,
+  localModelStatusLabel,
+  localModelStatusTone = "neutral",
   localModelLabel,
   isBusy = false,
 }: ChatComposerProps) {
@@ -25,10 +31,24 @@ export function ChatComposer({
     setDraft("");
   };
 
+  const statusToneClassName =
+    localModelStatusTone === "success"
+      ? "border-[rgba(100,147,112,0.28)] bg-[rgba(231,243,233,0.9)] text-[rgba(53,92,62,0.96)]"
+      : localModelStatusTone === "warning"
+        ? "border-[rgba(181,142,83,0.3)] bg-[rgba(250,242,225,0.92)] text-[rgba(118,87,40,0.96)]"
+        : localModelStatusTone === "error"
+          ? "border-[rgba(185,97,97,0.26)] bg-[rgba(251,236,236,0.92)] text-[rgba(131,56,56,0.96)]"
+          : "border-[rgba(216,207,193,0.82)] bg-[rgba(255,251,244,0.82)] text-[var(--color-text-muted)]";
+
   return (
     <form className="grid gap-2" onSubmit={handleSubmit}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[0.76rem] text-[var(--color-text-muted)]">
         <span>{localModelSourceLabel}</span>
+        <span
+          className={`inline-flex items-center rounded-full border px-2 py-[3px] text-[0.72rem] font-semibold ${statusToneClassName}`}
+        >
+          {localModelStatusLabel}
+        </span>
         <span>{localModelLabel}</span>
       </div>
       <div className="flex items-center gap-[10px] rounded-[18px] border border-[rgba(216,207,193,0.88)] bg-[rgba(255,252,247,0.9)] px-3 py-3 pl-[14px]">
