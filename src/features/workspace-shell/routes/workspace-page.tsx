@@ -395,6 +395,10 @@ export function WorkspacePage() {
       return;
     }
 
+    if (providerSendGuard.blocked) {
+      return;
+    }
+
     const taskMap = {
       review: "review",
       revise: "revise",
@@ -548,6 +552,8 @@ export function WorkspacePage() {
         onImportDocument={handleImportDocument}
         onExport={() => setIsExportModalOpen(true)}
         onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
+        isSelectionActionBlocked={providerSendGuard.blocked}
+        selectionActionBlockReason={providerSendGuard.reason}
         localModelSourceLabel={getProviderSourceLabel(appSettings.llmProvider)}
         localModelStatusLabel={providerStatusBadge.label}
         localModelStatusTone={providerStatusBadge.tone}

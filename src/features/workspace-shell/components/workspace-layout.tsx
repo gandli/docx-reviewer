@@ -84,6 +84,8 @@ type WorkspaceLayoutProps = {
   onImportDocument: (file: File) => void | Promise<void>;
   onExport: () => void;
   onOpenSettings: () => void;
+  isSelectionActionBlocked?: boolean;
+  selectionActionBlockReason?: string;
   localModelSourceLabel: string;
   localModelStatusLabel: string;
   localModelStatusTone?: "neutral" | "success" | "warning" | "error";
@@ -105,6 +107,8 @@ export function WorkspaceLayout({
   onImportDocument,
   onExport,
   onOpenSettings,
+  isSelectionActionBlocked,
+  selectionActionBlockReason,
   localModelSourceLabel,
   localModelStatusLabel,
   localModelStatusTone,
@@ -285,6 +289,8 @@ export function WorkspaceLayout({
             summary={summary}
             title={summary.activeDocumentTitle}
             previewDocument={previewDocument}
+            isSelectionActionBlocked={isSelectionActionBlocked}
+            selectionActionBlockReason={selectionActionBlockReason}
             onSelectText={onSelectText}
           />
         ) : summary.activeDocumentMode === "docx" ? (
@@ -292,10 +298,17 @@ export function WorkspaceLayout({
             summary={summary}
             title={summary.activeDocumentTitle}
             previewDocument={previewDocument}
+            isSelectionActionBlocked={isSelectionActionBlocked}
+            selectionActionBlockReason={selectionActionBlockReason}
             onSelectText={onSelectText}
           />
         ) : (
-          <DocumentCanvas summary={summary} onSelectText={onSelectText} />
+          <DocumentCanvas
+            summary={summary}
+            isSelectionActionBlocked={isSelectionActionBlocked}
+            selectionActionBlockReason={selectionActionBlockReason}
+            onSelectText={onSelectText}
+          />
         )}
       </main>
       <div

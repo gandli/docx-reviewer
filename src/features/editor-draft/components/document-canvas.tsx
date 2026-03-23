@@ -7,6 +7,8 @@ import { RiskMarker } from "@/features/editor-draft/components/risk-marker";
 
 type DocumentCanvasProps = {
   summary: WorkspaceSummary;
+  isSelectionActionBlocked?: boolean;
+  selectionActionBlockReason?: string;
   onSelectText: (payload: {
     text: string;
     blockId?: string;
@@ -45,7 +47,12 @@ const popoverActionClassName =
 const popoverDismissClassName =
   "cursor-pointer border-0 bg-transparent p-0 font-sans text-[0.82rem] text-[var(--color-text-muted)]";
 
-export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
+export function DocumentCanvas({
+  summary,
+  isSelectionActionBlocked = false,
+  selectionActionBlockReason,
+  onSelectText,
+}: DocumentCanvasProps) {
   const suggestionCount = summary.pendingSuggestionIds.length + (summary.suggestedRevisionText ? 1 : 0);
   const hasFocusedSelection = summary.isSelectionFocused;
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -197,9 +204,15 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
             left: selectionPopover.left,
           }}
         >
+          {isSelectionActionBlocked && selectionActionBlockReason ? (
+            <div className="max-w-[220px] font-sans text-[0.75rem] leading-[1.55] text-[rgba(131,56,56,0.96)]">
+              {selectionActionBlockReason}
+            </div>
+          ) : null}
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,
@@ -216,6 +229,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,
@@ -232,6 +246,7 @@ export function DocumentCanvas({ summary, onSelectText }: DocumentCanvasProps) {
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,

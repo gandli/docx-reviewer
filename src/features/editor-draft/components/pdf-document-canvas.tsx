@@ -15,6 +15,8 @@ type PdfDocumentCanvasProps = {
   summary: WorkspaceSummary;
   title: string;
   previewDocument?: WorkspacePreviewDocument;
+  isSelectionActionBlocked?: boolean;
+  selectionActionBlockReason?: string;
   onSelectText: (payload: {
     text: string;
     blockId?: string;
@@ -99,6 +101,8 @@ export function PdfDocumentCanvas({
   summary,
   title,
   previewDocument,
+  isSelectionActionBlocked = false,
+  selectionActionBlockReason,
   onSelectText,
 }: PdfDocumentCanvasProps) {
   const [pageCount, setPageCount] = useState(0);
@@ -295,9 +299,15 @@ export function PdfDocumentCanvas({
             left: selectionPopover.left,
           }}
         >
+          {isSelectionActionBlocked && selectionActionBlockReason ? (
+            <div className="max-w-[220px] font-sans text-[0.75rem] leading-[1.55] text-[rgba(131,56,56,0.96)]">
+              {selectionActionBlockReason}
+            </div>
+          ) : null}
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,
@@ -314,6 +324,7 @@ export function PdfDocumentCanvas({
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,
@@ -330,6 +341,7 @@ export function PdfDocumentCanvas({
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,

@@ -9,6 +9,8 @@ type DocxDocumentCanvasProps = {
   summary: WorkspaceSummary;
   title: string;
   previewDocument?: WorkspacePreviewDocument;
+  isSelectionActionBlocked?: boolean;
+  selectionActionBlockReason?: string;
   onSelectText: (payload: {
     text: string;
     blockId?: string;
@@ -34,6 +36,8 @@ export function DocxDocumentCanvas({
   summary,
   title,
   previewDocument,
+  isSelectionActionBlocked = false,
+  selectionActionBlockReason,
   onSelectText,
 }: DocxDocumentCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -171,9 +175,15 @@ export function DocxDocumentCanvas({
             left: selectionPopover.left,
           }}
         >
+          {isSelectionActionBlocked && selectionActionBlockReason ? (
+            <div className="max-w-[220px] font-sans text-[0.75rem] leading-[1.55] text-[rgba(131,56,56,0.96)]">
+              {selectionActionBlockReason}
+            </div>
+          ) : null}
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,
@@ -189,6 +199,7 @@ export function DocxDocumentCanvas({
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,
@@ -204,6 +215,7 @@ export function DocxDocumentCanvas({
           <button
             className={popoverActionClassName}
             type="button"
+            disabled={isSelectionActionBlocked}
             onClick={() => {
               onSelectText({
                 text: selectionPopover.text,

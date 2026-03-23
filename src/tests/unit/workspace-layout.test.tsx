@@ -1220,6 +1220,95 @@ describe("workspace shell", () => {
     });
   });
 
+  it("blocks pdf selection actions when the current model is unavailable", async () => {
+    getProviderMissingConfigMessageMock.mockImplementation(
+      (settings: { llmProvider: string; openAIApiKey?: string }) => {
+        if (settings.llmProvider === "openai" && !settings.openAIApiKey?.trim()) {
+          return "请先在设置里填写 API Key。";
+        }
+
+        return "";
+      },
+    );
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "openai",
+        webllmModelId: "Qwen3-0.6B-q4f16_1-MLC",
+        openAIBaseUrl: "https://api.example.com/v1",
+        openAIApiKey: "",
+        openAIModel: "qwen-reviewer",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    parsePdfDocumentMock.mockResolvedValue({
+      mode: "pdf",
+      title: "制度附件",
+      blocks: [
+        { id: "pdf-heading-1", kind: "heading", level: 2, pageNumber: 1, text: "第 1 页" },
+        { id: "pdf-paragraph-1", kind: "paragraph", pageNumber: 1, text: "第一页付款正文。" },
+      ],
+      activeClauseTitle: "第 1 页",
+      activeClauseText: "第一页付款正文。",
+      pdfSource: "data:application/pdf;base64,ZmFrZQ==",
+    });
+
+    fireEvent.change(screen.getByTestId("workspace-import-input"), {
+      target: { files: [new File(["fake"], "制度附件.pdf", { type: "application/pdf" })] },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pdf-page-card-1")).toBeInTheDocument();
+    });
+
+    const pageText = screen.getByTestId("pdf-page-text-1");
+    const pageCard = screen.getByTestId("pdf-page-card-1");
+    const textNode = pageText.firstChild;
+    const selectionMock = {
+      toString: () => "付款正文",
+      rangeCount: 1,
+      getRangeAt: () =>
+        ({
+          commonAncestorContainer: textNode,
+          getBoundingClientRect: () => ({
+            top: 160,
+            left: 320,
+            width: 80,
+            height: 18,
+            right: 400,
+            bottom: 178,
+            x: 320,
+            y: 160,
+            toJSON: () => ({}),
+          }),
+        }) as Range,
+      removeAllRanges: vi.fn(),
+    };
+
+    vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
+
+    fireEvent.mouseUp(pageCard);
+
+    await waitFor(() => {
+      const popover = screen.getByTestId("pdf-selection-popover");
+      expect(popover).toBeInTheDocument();
+      expect(within(popover).getByText("先在设置里补全 API Key。")).toBeInTheDocument();
+      expect(within(popover).getByRole("button", { name: "找问题" })).toBeDisabled();
+      expect(within(popover).getByRole("button", { name: "直接改写" })).toBeDisabled();
+      expect(within(popover).getByRole("button", { name: "润色表达" })).toBeDisabled();
+    });
+  });
+
   it("shows an action popover after selecting text in the markdown or text document", async () => {
     render(
       <MemoryRouter>
@@ -1278,6 +1367,73 @@ describe("workspace shell", () => {
         }),
         expect.any(Object),
       );
+    });
+  });
+
+  it("blocks plain-text selection actions when the current model is unavailable", async () => {
+    getProviderMissingConfigMessageMock.mockImplementation(
+      (settings: { llmProvider: string; openAIApiKey?: string }) => {
+        if (settings.llmProvider === "openai" && !settings.openAIApiKey?.trim()) {
+          return "请先在设置里填写 API Key。";
+        }
+
+        return "";
+      },
+    );
+    window.localStorage.setItem(
+      "app-settings",
+      JSON.stringify({
+        themeId: "warm",
+        reviewPromptNote: "",
+        llmProvider: "openai",
+        webllmModelId: "Qwen3-0.6B-q4f16_1-MLC",
+        openAIBaseUrl: "https://api.example.com/v1",
+        openAIApiKey: "",
+        openAIModel: "qwen-reviewer",
+        ollamaBaseUrl: "http://127.0.0.1:11434",
+        ollamaModel: "qwen2.5:3b",
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    const paragraphNode = screen.getAllByText("合同签订后一次性支付全部款项。")[0].firstChild;
+    const selectionMock = {
+      toString: () => "合同签订后一次性支付全部款项。",
+      rangeCount: 1,
+      getRangeAt: () =>
+        ({
+          commonAncestorContainer: paragraphNode,
+          getBoundingClientRect: () => ({
+            top: 180,
+            left: 360,
+            width: 120,
+            height: 20,
+            right: 480,
+            bottom: 200,
+            x: 360,
+            y: 180,
+            toJSON: () => ({}),
+          }),
+        }) as Range,
+      removeAllRanges: vi.fn(),
+    };
+
+    vi.spyOn(window, "getSelection").mockReturnValue(selectionMock as unknown as Selection);
+
+    fireEvent.mouseUp(screen.getAllByText("合同签订后一次性支付全部款项。")[0]);
+
+    await waitFor(() => {
+      const popover = screen.getByTestId("document-selection-popover");
+      expect(popover).toBeInTheDocument();
+      expect(within(popover).getByText("先在设置里补全 API Key。")).toBeInTheDocument();
+      expect(within(popover).getByRole("button", { name: "找问题" })).toBeDisabled();
+      expect(within(popover).getByRole("button", { name: "直接改写" })).toBeDisabled();
+      expect(within(popover).getByRole("button", { name: "润色表达" })).toBeDisabled();
     });
   });
 });
