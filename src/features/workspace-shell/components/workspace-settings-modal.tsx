@@ -9,7 +9,10 @@ type WorkspaceSettingsModalProps = {
   selectedThemeId: AppThemeId;
   reviewPromptNote: string;
   selectedModelId: string;
+  activeModelId?: string;
   modelOptions: readonly LocalLLMModelOption[];
+  isModelBusy?: boolean;
+  isModelSupported?: boolean;
   onClose: () => void;
   onSave: (payload: {
     workspaceTitle: string;
@@ -26,7 +29,10 @@ export function WorkspaceSettingsModal({
   selectedThemeId,
   reviewPromptNote,
   selectedModelId,
+  activeModelId,
   modelOptions,
+  isModelBusy = false,
+  isModelSupported = true,
   onClose,
   onSave,
   onClear,
@@ -35,6 +41,7 @@ export function WorkspaceSettingsModal({
   const [draftThemeId, setDraftThemeId] = useState<AppThemeId>(selectedThemeId);
   const [draftPromptNote, setDraftPromptNote] = useState(reviewPromptNote);
   const [draftModelId, setDraftModelId] = useState(selectedModelId);
+  const [modelQuery, setModelQuery] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
@@ -45,16 +52,30 @@ export function WorkspaceSettingsModal({
     setDraftThemeId(selectedThemeId);
     setDraftPromptNote(reviewPromptNote);
     setDraftModelId(selectedModelId);
+    setModelQuery("");
   }, [isOpen, reviewPromptNote, selectedModelId, selectedThemeId, workspaceTitle]);
+
+  const filteredModels = modelOptions.filter((model) =>
+    [model.label, model.summary, model.id, model.deviceTier, model.vramHint, ...model.tags]
+      .join(" ")
+      .toLowerCase()
+      .includes(modelQuery.trim().toLowerCase()),
+  );
 
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(17,14,10,0.45)] px-6 py-10 backdrop-blur-sm">
-      <section className="flex w-full max-w-2xl flex-col overflow-hidden rounded-[28px] border border-[rgba(216,207,193,0.9)] bg-[rgba(251,248,242,0.98)] shadow-[0_28px_80px_rgba(41,31,21,0.22)]">
-        <header className="flex items-start justify-between gap-4 border-b border-[rgba(216,207,193,0.72)] px-6 py-5">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(17,14,10,0.45)] px-4 py-6 backdrop-blur-sm sm:px-6 sm:py-8"
+      onClick={onClose}
+    >
+      <section
+        className="flex max-h-[min(840px,calc(100vh-48px))] w-full max-w-[880px] min-w-0 flex-col overflow-hidden rounded-[28px] border border-[rgba(216,207,193,0.9)] bg-[rgba(251,248,242,0.98)] shadow-[0_28px_80px_rgba(41,31,21,0.22)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <header className="shrink-0 flex items-start justify-between gap-4 border-b border-[rgba(216,207,193,0.72)] px-5 py-5 sm:px-6">
           <div>
             <div className="font-sans text-[12px] font-semibold tracking-[0.08em] text-[var(--color-text-muted)] uppercase">
               Workspace
@@ -67,7 +88,7 @@ export function WorkspaceSettingsModal({
             </p>
           </div>
           <button
-            className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-3 py-2 font-sans text-[0.82rem] text-[var(--color-text-secondary)]"
+            className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
             type="button"
             onClick={onClose}
           >
@@ -75,7 +96,10 @@ export function WorkspaceSettingsModal({
           </button>
         </header>
 
-        <div className="grid gap-5 px-6 py-5">
+        <div
+          className="grid flex-1 gap-5 overflow-y-auto px-5 py-5 sm:px-6"
+          data-scroll-region="true"
+        >
           <label className="grid gap-2">
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
               工作区名称
@@ -138,22 +162,90 @@ export function WorkspaceSettingsModal({
             </div>
           </div>
 
-          <div className="grid gap-2">
+          <div className="grid gap-3">
             <span className="font-sans text-[0.86rem] font-semibold text-[var(--color-text-secondary)]">
               本地模型
             </span>
-            <select
-              aria-label="本地模型"
-              className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none"
-              value={draftModelId}
-              onChange={(event) => setDraftModelId(event.target.value)}
-            >
-              {modelOptions.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.label} · {model.summary}
-                </option>
-              ))}
-            </select>
+            <input
+              aria-label="搜索本地模型"
+              className="w-full rounded-2xl border border-[rgba(216,207,193,0.86)] bg-white/80 px-4 py-3 font-sans text-[0.92rem] text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-muted)]"
+              placeholder="搜索模型"
+              value={modelQuery}
+              onChange={(event) => setModelQuery(event.target.value)}
+            />
+            {!isModelSupported ? (
+              <div className="font-sans text-[0.84rem] leading-[1.6] text-[rgba(143,83,52,0.92)]">
+                当前浏览器不支持 WebGPU，所以这里可以先选模型，但暂时无法实际加载。
+              </div>
+            ) : null}
+            <div className="grid gap-3">
+              {filteredModels.map((model) => {
+                const isSelected = draftModelId === model.id;
+                const isActive = activeModelId === model.id;
+
+                return (
+                  <label
+                    key={model.id}
+                    aria-label={model.label}
+                    className={`cursor-pointer rounded-2xl border px-4 py-4 transition ${
+                      isSelected
+                        ? "border-[rgba(181,142,83,0.72)] bg-[rgba(251,246,233,0.96)] shadow-[0_0_0_3px_rgba(181,142,83,0.12)]"
+                        : "border-[rgba(216,207,193,0.78)] bg-[rgba(255,252,247,0.86)]"
+                    }`}
+                  >
+                    <input
+                      checked={isSelected}
+                      className="sr-only"
+                      name="local-model"
+                      type="radio"
+                      value={model.id}
+                      onChange={() => setDraftModelId(model.id)}
+                    />
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-[1rem] font-semibold text-[var(--color-text-primary)]">
+                          {model.label}
+                        </div>
+                        <div className="mt-1 font-sans text-[0.86rem] leading-[1.6] text-[var(--color-text-muted)]">
+                          {model.summary}
+                        </div>
+                        <div className="mt-3 grid gap-1 font-sans text-[0.8rem] leading-[1.5] text-[var(--color-text-secondary)]">
+                          <div>
+                            推荐设备档位：<span className="font-semibold">{model.deviceTier}</span>
+                          </div>
+                          <div>
+                            显存提示：<span className="font-semibold">{model.vramHint}</span>
+                          </div>
+                        </div>
+                      </div>
+                      {isActive ? (
+                        <span className="shrink-0 rounded-full bg-[rgba(181,142,83,0.14)] px-3 py-1 font-sans text-[0.74rem] font-semibold text-[rgba(138,106,55,0.94)]">
+                          当前加载
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {model.tags.map((tag) => (
+                        <span
+                          key={`${model.id}-${tag}`}
+                          className="rounded-full bg-[rgba(236,228,216,0.82)] px-3 py-1 font-sans text-[0.72rem] font-semibold text-[var(--color-text-muted)]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-3 font-sans text-[0.74rem] text-[var(--color-text-muted)]">
+                      {model.id}
+                    </div>
+                  </label>
+                );
+              })}
+              {filteredModels.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-[rgba(216,207,193,0.8)] px-4 py-6 text-center font-sans text-[0.9rem] text-[var(--color-text-muted)]">
+                  没找到匹配的模型，可以换个关键词试试。
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className="rounded-2xl border border-[rgba(216,207,193,0.76)] bg-[rgba(255,252,247,0.9)] px-4 py-4">
@@ -173,7 +265,7 @@ export function WorkspaceSettingsModal({
           </div>
         </div>
 
-        <footer className="flex items-center justify-end gap-3 border-t border-[rgba(216,207,193,0.72)] px-6 py-4">
+        <footer className="shrink-0 flex items-center justify-end gap-3 border-t border-[rgba(216,207,193,0.72)] px-5 py-4 sm:px-6">
           <button
             className="cursor-pointer rounded-full border border-[rgba(216,207,193,0.78)] bg-[rgba(255,251,244,0.86)] px-4 py-2 font-sans text-[0.84rem] text-[var(--color-text-secondary)]"
             type="button"
@@ -182,8 +274,9 @@ export function WorkspaceSettingsModal({
             取消
           </button>
           <button
-            className="cursor-pointer rounded-full border-0 bg-[rgba(47,38,29,0.94)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[#fffdf9]"
+            className="cursor-pointer rounded-full border-0 bg-[rgba(47,38,29,0.94)] px-4 py-2 font-sans text-[0.84rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-60"
             type="button"
+            disabled={isModelBusy}
             onClick={() =>
               onSave({
                 workspaceTitle: draftTitle,

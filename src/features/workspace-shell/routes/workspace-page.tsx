@@ -17,7 +17,6 @@ import {
   saveSelectedLocalLLMModelId,
 } from "@/services/ai/local-llm";
 import { mockWorkspaceSummary } from "@/shared/mocks/workspace-shell";
-import { LocalModelSettingsModal } from "@/features/assistant-panel/components/local-model-settings-modal";
 import { WorkspaceSettingsModal } from "@/features/workspace-shell/components/workspace-settings-modal";
 import { WorkspaceExportModal } from "@/features/workspace-shell/components/workspace-export-modal";
 import {
@@ -46,7 +45,6 @@ export function WorkspacePage() {
   const summary = workspaceState.summary ?? mockWorkspaceSummary;
   const modelOptions = useMemo(() => getAvailableLocalLLMModels(), []);
   const [selectedModelId, setSelectedModelId] = useState(() => loadSelectedLocalLLMModelId());
-  const [isModelSettingsOpen, setIsModelSettingsOpen] = useState(false);
   const [isWorkspaceSettingsOpen, setIsWorkspaceSettingsOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [appSettings, setAppSettings] = useState(() => loadAppSettings());
@@ -210,13 +208,6 @@ export function WorkspacePage() {
     }
   };
 
-  const handleConfirmModel = async (modelId: string) => {
-    saveSelectedLocalLLMModelId(modelId);
-    setSelectedModelId(modelId);
-    setIsModelSettingsOpen(false);
-    await ensureModelReady(modelId);
-  };
-
   const handleSaveWorkspaceSettings = (payload: {
     workspaceTitle: string;
     themeId: "warm" | "ink" | "forest";
@@ -242,6 +233,7 @@ export function WorkspacePage() {
       workspaceState.previewDocument,
     );
     setIsWorkspaceSettingsOpen(false);
+    void ensureModelReady(payload.modelId);
   };
 
   const handleClearWorkspaceRecords = async () => {
@@ -275,10 +267,6 @@ export function WorkspacePage() {
         onExport={() => setIsExportModalOpen(true)}
         onOpenSettings={() => setIsWorkspaceSettingsOpen(true)}
         localModelLabel={localModelDetail}
-        localModelActionLabel="模型设置"
-        onLocalModelAction={() => {
-          setIsModelSettingsOpen(true);
-        }}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
       />
       <WorkspaceSettingsModal
@@ -287,7 +275,10 @@ export function WorkspacePage() {
         selectedThemeId={appSettings.themeId}
         reviewPromptNote={appSettings.reviewPromptNote}
         selectedModelId={selectedModelId}
+        activeModelId={getLoadedLocalLLMModelId()}
         modelOptions={modelOptions}
+        isModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
+        isModelSupported={isLocalLLMSupported()}
         onClose={() => setIsWorkspaceSettingsOpen(false)}
         onSave={handleSaveWorkspaceSettings}
         onClear={() => {
@@ -299,18 +290,6 @@ export function WorkspacePage() {
         documentTitle={summary.activeDocumentTitle}
         onClose={() => setIsExportModalOpen(false)}
         onExport={handleExportWorkspace}
-      />
-      <LocalModelSettingsModal
-        isOpen={isModelSettingsOpen}
-        selectedModelId={selectedModelId}
-        activeModelId={getLoadedLocalLLMModelId()}
-        modelOptions={modelOptions}
-        isBusy={localModelStatus === "loading" || localModelStatus === "responding"}
-        isSupported={isLocalLLMSupported()}
-        onClose={() => setIsModelSettingsOpen(false)}
-        onConfirm={(modelId) => {
-          void handleConfirmModel(modelId);
-        }}
       />
     </div>
   );

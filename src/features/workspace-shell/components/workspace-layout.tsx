@@ -23,8 +23,6 @@ type WorkspaceLayoutProps = {
   onExport: () => void;
   onOpenSettings: () => void;
   localModelLabel: string;
-  localModelActionLabel?: string;
-  onLocalModelAction?: () => void;
   isLocalModelBusy?: boolean;
 };
 
@@ -39,8 +37,6 @@ export function WorkspaceLayout({
   onExport,
   onOpenSettings,
   localModelLabel,
-  localModelActionLabel,
-  onLocalModelAction,
   isLocalModelBusy,
 }: WorkspaceLayoutProps) {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
@@ -91,8 +87,6 @@ export function WorkspaceLayout({
         onJumpToSelection={onJumpToSelection}
         onSendMessage={onSendMessage}
         localModelLabel={localModelLabel}
-        localModelActionLabel={localModelActionLabel}
-        onLocalModelAction={onLocalModelAction}
         isLocalModelBusy={isLocalModelBusy}
         isCollapsed={isRightCollapsed}
         onToggleCollapse={() => setIsRightCollapsed((current) => !current)}

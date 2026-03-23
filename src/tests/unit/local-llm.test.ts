@@ -21,6 +21,8 @@ describe("local llm", () => {
     expect(models.some((model) => model.id === "SmolLM2-360M-Instruct-q4f16_1-MLC")).toBe(true);
     expect(models.some((model) => model.id === "Qwen2.5-3B-Instruct-q4f16_1-MLC")).toBe(true);
     expect(models.some((model) => model.id === "Llama-3.2-3B-Instruct-q4f16_1-MLC")).toBe(true);
+    expect(models.every((model) => model.deviceTier.length > 0)).toBe(true);
+    expect(models.every((model) => model.vramHint.length > 0)).toBe(true);
   });
 
   it("persists and restores selected model id", () => {
@@ -50,8 +52,10 @@ describe("local llm", () => {
     expect(messages[0]?.content).toContain("笔误类");
     expect(messages[0]?.content).toContain("语法类");
     expect(messages[0]?.content).toContain("条款风险类");
+    expect(messages[0]?.content).toContain("绝对不要为了凑数量而编造问题");
+    expect(messages[0]?.content).toContain("未发现需要修改的明确问题");
     expect(messages[0]?.content).toContain("Markdown");
-    expect(messages[0]?.content).toContain("### 问题 1");
+    expect(messages[0]?.content).toContain("## 问题 1");
     expect(messages[0]?.content).toContain("- 原文：");
     expect(messages[0]?.content).toContain("- 修改建议：");
     expect(messages[0]?.content).toContain("审阅时优先指出事实缺失");

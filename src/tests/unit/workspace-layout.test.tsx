@@ -59,12 +59,16 @@ const {
       label: "Qwen3 0.6B",
       summary: "更轻，启动更快",
       tags: ["中文", "轻量"],
+      deviceTier: "入门设备",
+      vramHint: "建议显存 2GB 以上",
     },
     {
       id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
       label: "Qwen2.5 1.5B",
       summary: "中文审阅更稳",
       tags: ["中文", "审阅"],
+      deviceTier: "主流设备",
+      vramHint: "建议显存 4GB 以上",
     },
   ]),
   loadSelectedLocalLLMModelIdMock: vi.fn(() => "Qwen3-0.6B-q4f16_1-MLC"),
@@ -275,7 +279,7 @@ describe("workspace shell", () => {
     expect(screen.getByText("Assistant")).toBeInTheDocument();
   });
 
-  it("renders document header, highlighted active clause, and local model controls", () => {
+  it("renders document content, active clause, and local model status", () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
@@ -285,30 +289,33 @@ describe("workspace shell", () => {
     expect(screen.queryByText("阅读视图")).not.toBeInTheDocument();
     expect(screen.queryByText("可编辑")).not.toBeInTheDocument();
     expect(screen.getByText(/尚未加载/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "模型设置" })).toBeInTheDocument();
     expect(getActiveClauseHeading()).toHaveAttribute("data-active", "true");
   });
 
-  it("opens model settings, filters models, and persists selected model", async () => {
+  it("opens workspace settings, filters models, and persists selected model", async () => {
     render(
       <MemoryRouter>
         <WorkspacePage />
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "模型设置" }));
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
 
-    expect(screen.getByText("本地模型设置")).toBeInTheDocument();
+    expect(screen.getByText("工作区设置")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("搜索模型"), {
+    fireEvent.change(screen.getByLabelText("搜索本地模型"), {
       target: { value: "1.5B" },
     });
 
     expect(screen.queryByText("Qwen3 0.6B")).not.toBeInTheDocument();
-    expect(screen.getByText("Qwen2.5 1.5B")).toBeInTheDocument();
+    const selectedModelCard = screen.getByText("Qwen2.5 1.5B").closest("label");
+    expect(selectedModelCard).not.toBeNull();
+    expect(selectedModelCard).toHaveTextContent("Qwen2.5 1.5B");
+    expect(selectedModelCard).toHaveTextContent("推荐设备档位：主流设备");
+    expect(selectedModelCard).toHaveTextContent("显存提示：建议显存 4GB 以上");
 
-    fireEvent.click(screen.getByLabelText("Qwen2.5 1.5B"));
-    fireEvent.click(screen.getByRole("button", { name: "保存并启用" }));
+    fireEvent.click(selectedModelCard!);
+    fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
       expect(saveSelectedLocalLLMModelIdMock).toHaveBeenCalledWith(
@@ -364,9 +371,10 @@ describe("workspace shell", () => {
       target: { value: "审阅时优先指出事实缺失" },
     });
     fireEvent.click(screen.getByLabelText("冷灰墨"));
-    fireEvent.change(screen.getByLabelText("本地模型"), {
-      target: { value: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC" },
+    fireEvent.change(screen.getByLabelText("搜索本地模型"), {
+      target: { value: "1.5B" },
     });
+    fireEvent.click(screen.getByText("Qwen2.5 1.5B").closest("label")!);
     fireEvent.click(screen.getByRole("button", { name: "保存设置" }));
 
     await waitFor(() => {
@@ -411,6 +419,23 @@ describe("workspace shell", () => {
       expect(screen.getAllByText("采购与付款管理制度").length).toBeGreaterThan(0);
       expect(window.localStorage.getItem("workspace-state:ws-enterprise")).toBeNull();
       expect(window.localStorage.getItem("workspace-summary:ws-enterprise")).toBeNull();
+    });
+  });
+
+  it("closes settings when clicking the backdrop", async () => {
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "设置" }));
+    expect(screen.getByText("工作区设置")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("工作区设置").closest("section")!.parentElement!);
+
+    await waitFor(() => {
+      expect(screen.queryByText("工作区设置")).not.toBeInTheDocument();
     });
   });
 

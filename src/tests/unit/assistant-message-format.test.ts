@@ -29,4 +29,16 @@ describe("assistant message format", () => {
 
     expect(result).toBe("### 改写结果\n\n付款应在验收通过且发票齐全后，按约定节点分阶段支付。");
   });
+
+  it("repairs collapsed review output into readable markdown bullets", () => {
+    const result = normalizeAssistantMarkdown(`
+问题 1；- 问题类型：表达类；- 问题归类：语句通顺性；- 问题说明：原文中的句子不够顺。- 修改建议：建议调整语序。
+`);
+
+    expect(result).toContain("问题 1");
+    expect(result).toContain("\n- 问题类型：表达类");
+    expect(result).toContain("\n- 问题归类：语句通顺性");
+    expect(result).toContain("\n- 问题说明：原文中的句子不够顺。");
+    expect(result).toContain("\n- 修改建议：建议调整语序。");
+  });
 });

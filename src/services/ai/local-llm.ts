@@ -26,6 +26,8 @@ export type LocalLLMModelOption = {
   label: string;
   summary: string;
   tags: string[];
+  deviceTier: string;
+  vramHint: string;
 };
 
 const LOCAL_MODEL_STORAGE_KEY = "local-llm:selected-model";
@@ -36,72 +38,96 @@ const AVAILABLE_LOCAL_MODELS: LocalLLMModelOption[] = [
     label: "SmolLM2 360M",
     summary: "最轻量，适合先快速验证流程或低资源设备。",
     tags: ["轻量", "快速", "入门"],
+    deviceTier: "入门设备",
+    vramHint: "建议显存 2GB 以上",
   },
   {
     id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
     label: "Qwen2.5 0.5B",
     summary: "中文友好，加载更快，适合轻量审阅和短文本处理。",
     tags: ["中文", "轻量", "快速"],
+    deviceTier: "入门设备",
+    vramHint: "建议显存 2GB 以上",
   },
   {
     id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC",
     label: "Qwen2.5 1.5B",
     summary: "中文审阅和校改更稳，适合正式文档处理。",
     tags: ["推荐", "中文", "审阅"],
+    deviceTier: "主流设备",
+    vramHint: "建议显存 4GB 以上",
   },
   {
     id: "Qwen3-0.6B-q4f16_1-MLC",
     label: "Qwen3 0.6B",
     summary: "更轻，启动更快，适合先快速试跑。",
     tags: ["轻量", "快速"],
+    deviceTier: "入门设备",
+    vramHint: "建议显存 2GB 以上",
   },
   {
     id: "Qwen3-1.7B-q4f16_1-MLC",
     label: "Qwen3 1.7B",
     summary: "兼顾速度和质量，适合更长一点的上下文。",
     tags: ["平衡", "中文"],
+    deviceTier: "主流设备",
+    vramHint: "建议显存 4GB 以上",
   },
   {
     id: "Qwen2.5-3B-Instruct-q4f16_1-MLC",
     label: "Qwen2.5 3B",
     summary: "比 1.5B 更稳，适合更复杂的正式文书生成和审阅。",
     tags: ["中文", "增强", "审阅"],
+    deviceTier: "增强设备",
+    vramHint: "建议显存 6GB 以上",
   },
   {
     id: "Qwen3-4B-q4f16_1-MLC",
     label: "Qwen3 4B",
     summary: "更强的上下文理解与改写能力，适合长一点的文书任务。",
     tags: ["增强", "中文", "长文"],
+    deviceTier: "增强设备",
+    vramHint: "建议显存 8GB 以上",
   },
   {
     id: "Llama-3.2-1B-Instruct-q4f16_1-MLC",
     label: "Llama 3.2 1B",
     summary: "通用能力稳定，可作为 Qwen 之外的轻量备选。",
     tags: ["通用", "轻量", "备选"],
+    deviceTier: "入门设备",
+    vramHint: "建议显存 3GB 以上",
   },
   {
     id: "Llama-3.2-3B-Instruct-q4f16_1-MLC",
     label: "Llama 3.2 3B",
     summary: "质量更稳，适合做对比生成和通用文书处理。",
     tags: ["通用", "平衡", "备选"],
+    deviceTier: "增强设备",
+    vramHint: "建议显存 6GB 以上",
   },
   {
     id: "Phi-3.5-mini-instruct-q4f16_1-MLC",
     label: "Phi 3.5 Mini",
     summary: "英文和通用写作表现稳定，可作备选。",
     tags: ["英文", "通用"],
+    deviceTier: "主流设备",
+    vramHint: "建议显存 4GB 以上",
   },
   {
     id: "gemma-2-2b-it-q4f16_1-MLC",
     label: "Gemma 2 2B",
     summary: "适合对比不同风格输出，回复更克制。",
     tags: ["备选", "克制"],
+    deviceTier: "主流设备",
+    vramHint: "建议显存 4GB 以上",
   },
   {
     id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC",
     label: "SmolLM2 1.7B",
     summary: "在较低资源下保持不错的响应速度，适合轻量长文处理。",
     tags: ["轻量", "平衡", "低资源"],
+    deviceTier: "主流设备",
+    vramHint: "建议显存 4GB 以上",
   },
 ];
 
@@ -203,7 +229,7 @@ export function createLocalLLMMessages(request: LocalLLMRequest): LocalLLMMessag
     return [
       {
         role: "system" as const,
-        content: `${baseSystemPrompt} 你现在是商务文档审阅助手，任务是做正式文件审阅和校对，而不是自由聊天。请按以下顺序逐一检查：1. 用词；2. 标点；3. 语法；4. 语句通顺性；5. 逻辑是否清楚；6. 事实是否完整；7. 条款风险。请只列出 2 到 3 条最重要、最有把握的问题，不要凑数。请用 Markdown 输出，格式示例必须遵守：### 问题 1；- 原文：…；- 问题类型：…；- 问题归类：笔误类/标点类/语法类/表达类/逻辑类/事实完整性类/条款风险类；- 问题说明：…；- 修改建议：…。不要写客套话，不要泛泛评价，不要输出 <think> 或思考过程。${customPromptSuffix}`,
+        content: `${baseSystemPrompt} 你现在是商务文档审阅助手，任务是做正式文件审阅和校对，而不是自由聊天。请按以下顺序逐一检查：1. 用词；2. 标点；3. 语法；4. 语句通顺性；5. 逻辑是否清楚；6. 事实是否完整；7. 条款风险。只输出你真正有把握的问题，绝对不要为了凑数量而编造问题。如果原文没有明确错误或风险，请直接输出：## 审阅结论\n未发现需要修改的明确问题。\n\n- 说明：这段内容在当前上下文下未发现确定性的用词、标点、语法、逻辑、事实完整性或条款风险问题。 如果发现问题，最多列出 3 条，并且必须严格使用 Markdown，多行展示，不能把标题和列表写在同一行。格式必须像下面这样：\n## 问题 1\n- 原文：...\n- 问题类型：...\n- 问题归类：笔误类 / 标点类 / 语法类 / 表达类 / 逻辑类 / 事实完整性类 / 条款风险类\n- 问题说明：...\n- 修改建议：...\n不要写客套话，不要泛泛评价，不要输出 <think> 或思考过程。${customPromptSuffix}`,
       },
       {
         role: "user" as const,
