@@ -90,6 +90,8 @@ type WorkspaceLayoutProps = {
   localModelLabel: string;
   localModelHelperText?: string;
   localModelHelperTone?: "neutral" | "success" | "warning" | "error";
+  isSendBlocked?: boolean;
+  sendBlockReason?: string;
   isLocalModelBusy?: boolean;
 };
 
@@ -109,6 +111,8 @@ export function WorkspaceLayout({
   localModelLabel,
   localModelHelperText,
   localModelHelperTone,
+  isSendBlocked,
+  sendBlockReason,
   isLocalModelBusy,
 }: WorkspaceLayoutProps) {
   const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
@@ -335,6 +339,8 @@ export function WorkspaceLayout({
         localModelLabel={localModelLabel}
         localModelHelperText={localModelHelperText}
         localModelHelperTone={localModelHelperTone}
+        isSendBlocked={isSendBlocked}
+        sendBlockReason={sendBlockReason}
         isLocalModelBusy={isLocalModelBusy}
         isCollapsed={isRightCollapsed}
         onToggleCollapse={() => setIsRightCollapsed((current) => !current)}

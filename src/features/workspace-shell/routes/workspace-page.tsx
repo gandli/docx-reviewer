@@ -155,6 +155,61 @@ function getProviderHelperText(params: {
   };
 }
 
+function getProviderSendGuard(params: {
+  settings: AppSettings;
+  localModelStatus: LocalModelStatus;
+  currentCheckVariant: "success" | "error" | null;
+  currentCheckStatus: string;
+}) {
+  const missingMessage = getProviderMissingConfigMessage(params.settings);
+  if (missingMessage) {
+    return {
+      blocked: true,
+      reason: missingMessage.replace("请先在设置里填写", "先在设置里补全"),
+    };
+  }
+
+  if (params.localModelStatus === "unsupported") {
+    return {
+      blocked: true,
+      reason: "当前环境不支持本地模型",
+    };
+  }
+
+  if (params.currentCheckVariant === "error") {
+    if (params.settings.llmProvider === "openai") {
+      return {
+        blocked: true,
+        reason: "请先修正 API 设置",
+      };
+    }
+
+    if (params.settings.llmProvider === "ollama") {
+      return {
+        blocked: true,
+        reason: "请先修正 Ollama 设置",
+      };
+    }
+
+    return {
+      blocked: true,
+      reason: params.currentCheckStatus || "请先修正本地模型环境",
+    };
+  }
+
+  if (params.localModelStatus === "error") {
+    return {
+      blocked: true,
+      reason: "请先修正当前模型状态",
+    };
+  }
+
+  return {
+    blocked: false,
+    reason: "",
+  };
+}
+
 export function WorkspacePage() {
   const { workspaceId = mockWorkspaceSummary.workspaceId } = useParams();
   const repository = useMemo(
@@ -211,6 +266,12 @@ export function WorkspacePage() {
     currentCheckVariant: modelCheckVariant,
     currentCheckStatus: modelCheckStatus,
     lastSuccessfulCheckAt,
+  });
+  const providerSendGuard = getProviderSendGuard({
+    settings: appSettings,
+    localModelStatus,
+    currentCheckVariant: modelCheckVariant,
+    currentCheckStatus: modelCheckStatus,
   });
 
   useEffect(() => {
@@ -493,6 +554,8 @@ export function WorkspacePage() {
         localModelLabel={localModelDetail}
         localModelHelperText={providerHelper.text}
         localModelHelperTone={providerHelper.tone}
+        isSendBlocked={providerSendGuard.blocked}
+        sendBlockReason={providerSendGuard.reason}
         isLocalModelBusy={localModelStatus === "loading" || localModelStatus === "responding"}
       />
       <WorkspaceSettingsModal

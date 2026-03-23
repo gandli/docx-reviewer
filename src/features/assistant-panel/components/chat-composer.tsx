@@ -10,6 +10,8 @@ type ChatComposerProps = {
   localModelLabel: string;
   localModelHelperText?: string;
   localModelHelperTone?: ModelStatusTone;
+  isSendBlocked?: boolean;
+  sendBlockReason?: string;
   isBusy?: boolean;
 };
 
@@ -21,12 +23,19 @@ export function ChatComposer({
   localModelLabel,
   localModelHelperText,
   localModelHelperTone = "neutral",
+  isSendBlocked = false,
+  sendBlockReason,
   isBusy = false,
 }: ChatComposerProps) {
   const [draft, setDraft] = useState("");
+  const isInputDisabled = isBusy || isSendBlocked;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSendBlocked) {
+      return;
+    }
+
     if (!draft.trim()) {
       return;
     }
@@ -73,13 +82,13 @@ export function ChatComposer({
           className="flex-1 border-0 bg-transparent p-0 font-sans text-[0.88rem] leading-[1.4] text-[var(--color-text-muted)] outline-none placeholder:text-[var(--color-text-muted)] disabled:cursor-not-allowed disabled:opacity-70"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          disabled={isBusy}
-          placeholder="输入你的要求，或继续处理当前内容"
+          disabled={isInputDisabled}
+          placeholder={isSendBlocked ? sendBlockReason || "请先完成模型设置" : "输入你的要求，或继续处理当前内容"}
         />
         <button
           className="rounded-full border-0 bg-[rgba(47,38,29,0.92)] px-[13px] py-[9px] font-sans text-[0.8rem] font-semibold text-[#fffdf9] disabled:cursor-not-allowed disabled:opacity-70"
           type="submit"
-          disabled={isBusy}
+          disabled={isInputDisabled}
         >
           发送
         </button>

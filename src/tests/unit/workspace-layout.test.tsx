@@ -474,7 +474,25 @@ describe("workspace shell", () => {
       expect(screen.getByText("来源：OpenAI API")).toBeInTheDocument();
       expect(screen.getByText("未配置")).toBeInTheDocument();
       expect(screen.getByText("先在设置里补全 API Key。")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText("先在设置里补全 API Key。")).toBeDisabled();
+      expect(screen.getByRole("button", { name: "发送" })).toBeDisabled();
     });
+  });
+
+  it("blocks sending when the current environment does not support local models", () => {
+    isLocalLLMSupportedMock.mockReturnValue(false);
+
+    render(
+      <MemoryRouter>
+        <WorkspacePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("来源：WebLLM")).toBeInTheDocument();
+    expect(screen.getByText("不可用")).toBeInTheDocument();
+    expect(screen.getByText("请换支持 WebGPU 的浏览器或设备。")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("当前环境不支持本地模型")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "发送" })).toBeDisabled();
   });
 
   it("opens workspace settings, filters models, and persists selected model", async () => {
